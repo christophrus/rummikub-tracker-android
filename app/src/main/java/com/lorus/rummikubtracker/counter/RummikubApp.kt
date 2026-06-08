@@ -51,12 +51,6 @@ fun RummikubApp(
                 },
                 onNavigateToHistory = {
                     navController.navigate(Routes.HISTORY)
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Routes.SETTINGS)
-                },
-                onNavigateToAbout = {
-                    navController.navigate(Routes.ABOUT)
                 }
             )
         }

@@ -20,8 +20,6 @@ private object CounterRoutes {
     const val RESULT = "counter_result"
     const val HISTORY = "counter_history"
     const val HISTORY_DETAIL = "counter_history_detail"
-    const val SETTINGS = "counter_settings"
-    const val ABOUT = "counter_about"
 }
 
 @Composable
@@ -43,8 +41,6 @@ fun CounterNavHost(
             MainMenuScreen(
                 onNavigateToCamera = { navController.navigate(CounterRoutes.CAMERA) },
                 onNavigateToHistory = { navController.navigate(CounterRoutes.HISTORY) },
-                onNavigateToSettings = { navController.navigate(CounterRoutes.SETTINGS) },
-                onNavigateToAbout = { navController.navigate(CounterRoutes.ABOUT) },
                 onBack = onBackToTracker
             )
         }
@@ -131,18 +127,6 @@ fun CounterNavHost(
                     }
                 )
             }
-        }
-
-        composable(CounterRoutes.SETTINGS) {
-            SettingsScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable(CounterRoutes.ABOUT) {
-            AboutScreen(
-                onBack = { navController.popBackStack() }
-            )
         }
     }
 }

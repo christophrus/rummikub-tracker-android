@@ -41,8 +41,6 @@ import com.lorus.rummikubtracker.R
 fun MainMenuScreen(
     onNavigateToCamera: () -> Unit,
     onNavigateToHistory: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToAbout: () -> Unit,
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -86,10 +84,10 @@ fun MainMenuScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = stringResource(R.string.app_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
+                text = "AI Tile Counter",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -109,24 +107,6 @@ fun MainMenuScreen(
                 title = stringResource(R.string.menu_history),
                 description = stringResource(R.string.menu_history_desc),
                 onClick = onNavigateToHistory
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-            MenuItem(
-                icon = Icons.Default.Settings,
-                title = stringResource(R.string.menu_settings),
-                description = stringResource(R.string.menu_settings_desc),
-                onClick = onNavigateToSettings
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-            MenuItem(
-                icon = Icons.Default.Info,
-                title = stringResource(R.string.menu_about),
-                description = stringResource(R.string.menu_about_desc),
-                onClick = onNavigateToAbout
             )
         }
     }
