@@ -46,17 +46,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setUiLanguage(lang: String) {
+    fun updateUiLanguage(lang: String) {
         uiLanguage = lang
         scope.launch { preferencesDataStore.setUiLanguage(lang) }
     }
 
-    fun setTtsLanguage(lang: String) {
+    fun updateTtsLanguage(lang: String) {
         ttsLanguage = lang
         scope.launch { preferencesDataStore.setTtsLanguage(lang) }
     }
 
-    fun setTheme(themeMode: String) {
+    fun updateTheme(themeMode: String) {
         theme = themeMode
         scope.launch { preferencesDataStore.setTheme(themeMode) }
     }
@@ -119,7 +119,7 @@ fun SettingsScreen(
                         DropdownMenuItem(
                             text = { Text(getUiLanguageName(lang)) },
                             onClick = {
-                                viewModel.setUiLanguage(lang)
+                                viewModel.updateUiLanguage(lang)
                                 viewModel.showUiLangDropdown = false
                             }
                         )
@@ -155,7 +155,7 @@ fun SettingsScreen(
                         DropdownMenuItem(
                             text = { Text(getTtsLanguageName(lang)) },
                             onClick = {
-                                viewModel.setTtsLanguage(lang)
+                                viewModel.updateTtsLanguage(lang)
                                 viewModel.showTtsDropdown = false
                             }
                         )
@@ -203,7 +203,7 @@ fun SettingsScreen(
                                 )
                             },
                             onClick = {
-                                viewModel.setTheme(mode)
+                                viewModel.updateTheme(mode)
                                 viewModel.showThemeDropdown = false
                             }
                         )

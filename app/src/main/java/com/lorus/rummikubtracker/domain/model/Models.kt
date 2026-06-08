@@ -57,7 +57,7 @@ data class Game(
         return result
     }
 
-    fun getWinner(): String? {
+    fun computeWinner(): String? {
         if (status != "completed") return null
         return players.minByOrNull { getPlayerTotal(it.name) }?.name
     }

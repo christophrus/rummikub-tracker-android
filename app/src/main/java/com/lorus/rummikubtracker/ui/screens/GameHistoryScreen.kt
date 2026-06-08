@@ -141,7 +141,7 @@ fun GameHistoryScreen(
                             }
 
                             // Winner info
-                            val winner = game.getWinner()
+                            val winner = game.computeWinner()
                             if (winner != null) {
                                 Text(
                                     text = stringResource(R.string.winner_label, winner),

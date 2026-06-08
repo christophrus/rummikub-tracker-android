@@ -35,15 +35,8 @@ class AudioEngine @Inject constructor(
             .setAudioAttributes(audioAttributes)
             .build()
 
-        // Load sounds from raw resources (will be created as placeholder WAVs)
-        try {
-            tickSoundId = soundPool?.load(context, android.R.raw, 1) ?: 0
-            turnSoundId = soundPool?.load(context, android.R.raw, 1) ?: 0
-            extendSoundId = soundPool?.load(context, android.R.raw, 1) ?: 0
-            victorySoundId = soundPool?.load(context, android.R.raw, 1) ?: 0
-        } catch (_: Exception) {
-            // Sounds will be bundled later
-        }
+        // Sound IDs will be loaded when audio resource files are added to res/raw
+        // For now, sounds are disabled gracefully
 
         initTts()
     }
