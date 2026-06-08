@@ -113,6 +113,20 @@ class ActiveGameViewModel @Inject constructor(
         )
     }
 
+    fun skipPlayer() {
+        val game = uiState.game ?: return
+        val nextIndex = (game.currentPlayerIndex + 1) % game.players.size
+        val nextPlayer = game.players[nextIndex]
+
+        scope.launch {
+            gameRepository.updateGame(game.copy(currentPlayerIndex = nextIndex))
+            timerEngine.reset()
+            timerEngine.start()
+            audioEngine.playTurnNotification()
+            audioEngine.announcePlayer(nextPlayer.name)
+        }
+    }
+
     fun updateScore(playerName: String, score: String) {
         uiState = uiState.copy(
             scores = uiState.scores + (playerName to score),
@@ -263,7 +277,7 @@ fun ActiveGameScreen(
                         onResetTimer = { viewModel.resetTimer() },
                         onExtend = { viewModel.extendTimer() },
                         onDeclareWinner = { viewModel.declareWinner() },
-                        onSkipPlayer = { /* advance to next player */ }
+                        onSkipPlayer = { viewModel.skipPlayer() }
                     )
 
                     HorizontalDivider()
