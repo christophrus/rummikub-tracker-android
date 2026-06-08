@@ -28,15 +28,4 @@ class PlayerRepository @Inject constructor(
     suspend fun deleteAllPlayers() {
         playerDao.deleteAllPlayers()
     }
-
-    suspend fun getAllPlayerNames(): List<String> {
-        return playerDao.getAllPlayers().map { it.map { p -> p.name } }.let {
-            // This is a flow, get first emission
-            playerDao.getAllPlayers().let { flow ->
-                var result = emptyList<String>()
-                flow.collect { result = it.map { p -> p.name } }
-                result
-            }
-        }
-    }
 }
