@@ -390,7 +390,7 @@ fun ActiveGameScreen(
                         remainingMs = remainingMs,
                         totalMs = effectiveTotalMs,
                         isPaused = timerState == TimerState.PAUSED,
-                        size = 220.dp,
+                        size = 260.dp,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
@@ -398,22 +398,26 @@ fun ActiveGameScreen(
 
                     // === Extension button with badge ===
                     Box(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
                     ) {
                         Button(
                             onClick = { viewModel.extendTimer() },
                             enabled = game.maxExtensions - extensionsUsed > 0,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF1565C0),
                                 disabledContainerColor = Color(0xFF1565C0).copy(alpha = 0.4f)
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
-                            Spacer(Modifier.width(6.dp))
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp))
+                            Spacer(Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.add_30_seconds),
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = Color.White
                             )
                         }
@@ -422,10 +426,10 @@ fun ActiveGameScreen(
                         Badge(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = 8.dp, y = (-8).dp),
+                                .offset(x = 12.dp, y = (-10).dp),
                             containerColor = Color(0xFFE53935)
                         ) {
-                            Text("$remaining", color = Color.White)
+                            Text("$remaining", color = Color.White, style = MaterialTheme.typography.titleSmall)
                         }
                     }
 
@@ -496,40 +500,6 @@ fun ActiveGameScreen(
                                 contentDescription = stringResource(R.string.lock_screen),
                                 modifier = Modifier.size(24.dp)
                             )
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // === Duration selector ===
-                    ExposedDropdownMenuBox(
-                        expanded = state.showDurationDropdown,
-                        onExpandedChange = { viewModel.toggleDurationDropdown() }
-                    ) {
-                        OutlinedTextField(
-                            value = formatDurationShort(game.timerDuration),
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.duration_label)) },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.showDurationDropdown)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .menuAnchor(),
-                            singleLine = true
-                        )
-                        ExposedDropdownMenu(
-                            expanded = state.showDurationDropdown,
-                            onDismissRequest = { viewModel.dismissDurationDropdown() }
-                        ) {
-                            Config.TIMER_PRESETS.forEach { (ms, _) ->
-                                DropdownMenuItem(
-                                    text = { Text(formatDurationShort(ms)) },
-                                    onClick = { viewModel.setTimerDuration(ms) }
-                                )
-                            }
                         }
                     }
 
