@@ -271,7 +271,15 @@ class ActiveGameViewModel @Inject constructor(
         )
     }
 
-    fun dismissScanSourceDialog() {
+    fun onDialogLaunchCamera() {
+        uiState = uiState.copy(showScanSourceDialog = false)
+    }
+
+    fun onDialogLaunchGallery() {
+        uiState = uiState.copy(showScanSourceDialog = false)
+    }
+
+    fun cancelScanDialog() {
         uiState = uiState.copy(showScanSourceDialog = false, scannedPlayerName = null)
     }
 
@@ -371,13 +379,13 @@ fun ActiveGameScreen(
     // Show scan source dialog when triggered
     if (state.showScanSourceDialog) {
         AlertDialog(
-            onDismissRequest = { viewModel.dismissScanSourceDialog() },
+            onDismissRequest = { viewModel.cancelScanDialog() },
             title = { Text(stringResource(R.string.scan_tile)) },
             text = {
                 Column {
                     TextButton(
                         onClick = {
-                            viewModel.dismissScanSourceDialog()
+                            viewModel.onDialogLaunchCamera()
                             cameraLauncher.launch(null)
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -388,7 +396,7 @@ fun ActiveGameScreen(
                     }
                     TextButton(
                         onClick = {
-                            viewModel.dismissScanSourceDialog()
+                            viewModel.onDialogLaunchGallery()
                             galleryLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
@@ -403,7 +411,7 @@ fun ActiveGameScreen(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { viewModel.dismissScanSourceDialog() }) {
+                TextButton(onClick = { viewModel.cancelScanDialog() }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
