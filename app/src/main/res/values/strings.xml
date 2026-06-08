@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rummikub Tracker</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Rummikub Tracker</string>
+    <string name="game_in_progress">Game in Progress</string>
+    <string name="resume_game">Resume Game</string>
+    <string name="cancel_game">Cancel Game</string>
+    <string name="new_game">New Game</string>
+    <string name="manage_players">Manage Players</string>
+    <string name="game_history">Game History</string>
+    <string name="settings">Settings</string>
+
+    <!-- New Game Screen -->
+    <string name="new_game_title">New Game</string>
+    <string name="game_name">Game Name</string>
+    <string name="game_name_hint">Enter game name (optional)</string>
+    <string name="timer_duration">Timer Duration</string>
+    <string name="max_extensions">Max Extensions</string>
+    <string name="extension_replenish">Extension Replenishment</string>
+    <string name="every_n_rounds">Every %d Rounds</string>
+    <string name="tts_language">Voice Language</string>
+    <string name="players">Players</string>
+    <string name="add_player">Add Player</string>
+    <string name="quick_add">Quick Add</string>
+    <string name="start_game">Start Game</string>
+    <string name="min_two_players">At least 2 players required</string>
+
+    <!-- Player Selection Screen -->
+    <string name="select_starting_player">Select Starting Player</string>
+
+    <!-- Active Game Screen -->
+    <string name="round_number">Round %d</string>
+    <string name="paused">PAUSED</string>
+    <string name="extensions_remaining">Extensions: %d</string>
+    <string name="skip">Skip</string>
+    <string name="declare_winner">Declare Winner</string>
+    <string name="winner">Winner!</string>
+    <string name="enter_scores">Enter Scores</string>
+    <string name="score">Score</string>
+    <string name="save_round">Save Round</string>
+    <string name="scan_tile">Scan Tiles</string>
+    <string name="end_game">End Game</string>
+    <string name="confirm_end_game">Are you sure you want to end the game?</string>
+    <string name="confirm_cancel_game">Are you sure you want to cancel the game? All progress will be lost.</string>
+    <string name="all_scores_required">All scores must be entered</string>
+    <string name="one_zero_required">Exactly one player must have score 0</string>
+
+    <!-- Manage Players Screen -->
+    <string name="manage_players_title">Manage Players</string>
+    <string name="no_saved_players">No saved players yet</string>
+    <string name="delete_player">Delete Player</string>
+    <string name="confirm_delete_player">Delete %s from saved players?</string>
+
+    <!-- Game History Screen -->
+    <string name="game_history_title">Game History</string>
+    <string name="no_games_played">No games played yet</string>
+    <string name="winner_label">Winner: %s</string>
+    <string name="date_label">Date: %s</string>
+    <string name="rounds_label">Rounds: %d</string>
+    <string name="delete_game">Delete Game</string>
+    <string name="confirm_delete_game">Delete this game from history?</string>
+    <string name="screenshot">Screenshot</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="ui_language">UI Language</string>
+    <string name="voice_language">Voice Language</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="clear_all_data">Clear All Data</string>
+    <string name="confirm_clear_data">This will delete all games, players, and settings. This cannot be undone.</string>
+
+    <!-- Languages -->
+    <string name="lang_en">English</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_it">Italiano</string>
+    <string name="lang_nl">Nederlands</string>
+    <string name="lang_pl">Polski</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_tr">Türkçe</string>
+    <string name="lang_cs">Čeština</string>
+
+    <!-- Timer presets -->
+    <string name="timer_30s">30 seconds</string>
+    <string name="timer_45s">45 seconds</string>
+    <string name="timer_1m">1 minute</string>
+    <string name="timer_1_5m">1.5 minutes</string>
+    <string name="timer_2m">2 minutes</string>
+    <string name="timer_3m">3 minutes</string>
+    <string name="timer_5m">5 minutes</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="back">Back</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="reset">Reset</string>
+    <string name="extend">Extend</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="player">Player</string>
+    <string name="total">Total</string>
+    <string name="error_network">Network error. Please try again.</string>
+    <string name="scan_failed">Tile scan failed</string>
+
+    <!-- Timer -->
+    <string name="time_up">Time\'s up!</string>
+</resources>

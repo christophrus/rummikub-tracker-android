@@ -1,0 +1,42 @@
+package com.lorus.rummikubtracker.data.repository
+
+import com.lorus.rummikubtracker.data.local.dao.PlayerDao
+import com.lorus.rummikubtracker.data.local.entity.PlayerEntity
+import com.lorus.rummikubtracker.domain.model.Player
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class PlayerRepository @Inject constructor(
+    private val playerDao: PlayerDao
+) {
+    fun getAllPlayers(): Flow<List<Player>> = playerDao.getAllPlayers().map { entities ->
+        entities.map { Player(name = it.name, imagePath = it.imagePath) }
+    }
+
+    suspend fun savePlayer(player: Player) {
+        playerDao.insertPlayer(PlayerEntity(name = player.name, imagePath = player.imagePath))
+    }
+
+    suspend fun deletePlayer(name: String) {
+        playerDao.deletePlayerByName(name)
+    }
+
+    suspend fun deleteAllPlayers() {
+        playerDao.deleteAllPlayers()
+    }
+
+    suspend fun getAllPlayerNames(): List<String> {
+        return playerDao.getAllPlayers().map { it.map { p -> p.name } }.let {
+            // This is a flow, get first emission
+            playerDao.getAllPlayers().let { flow ->
+                var result = emptyList<String>()
+                flow.collect { result = it.map { p -> p.name } }
+                result
+            }
+        }
+    }
+}
