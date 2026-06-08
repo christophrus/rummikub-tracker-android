@@ -17,6 +17,7 @@ object Routes {
     const val MANAGE_PLAYERS = "manage_players"
     const val GAME_HISTORY = "game_history"
     const val SETTINGS = "settings"
+    const val COUNTER = "counter"
 
     fun playerSelection(gameId: Long) = "player_selection/$gameId"
     fun activeGame(gameId: Long) = "active_game/$gameId"
@@ -36,7 +37,8 @@ fun RummikubNavHost(
                 onResumeGame = { gameId -> navController.navigate(Routes.activeGame(gameId)) },
                 onManagePlayers = { navController.navigate(Routes.MANAGE_PLAYERS) },
                 onGameHistory = { navController.navigate(Routes.GAME_HISTORY) },
-                onSettings = { navController.navigate(Routes.SETTINGS) }
+                onSettings = { navController.navigate(Routes.SETTINGS) },
+                onCounter = { navController.navigate(Routes.COUNTER) }
             )
         }
 
@@ -99,6 +101,12 @@ fun RummikubNavHost(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.COUNTER) {
+            CounterNavHost(
+                onBackToTracker = { navController.popBackStack() }
             )
         }
     }

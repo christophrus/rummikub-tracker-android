@@ -91,6 +91,12 @@ dependencies {
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
 
+    // ONNX Runtime (ML for tile detection)
+    implementation(libs.onnxruntime.android)
+
+    // Permissions
+    implementation(libs.accompanist.permissions)
+
     // Image Loading
     implementation(libs.coil.compose)
 

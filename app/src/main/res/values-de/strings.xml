@@ -9,6 +9,7 @@
     <string name="manage_players">Spieler verwalten</string>
     <string name="game_history">Spielverlauf</string>
     <string name="settings">Einstellungen</string>
+    <string name="counter">Steine Zähler</string>
     <string name="new_game_title">Neues Spiel</string>
     <string name="game_name">Spielname</string>
     <string name="game_name_hint">Spielname eingeben (optional)</string>

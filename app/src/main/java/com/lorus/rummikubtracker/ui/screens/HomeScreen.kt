@@ -49,6 +49,7 @@ fun HomeScreen(
     onManagePlayers: () -> Unit,
     onGameHistory: () -> Unit,
     onSettings: () -> Unit,
+    onCounter: () -> Unit,
     viewModel: HomeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     val activeGame = viewModel.activeGame
@@ -141,6 +142,10 @@ fun HomeScreen(
             ActionButton(
                 title = stringResource(R.string.settings),
                 onClick = onSettings
+            )
+            ActionButton(
+                title = stringResource(R.string.counter),
+                onClick = onCounter
             )
         }
     }

@@ -9,6 +9,7 @@
     <string name="manage_players">Gérer les joueurs</string>
     <string name="game_history">Historique des parties</string>
     <string name="settings">Paramètres</string>
+    <string name="counter">Compteur</string>
     <string name="new_game_title">Nouvelle partie</string>
     <string name="game_name">Nom de la partie</string>
     <string name="game_name_hint">Entrez le nom (optionnel)</string>
