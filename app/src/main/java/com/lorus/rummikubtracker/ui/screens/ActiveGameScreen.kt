@@ -477,20 +477,6 @@ fun ActiveGameScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                        // Skip player
-                        FilledIconButton(
-                            onClick = { viewModel.skipPlayer() },
-                            modifier = Modifier.size(52.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Icon(
-                                Icons.Default.SkipNext,
-                                contentDescription = stringResource(R.string.skip),
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
                         // Lock/fullscreen
                         FilledIconButton(
                             onClick = { viewModel.toggleScrollLock() },
