@@ -118,10 +118,17 @@ class ActiveGameViewModel @Inject constructor(
         val nextIndex = (game.currentPlayerIndex + 1) % game.players.size
         val nextPlayer = game.players[nextIndex]
 
+        // Update local state immediately so UI reflects the new player
+        val updatedGame = game.copy(currentPlayerIndex = nextIndex)
+        uiState = uiState.copy(game = updatedGame)
+
+        // Timer operations must happen synchronously on the click
+        timerEngine.reset()
+        timerEngine.start()
+
+        // DB update and audio run in background
         scope.launch {
-            gameRepository.updateGame(game.copy(currentPlayerIndex = nextIndex))
-            timerEngine.reset()
-            timerEngine.start()
+            gameRepository.updateGame(updatedGame)
             audioEngine.playTurnNotification()
             audioEngine.announcePlayer(nextPlayer.name)
         }
@@ -157,17 +164,20 @@ class ActiveGameViewModel @Inject constructor(
             winnerPlayerName = uiState.winnerPlayerName
         )
 
+        // Clear winner declaration UI immediately
+        uiState = uiState.copy(
+            showWinnerDeclaration = false,
+            winnerPlayerName = null,
+            scores = emptyMap(),
+            validationError = null
+        )
+
+        // Timer operations must happen synchronously
+        timerEngine.reset()
+        timerEngine.start()
+
         scope.launch {
             gameManager.saveRound(game, round)
-            uiState = uiState.copy(
-                showWinnerDeclaration = false,
-                winnerPlayerName = null,
-                scores = emptyMap(),
-                validationError = null
-            )
-            timerEngine.reset()
-            timerEngine.start()
-            audioEngine.playTurnNotification()
 
             // Announce next player
             val updatedGame = gameRepository.getGameById(gameId).first()
@@ -175,6 +185,8 @@ class ActiveGameViewModel @Inject constructor(
                 val nextPlayer = g.players.getOrNull(g.currentPlayerIndex)
                 nextPlayer?.let { audioEngine.announcePlayer(it.name) }
             }
+
+            audioEngine.playTurnNotification()
         }
     }
 
