@@ -224,6 +224,7 @@ fun ActiveGameScreen(
     val state = viewModel.uiState
     val timerState by viewModel.timerEngine.timerState.collectAsState()
     val remainingMs by viewModel.timerEngine.remainingMs.collectAsState()
+    val effectiveTotalMs by viewModel.timerEngine.effectiveTotalMs.collectAsState()
     val extensionsUsed by viewModel.timerEngine.extensionsUsed.collectAsState()
     val scope = rememberCoroutineScope()
 
@@ -279,8 +280,8 @@ fun ActiveGameScreen(
                     // Timer section
                     TimerSection(
                         remainingMs = remainingMs,
-                        // Effective total = original duration + all extensions added so far
-                        totalMs = game.timerDuration.toLong() + extensionsUsed * Config.EXTENSION_DURATION_MS,
+                        // Effective total = peak remaining (snaps to 100% on extend, then shrinks)
+                        totalMs = effectiveTotalMs,
                         isPaused = timerState == TimerState.PAUSED,
                         isRunning = timerState == TimerState.RUNNING,
                         extensionsRemaining = game.maxExtensions - extensionsUsed,

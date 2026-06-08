@@ -20,6 +20,7 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 mockk = "1.13.12"
 turbine = "1.1.0"
+kotlinxCoroutinesTest = "1.9.0"
 composeUiTest = "1.7.4"
 
 [libraries]
@@ -81,6 +82,7 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeUiTest" }
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeUiTest" }
 

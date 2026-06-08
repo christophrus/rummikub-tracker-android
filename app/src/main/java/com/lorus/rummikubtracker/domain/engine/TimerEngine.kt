@@ -12,6 +12,9 @@ import javax.inject.Singleton
 @Singleton
 class TimerEngine @Inject constructor() {
 
+    // Visible for testing — allows injection of a test dispatcher
+    internal var countdownDispatcher: CoroutineDispatcher = Dispatchers.Main
+
     private val _remainingMs = MutableStateFlow(0L)
     val remainingMs: StateFlow<Long> = _remainingMs.asStateFlow()
 
@@ -20,6 +23,10 @@ class TimerEngine @Inject constructor() {
 
     private val _extensionsUsed = MutableStateFlow(0)
     val extensionsUsed: StateFlow<Int> = _extensionsUsed.asStateFlow()
+
+    /** Tracks the peak remaining time (original + extensions), used by the clock for the full-circle reference. */
+    private val _effectiveTotalMs = MutableStateFlow(0L)
+    val effectiveTotalMs: StateFlow<Long> = _effectiveTotalMs.asStateFlow()
 
     private var maxExtensions: Int = 3
     private var timerJob: Job? = null
@@ -33,6 +40,7 @@ class TimerEngine @Inject constructor() {
         totalDuration = durationMs
         maxExtensions = maxExt
         _remainingMs.value = durationMs
+        _effectiveTotalMs.value = durationMs
         _extensionsUsed.value = 0
         _timerState.value = TimerState.STOPPED
     }
@@ -67,6 +75,7 @@ class TimerEngine @Inject constructor() {
     fun reset() {
         timerJob?.cancel()
         _remainingMs.value = totalDuration
+        _effectiveTotalMs.value = totalDuration
         _timerState.value = TimerState.STOPPED
     }
 
@@ -81,6 +90,8 @@ class TimerEngine @Inject constructor() {
 
         _extensionsUsed.value += 1
         _remainingMs.value += Config.EXTENSION_DURATION_MS
+        // After extension, the clock should be fully filled
+        _effectiveTotalMs.value = _remainingMs.value
         return true
     }
 
@@ -95,7 +106,7 @@ class TimerEngine @Inject constructor() {
 
     private fun startCountdown() {
         timerJob?.cancel()
-        timerJob = CoroutineScope(Dispatchers.Main).launch {
+        timerJob = CoroutineScope(countdownDispatcher).launch {
             while (_remainingMs.value > 0 && _timerState.value == TimerState.RUNNING) {
                 delay(1000)
                 if (_timerState.value != TimerState.RUNNING) break
