@@ -86,18 +86,18 @@ class ActiveGameViewModel @Inject constructor(
         timerEngine.reset()
     }
 
-    fun extendTimer(): Boolean {
-        val game = uiState.game ?: return false
-        val currentPlayer = game.players.getOrNull(game.currentPlayerIndex) ?: return false
+    fun extendTimer() {
+        // Extend must happen synchronously so the UI updates immediately
+        if (!timerEngine.extend()) return
 
+        val game = uiState.game ?: return
+        val currentPlayer = game.players.getOrNull(game.currentPlayerIndex) ?: return
+
+        // DB persistence runs in background
         scope.launch {
-            val success = gameManager.incrementExtensions(gameId, currentPlayer.name)
-            if (success) {
-                timerEngine.extend()
-                audioEngine.playExtend()
-            }
+            gameManager.incrementExtensions(gameId, currentPlayer.name)
+            audioEngine.playExtend()
         }
-        return true
     }
 
     fun declareWinner() {
