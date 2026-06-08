@@ -416,6 +416,13 @@ private fun getTtsLanguageName(code: String): String {
 
 private fun getStringResId(name: String): Int {
     return when (name) {
+        "timer_30s" -> R.string.timer_30s
+        "timer_45s" -> R.string.timer_45s
+        "timer_1m" -> R.string.timer_1m
+        "timer_1_5m" -> R.string.timer_1_5m
+        "timer_2m" -> R.string.timer_2m
+        "timer_3m" -> R.string.timer_3m
+        "timer_5m" -> R.string.timer_5m
         "min_two_players" -> R.string.min_two_players
         else -> R.string.app_name
     }
