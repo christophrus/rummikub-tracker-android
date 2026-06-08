@@ -44,7 +44,8 @@ fun CounterNavHost(
                 onNavigateToCamera = { navController.navigate(CounterRoutes.CAMERA) },
                 onNavigateToHistory = { navController.navigate(CounterRoutes.HISTORY) },
                 onNavigateToSettings = { navController.navigate(CounterRoutes.SETTINGS) },
-                onNavigateToAbout = { navController.navigate(CounterRoutes.ABOUT) }
+                onNavigateToAbout = { navController.navigate(CounterRoutes.ABOUT) },
+                onBack = onBackToTracker
             )
         }
 
