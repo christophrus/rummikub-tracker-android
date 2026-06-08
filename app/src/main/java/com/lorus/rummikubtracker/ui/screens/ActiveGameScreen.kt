@@ -1,5 +1,9 @@
 package com.lorus.rummikubtracker.ui.screens
 
+import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -15,12 +19,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
+import com.lorus.rummikubtracker.counter.ml.ImagePreprocessor
+import com.lorus.rummikubtracker.counter.ml.NmsProcessor
+import com.lorus.rummikubtracker.counter.ml.OrientationDetector
+import com.lorus.rummikubtracker.counter.ml.OrientationPreprocessor
+import com.lorus.rummikubtracker.counter.ml.YoloDetector
+import com.lorus.rummikubtracker.data.local.datastore.PreferencesDataStore
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.engine.AudioEngine
 import com.lorus.rummikubtracker.domain.engine.TimerEngine
@@ -32,6 +43,8 @@ import com.lorus.rummikubtracker.ui.components.ConfettiEffect
 import com.lorus.rummikubtracker.ui.components.PlayerAvatar
 import com.lorus.rummikubtracker.ui.components.PlayerCard
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,7 +58,8 @@ data class ActiveGameUiState(
     val validationError: String? = null,
     val isScanning: Set<String> = emptySet(),
     val showDurationDropdown: Boolean = false,
-    val scrollLocked: Boolean = false
+    val scrollLocked: Boolean = false,
+    val scannedPlayerName: String? = null
 )
 
 @HiltViewModel
@@ -53,7 +67,9 @@ class ActiveGameViewModel @Inject constructor(
     private val gameRepository: GameRepository,
     private val gameManager: GameManager,
     val timerEngine: TimerEngine,
-    private val audioEngine: AudioEngine
+    private val audioEngine: AudioEngine,
+    private val preferencesDataStore: PreferencesDataStore,
+    @ApplicationContext private val appContext: android.content.Context
 ) : androidx.lifecycle.ViewModel() {
 
     var uiState by mutableStateOf(ActiveGameUiState())
@@ -237,6 +253,53 @@ class ActiveGameViewModel @Inject constructor(
         uiState = uiState.copy(showEndGameDialog = false)
     }
 
+    // --- Tile Scanning ---
+    private val yoloDetector: YoloDetector by lazy { YoloDetector(appContext) }
+    private val orientationDetector: OrientationDetector by lazy { OrientationDetector(appContext) }
+
+    fun startTileScan(playerName: String) {
+        uiState = uiState.copy(scannedPlayerName = playerName)
+    }
+
+    fun onImageCaptured(bitmap: Bitmap) {
+        val playerName = uiState.scannedPlayerName ?: return
+        uiState = uiState.copy(
+            isScanning = uiState.isScanning + playerName,
+            scannedPlayerName = null
+        )
+
+        kotlinx.coroutines.MainScope().launch(Dispatchers.Default) {
+            try {
+                val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold
+                val safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap)
+                val orientationInput = OrientationPreprocessor.preprocess(safeBitmap)
+                val detectedDegrees = orientationDetector.detect(orientationInput)
+                val correctionDegrees = orientationDetector.correctionDegrees(detectedDegrees)
+                val orientedBitmap = if (correctionDegrees != 0) {
+                    ImagePreprocessor.rotateBitmap(safeBitmap, correctionDegrees)
+                } else safeBitmap
+
+                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap)
+                val rawOutput = yoloDetector.detect(inputArray)
+                val tiles = NmsProcessor.postProcess(
+                    rawOutput, letterboxInfo, orientedBitmap.width, orientedBitmap.height,
+                    confThreshold = confThreshold
+                )
+                val totalScore = tiles.sumOf { if (it.isJoker) 20 else (it.number ?: 0) }
+
+                uiState = uiState.copy(
+                    isScanning = uiState.isScanning - playerName,
+                    scores = uiState.scores + (playerName to totalScore.toString()),
+                    validationError = null
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isScanning = uiState.isScanning - playerName
+                )
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         timerEngine.stop()
@@ -258,6 +321,26 @@ fun ActiveGameScreen(
     val effectiveTotalMs by viewModel.timerEngine.effectiveTotalMs.collectAsState()
     val extensionsUsed by viewModel.timerEngine.extensionsUsed.collectAsState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Gallery image picker
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            val bitmap = android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            viewModel.onImageCaptured(bitmap)
+        }
+    }
+
+    // Trigger gallery when scannedPlayerName is set
+    LaunchedEffect(state.scannedPlayerName) {
+        state.scannedPlayerName?.let {
+            galleryLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    }
 
     LaunchedEffect(gameId) {
         viewModel.loadGame(gameId)
@@ -308,7 +391,7 @@ fun ActiveGameScreen(
                     isScanning = state.isScanning,
                     onScoreChange = { name, score -> viewModel.updateScore(name, score) },
                     onSaveRound = { viewModel.saveRound() },
-                    onScanTile = { /* API scan */ }
+                    onScanTile = { playerName -> viewModel.startTileScan(playerName) }
                 )
             } else {
                 // Active game view — redesigned layout
