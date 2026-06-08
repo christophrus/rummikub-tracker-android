@@ -14,7 +14,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 
 object SettingsKeys {
     val CONFIDENCE_THRESHOLD = floatPreferencesKey("confidence_threshold")
-    val THEME_MODE = stringPreferencesKey("theme_mode") // "system", "light", "dark"
+    val THEME_MODE = stringPreferencesKey("theme") // "system", "light", "dark"
 }
 
 object SettingsDefaults {

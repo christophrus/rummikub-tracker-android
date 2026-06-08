@@ -21,7 +21,8 @@ data class AppPreferences(
     val scrollLock: Boolean = false,
     val extensionReplenishRounds: Int = 0,
     val gameNumberSeq: Int = 1,
-    val preferredSettings: String = "{}"
+    val preferredSettings: String = "{}",
+    val confidenceThreshold: Float = 0.25f
 )
 
 @Singleton
@@ -38,6 +39,7 @@ class PreferencesDataStore @Inject constructor(
         private val KEY_EXTENSION_REPLENISH_ROUNDS = intPreferencesKey("extension_replenish_rounds")
         private val KEY_GAME_NUMBER_SEQ = intPreferencesKey("game_number_seq")
         private val KEY_PREFERRED_SETTINGS = stringPreferencesKey("preferred_settings")
+        private val KEY_CONFIDENCE_THRESHOLD = floatPreferencesKey("confidence_threshold")
     }
 
     val preferences: Flow<AppPreferences> = context.dataStore.data.map { prefs ->
@@ -50,7 +52,8 @@ class PreferencesDataStore @Inject constructor(
             scrollLock = prefs[KEY_SCROLL_LOCK] ?: false,
             extensionReplenishRounds = prefs[KEY_EXTENSION_REPLENISH_ROUNDS] ?: 0,
             gameNumberSeq = prefs[KEY_GAME_NUMBER_SEQ] ?: 1,
-            preferredSettings = prefs[KEY_PREFERRED_SETTINGS] ?: "{}"
+            preferredSettings = prefs[KEY_PREFERRED_SETTINGS] ?: "{}",
+            confidenceThreshold = prefs[KEY_CONFIDENCE_THRESHOLD] ?: 0.25f
         )
     }
 
@@ -93,6 +96,10 @@ class PreferencesDataStore @Inject constructor(
 
     suspend fun setPreferredSettings(settings: String) {
         context.dataStore.edit { it[KEY_PREFERRED_SETTINGS] = settings }
+    }
+
+    suspend fun setConfidenceThreshold(threshold: Float) {
+        context.dataStore.edit { it[KEY_CONFIDENCE_THRESHOLD] = threshold }
     }
 
     suspend fun clearAll() {

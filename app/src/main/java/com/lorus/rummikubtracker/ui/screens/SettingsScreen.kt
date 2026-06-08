@@ -1,13 +1,16 @@
 package com.lorus.rummikubtracker.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.local.datastore.PreferencesDataStore
@@ -29,10 +32,10 @@ class SettingsViewModel @Inject constructor(
     var uiLanguage by mutableStateOf("en")
     var ttsLanguage by mutableStateOf("en")
     var theme by mutableStateOf("system")
+    var confidenceThreshold by mutableStateOf(0.25f)
     var showClearDialog by mutableStateOf(false)
     var showUiLangDropdown by mutableStateOf(false)
     var showTtsDropdown by mutableStateOf(false)
-    var showThemeDropdown by mutableStateOf(false)
 
     private val scope = kotlinx.coroutines.MainScope()
 
@@ -42,6 +45,7 @@ class SettingsViewModel @Inject constructor(
                 uiLanguage = prefs.uiLanguage
                 ttsLanguage = prefs.ttsLanguage
                 theme = prefs.theme
+                confidenceThreshold = prefs.confidenceThreshold
             }
         }
     }
@@ -59,6 +63,11 @@ class SettingsViewModel @Inject constructor(
     fun updateTheme(themeMode: String) {
         theme = themeMode
         scope.launch { preferencesDataStore.setTheme(themeMode) }
+    }
+
+    fun updateConfidenceThreshold(value: Float) {
+        confidenceThreshold = value
+        scope.launch { preferencesDataStore.setConfidenceThreshold(value) }
     }
 
     fun clearAllData() {
@@ -81,7 +90,7 @@ fun SettingsScreen(
                 title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -165,50 +174,57 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Theme
+            // Theme (radio buttons style from counter)
             Text(
-                text = stringResource(R.string.theme),
+                text = stringResource(R.string.settings_theme),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(Modifier.height(8.dp))
-            ExposedDropdownMenuBox(
-                expanded = viewModel.showThemeDropdown,
-                onExpandedChange = { viewModel.showThemeDropdown = it }
+
+            ThemeOption(
+                label = stringResource(R.string.settings_theme_system),
+                selected = viewModel.theme == "system",
+                onClick = { viewModel.updateTheme("system") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.settings_theme_light),
+                selected = viewModel.theme == "light",
+                onClick = { viewModel.updateTheme("light") }
+            )
+            ThemeOption(
+                label = stringResource(R.string.settings_theme_dark),
+                selected = viewModel.theme == "dark",
+                onClick = { viewModel.updateTheme("dark") }
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Confidence Threshold (from counter)
+            Text(
+                text = stringResource(R.string.settings_confidence),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.settings_confidence_desc, viewModel.confidenceThreshold * 100f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            Slider(
+                value = viewModel.confidenceThreshold,
+                onValueChange = { viewModel.updateConfidenceThreshold(it) },
+                valueRange = 0.1f..0.9f,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                OutlinedTextField(
-                    value = when (viewModel.theme) {
-                        "light" -> stringResource(R.string.theme_light)
-                        "dark" -> stringResource(R.string.theme_dark)
-                        else -> stringResource(R.string.theme_system)
-                    },
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.showThemeDropdown) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = viewModel.showThemeDropdown,
-                    onDismissRequest = { viewModel.showThemeDropdown = false }
-                ) {
-                    listOf("system", "light", "dark").forEach { mode ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    when (mode) {
-                                        "light" -> stringResource(R.string.theme_light)
-                                        "dark" -> stringResource(R.string.theme_dark)
-                                        else -> stringResource(R.string.theme_system)
-                                    }
-                                )
-                            },
-                            onClick = {
-                                viewModel.updateTheme(mode)
-                                viewModel.showThemeDropdown = false
-                            }
-                        )
-                    }
-                }
+                Text("10%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("90%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(Modifier.weight(1f))
@@ -251,6 +267,38 @@ fun SettingsScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ThemeOption(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        if (selected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+        }
     }
 }
 
