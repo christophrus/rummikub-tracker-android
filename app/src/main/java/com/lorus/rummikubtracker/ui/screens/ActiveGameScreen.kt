@@ -26,6 +26,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
+import com.lorus.rummikubtracker.counter.data.local.AppDatabase
+import com.lorus.rummikubtracker.counter.data.repository.HistoryRepository
 import com.lorus.rummikubtracker.counter.ml.ImagePreprocessor
 import com.lorus.rummikubtracker.counter.ml.NmsProcessor
 import com.lorus.rummikubtracker.counter.ml.OrientationDetector
@@ -256,6 +258,10 @@ class ActiveGameViewModel @Inject constructor(
     // --- Tile Scanning ---
     private val yoloDetector: YoloDetector by lazy { YoloDetector(appContext) }
     private val orientationDetector: OrientationDetector by lazy { OrientationDetector(appContext) }
+    private val historyRepository: HistoryRepository by lazy {
+        val db = AppDatabase.getInstance(appContext)
+        HistoryRepository(db.analysisDao(), appContext)
+    }
 
     fun startTileScan(playerName: String) {
         uiState = uiState.copy(scannedPlayerName = playerName)
@@ -286,6 +292,20 @@ class ActiveGameViewModel @Inject constructor(
                     confThreshold = confThreshold
                 )
                 val totalScore = tiles.sumOf { if (it.isJoker) 20 else (it.number ?: 0) }
+                val elapsed = 0L // processing time not critical here
+                val result = com.lorus.rummikubtracker.counter.model.AnalysisResult(
+                    tiles = tiles,
+                    totalScore = totalScore,
+                    tileCount = tiles.size,
+                    processingTimeMs = elapsed
+                )
+
+                // Save to counter history
+                try {
+                    historyRepository.saveResult(result, tiles, orientedBitmap)
+                } catch (_: Exception) {
+                    // History save is best-effort, don't fail the scan
+                }
 
                 uiState = uiState.copy(
                     isScanning = uiState.isScanning - playerName,
