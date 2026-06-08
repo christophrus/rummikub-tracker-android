@@ -63,16 +63,16 @@ class ActiveGameViewModel @Inject constructor(
     fun loadGame(id: Long) {
         gameId = id
         scope.launch {
+            // Get initial game to configure timer/audio once
+            val initialGame = gameRepository.getGameById(id).first() ?: return@launch
+            timerEngine.configure(initialGame.timerDuration.toLong(), initialGame.maxExtensions)
+            audioEngine.setTtsLanguage(initialGame.ttsLanguage)
+            audioEngine.initialize()
+
+            // Collect subsequent changes for UI only — don't reconfigure timer
             gameRepository.getGameById(id).collect { game ->
                 game?.let { g ->
                     uiState = uiState.copy(game = g)
-
-                    // Configure timer
-                    timerEngine.configure(g.timerDuration.toLong(), g.maxExtensions)
-
-                    // Configure audio
-                    audioEngine.setTtsLanguage(g.ttsLanguage)
-                    audioEngine.initialize()
                 }
             }
         }
