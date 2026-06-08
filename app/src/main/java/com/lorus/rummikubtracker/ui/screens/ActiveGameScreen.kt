@@ -61,7 +61,8 @@ data class ActiveGameUiState(
     val isScanning: Set<String> = emptySet(),
     val showDurationDropdown: Boolean = false,
     val scrollLocked: Boolean = false,
-    val scannedPlayerName: String? = null
+    val scannedPlayerName: String? = null,
+    val showScanSourceDialog: Boolean = false
 )
 
 @HiltViewModel
@@ -264,7 +265,14 @@ class ActiveGameViewModel @Inject constructor(
     }
 
     fun startTileScan(playerName: String) {
-        uiState = uiState.copy(scannedPlayerName = playerName)
+        uiState = uiState.copy(
+            scannedPlayerName = playerName,
+            showScanSourceDialog = true
+        )
+    }
+
+    fun dismissScanSourceDialog() {
+        uiState = uiState.copy(showScanSourceDialog = false, scannedPlayerName = null)
     }
 
     fun onImageCaptured(bitmap: Bitmap) {
@@ -353,13 +361,53 @@ fun ActiveGameScreen(
         }
     }
 
-    // Trigger gallery when scannedPlayerName is set
-    LaunchedEffect(state.scannedPlayerName) {
-        state.scannedPlayerName?.let {
-            galleryLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }
+    // Camera photo capture
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        bitmap?.let { viewModel.onImageCaptured(it) }
+    }
+
+    // Show scan source dialog when triggered
+    if (state.showScanSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissScanSourceDialog() },
+            title = { Text(stringResource(R.string.scan_tile)) },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = {
+                            viewModel.dismissScanSourceDialog()
+                            cameraLauncher.launch(null)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text(stringResource(R.string.take_photo), modifier = Modifier.weight(1f))
+                    }
+                    TextButton(
+                        onClick = {
+                            viewModel.dismissScanSourceDialog()
+                            galleryLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text(stringResource(R.string.pick_gallery), modifier = Modifier.weight(1f))
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissScanSourceDialog() }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
     LaunchedEffect(gameId) {
