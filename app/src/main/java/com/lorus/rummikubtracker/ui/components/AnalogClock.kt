@@ -32,7 +32,8 @@ fun AnalogClock(
 ) {
     val seconds = remainingMs / 1000f
     val totalSeconds = totalMs / 1000f
-    val progress = if (totalSeconds > 0) seconds / totalSeconds else 0f
+    // Clamp progress to 0..1 so extensions don't push the hand beyond the circle
+    val progress = if (totalSeconds > 0) (seconds / totalSeconds).coerceIn(0f, 1f) else 0f
 
     val clockColor = when {
         seconds <= Config.CLOCK_COLOR_RED_SECONDS -> TimerRed

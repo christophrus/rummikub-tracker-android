@@ -279,7 +279,8 @@ fun ActiveGameScreen(
                     // Timer section
                     TimerSection(
                         remainingMs = remainingMs,
-                        totalMs = game.timerDuration.toLong(),
+                        // Use max of original and remaining so extended clock shows correct proportion
+                        totalMs = maxOf(game.timerDuration.toLong(), remainingMs),
                         isPaused = timerState == TimerState.PAUSED,
                         isRunning = timerState == TimerState.RUNNING,
                         extensionsRemaining = game.maxExtensions - extensionsUsed,
