@@ -113,6 +113,13 @@
     <string name="error_network">Network error. Please try again.</string>
     <string name="scan_failed">Tile scan failed</string>
 
+    <!-- Active Game -->
+    <string name="turn_label">Turn:</string>
+    <string name="add_30_seconds">+ 30s add</string>
+    <string name="duration_label">Duration</string>
+    <string name="round_label">Round %d</string>
+    <string name="lock_screen">Lock screen</string>
+
     <!-- Timer -->
     <string name="time_up">Time\'s up!</string>
 </resources>

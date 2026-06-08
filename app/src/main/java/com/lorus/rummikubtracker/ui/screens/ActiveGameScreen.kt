@@ -43,7 +43,9 @@ data class ActiveGameUiState(
     val winnerPlayerName: String? = null,
     val scores: Map<String, String> = emptyMap(),
     val validationError: String? = null,
-    val isScanning: Set<String> = emptySet()
+    val isScanning: Set<String> = emptySet(),
+    val showDurationDropdown: Boolean = false,
+    val scrollLocked: Boolean = false
 )
 
 @HiltViewModel
@@ -91,6 +93,24 @@ class ActiveGameViewModel @Inject constructor(
 
     fun resetTimer() {
         timerEngine.reset()
+    }
+
+    fun toggleScrollLock() {
+        uiState = uiState.copy(scrollLocked = !uiState.scrollLocked)
+    }
+
+    fun toggleDurationDropdown() {
+        uiState = uiState.copy(showDurationDropdown = !uiState.showDurationDropdown)
+    }
+
+    fun dismissDurationDropdown() {
+        uiState = uiState.copy(showDurationDropdown = false)
+    }
+
+    fun setTimerDuration(ms: Int) {
+        val game = uiState.game ?: return
+        timerEngine.configure(ms.toLong(), game.maxExtensions, currentExtensionsUsed = timerEngine.extensionsUsed.value)
+        uiState = uiState.copy(showDurationDropdown = false)
     }
 
     fun extendTimer() {
@@ -247,22 +267,29 @@ fun ActiveGameScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(state.game?.name ?: "", style = MaterialTheme.typography.titleMedium)
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
-                            text = stringResource(R.string.round_number, (state.game?.currentRound ?: 0) + 1),
-                            style = MaterialTheme.typography.bodySmall
+                            state.game?.name ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = buildString {
+                                append(stringResource(R.string.round_label, (state.game?.currentRound ?: 0) + 1))
+                                val elapsed = ((System.currentTimeMillis() - (state.game?.startTime ?: 0L)) / 1000).toInt()
+                                append(" · ${elapsed / 60}m")
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.showEndGameDialog() }) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.end_game))
                     }
                 }
             )
@@ -284,72 +311,248 @@ fun ActiveGameScreen(
                     onScanTile = { /* API scan */ }
                 )
             } else {
-                // Active game view
+                // Active game view — redesigned layout
+                val currentPlayer = game.players.getOrNull(game.currentPlayerIndex)
+                val currentPlayerName = currentPlayer?.name ?: ""
+                val currentPlayerImage = currentPlayer?.imagePath
+                val elapsedSeconds = ((System.currentTimeMillis() - game.startTime) / 1000).toInt()
+                val elapsedMin = elapsedSeconds / 60
+
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // Timer section
-                    TimerSection(
-                        remainingMs = remainingMs,
-                        // Effective total = peak remaining (snaps to 100% on extend, then shrinks)
-                        totalMs = effectiveTotalMs,
-                        isPaused = timerState == TimerState.PAUSED,
-                        isRunning = timerState == TimerState.RUNNING,
-                        extensionsRemaining = game.maxExtensions - extensionsUsed,
-                        currentPlayerName = game.players.getOrNull(game.currentPlayerIndex)?.name ?: "",
-                        currentPlayerImage = game.players.getOrNull(game.currentPlayerIndex)?.imagePath,
-                        onToggleTimer = { viewModel.toggleTimer() },
-                        onResetTimer = { viewModel.resetTimer() },
-                        onExtend = { viewModel.extendTimer() },
-                        onDeclareWinner = { viewModel.declareWinner() },
-                        onSkipPlayer = { viewModel.skipPlayer() }
-                    )
-
-                    HorizontalDivider()
-
-                    // Score summary table
-                    if (game.rounds.isNotEmpty()) {
-                        ScoreSummaryTable(game = game)
-                        HorizontalDivider()
+                    // === Player card (purple gradient) ===
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        shape = MaterialTheme.shapes.large,
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF5E35C2))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Avatar
+                            PlayerAvatar(
+                                name = currentPlayerName,
+                                imagePath = currentPlayerImage,
+                                size = 56
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            // Name
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.turn_label),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = currentPlayerName,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                            // Trophy button
+                            IconButton(
+                                onClick = { viewModel.declareWinner() },
+                                modifier = Modifier.size(44.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.EmojiEvents,
+                                    contentDescription = stringResource(R.string.declare_winner),
+                                    tint = Color(0xFFFFB300),
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                            // Play/Pause button
+                            IconButton(
+                                onClick = { viewModel.toggleTimer() },
+                                modifier = Modifier.size(44.dp)
+                            ) {
+                                Icon(
+                                    if (timerState == TimerState.RUNNING) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (timerState == TimerState.RUNNING) stringResource(R.string.pause) else stringResource(R.string.play),
+                                    tint = Color.White,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
                     }
 
-                    // Player cards grid
-                    Text(
-                        text = stringResource(R.string.players),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    Spacer(Modifier.height(16.dp))
+
+                    // === Large centered timer ===
+                    AnalogClock(
+                        remainingMs = remainingMs,
+                        totalMs = effectiveTotalMs,
+                        isPaused = timerState == TimerState.PAUSED,
+                        size = 220.dp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    Spacer(Modifier.height(16.dp))
+
+                    // === Extension button with badge ===
+                    Box(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
-                        itemsIndexed(game.players) { index, player ->
-                            PlayerCard(
-                                name = player.name,
-                                imagePath = player.imagePath,
-                                isCurrentPlayer = index == game.currentPlayerIndex,
-                                score = game.getPlayerTotal(player.name)
+                        Button(
+                            onClick = { viewModel.extendTimer() },
+                            enabled = game.maxExtensions - extensionsUsed > 0,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1565C0),
+                                disabledContainerColor = Color(0xFF1565C0).copy(alpha = 0.4f)
+                            ),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.add_30_seconds),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color.White
+                            )
+                        }
+                        // Badge
+                        val remaining = game.maxExtensions - extensionsUsed
+                        Badge(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = 8.dp, y = (-8).dp),
+                            containerColor = Color(0xFFE53935)
+                        ) {
+                            Text("$remaining", color = Color.White)
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // === Control row: play/pause, reset, skip, lock ===
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Play/Pause
+                        FilledIconButton(
+                            onClick = { viewModel.toggleTimer() },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                if (timerState == TimerState.RUNNING) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (timerState == TimerState.RUNNING) stringResource(R.string.pause) else stringResource(R.string.play),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        // Reset
+                        FilledIconButton(
+                            onClick = { viewModel.resetTimer() },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.reset),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        // Skip player
+                        FilledIconButton(
+                            onClick = { viewModel.skipPlayer() },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.SkipNext,
+                                contentDescription = stringResource(R.string.skip),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        // Lock/fullscreen
+                        FilledIconButton(
+                            onClick = { viewModel.toggleScrollLock() },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = if (state.scrollLocked)
+                                    MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                if (state.scrollLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                contentDescription = stringResource(R.string.lock_screen),
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
 
-                    // End Game button
-                    Button(
+                    Spacer(Modifier.height(16.dp))
+
+                    // === Duration selector ===
+                    ExposedDropdownMenuBox(
+                        expanded = state.showDurationDropdown,
+                        onExpandedChange = { viewModel.toggleDurationDropdown() }
+                    ) {
+                        OutlinedTextField(
+                            value = formatDurationShort(game.timerDuration),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(R.string.duration_label)) },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.showDurationDropdown)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .menuAnchor(),
+                            singleLine = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = state.showDurationDropdown,
+                            onDismissRequest = { viewModel.dismissDurationDropdown() }
+                        ) {
+                            Config.TIMER_PRESETS.forEach { (ms, _) ->
+                                DropdownMenuItem(
+                                    text = { Text(formatDurationShort(ms)) },
+                                    onClick = { viewModel.setTimerDuration(ms) }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.weight(1f))
+
+                    // === Bottom: score table + end game ===
+                    if (game.rounds.isNotEmpty()) {
+                        ScoreSummaryTable(game = game)
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    OutlinedButton(
                         onClick = { viewModel.showEndGameDialog() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
                         Text(stringResource(R.string.end_game))
                     }
+                    Spacer(Modifier.height(8.dp))
                 }
             }
         }
@@ -382,122 +585,6 @@ fun ActiveGameScreen(
                 }
             }
         )
-    }
-}
-
-@Composable
-private fun TimerSection(
-    remainingMs: Long,
-    totalMs: Long,
-    isPaused: Boolean,
-    isRunning: Boolean,
-    extensionsRemaining: Int,
-    currentPlayerName: String,
-    currentPlayerImage: String?,
-    onToggleTimer: () -> Unit,
-    onResetTimer: () -> Unit,
-    onExtend: () -> Unit,
-    onDeclareWinner: () -> Unit,
-    onSkipPlayer: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Analog Clock
-        AnalogClock(
-            remainingMs = remainingMs,
-            totalMs = totalMs,
-            isPaused = isPaused,
-            size = 180.dp
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // Timer controls
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onToggleTimer) {
-                Icon(
-                    if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isRunning) stringResource(R.string.pause) else stringResource(R.string.play),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            IconButton(onClick = onResetTimer) {
-                Icon(
-                    Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.reset),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            // Extend button
-            FilledTonalButton(
-                onClick = onExtend,
-                enabled = extensionsRemaining > 0
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Text(
-                    text = stringResource(R.string.extensions_remaining, extensionsRemaining)
-                )
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Current player card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PlayerAvatar(
-                    name = currentPlayerName,
-                    imagePath = currentPlayerImage,
-                    size = 48
-                )
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = currentPlayerName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-                // Winner button
-                IconButton(
-                    onClick = onDeclareWinner,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = stringResource(R.string.declare_winner),
-                        tint = Color(0xFFFFB300)
-                    )
-                }
-                // Skip button
-                IconButton(
-                    onClick = onSkipPlayer,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        Icons.Default.SkipNext,
-                        contentDescription = stringResource(R.string.skip),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -703,5 +790,18 @@ private fun ScoreSummaryTable(game: Game) {
                 )
             }
         }
+    }
+}
+
+private fun formatDurationShort(ms: Int): String {
+    return when (ms) {
+        30_000 -> "30s"
+        45_000 -> "45s"
+        60_000 -> "1m"
+        90_000 -> "1m 30s"
+        120_000 -> "2m"
+        180_000 -> "3m"
+        300_000 -> "5m"
+        else -> "${ms / 1000}s"
     }
 }
