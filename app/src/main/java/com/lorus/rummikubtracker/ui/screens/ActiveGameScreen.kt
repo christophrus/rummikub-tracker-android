@@ -385,14 +385,19 @@ fun ActiveGameScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // === Large centered timer ===
-                    AnalogClock(
-                        remainingMs = remainingMs,
-                        totalMs = effectiveTotalMs,
-                        isPaused = timerState == TimerState.PAUSED,
-                        size = 260.dp,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
+                    // === Large centered timer — as wide as screen ===
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val clockSize = maxWidth - 32.dp
+                        AnalogClock(
+                            remainingMs = remainingMs,
+                            totalMs = effectiveTotalMs,
+                            isPaused = timerState == TimerState.PAUSED,
+                            size = clockSize,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
 
                     Spacer(Modifier.height(16.dp))
 
