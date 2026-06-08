@@ -368,16 +368,16 @@ fun ActiveGameScreen(
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
-                            // Play/Pause button
+                            // Next Player button
                             IconButton(
-                                onClick = { viewModel.toggleTimer() },
+                                onClick = { viewModel.skipPlayer() },
                                 modifier = Modifier.size(44.dp)
                             ) {
                                 Icon(
-                                    if (timerState == TimerState.RUNNING) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (timerState == TimerState.RUNNING) stringResource(R.string.pause) else stringResource(R.string.play),
+                                    Icons.Default.SkipNext,
+                                    contentDescription = stringResource(R.string.skip),
                                     tint = Color.White,
-                                    modifier = Modifier.size(28.dp)
+                                    modifier = Modifier.size(32.dp)
                                 )
                             }
                         }
