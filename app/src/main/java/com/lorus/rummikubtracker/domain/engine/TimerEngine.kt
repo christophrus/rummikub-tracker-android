@@ -36,12 +36,12 @@ class TimerEngine @Inject constructor() {
     var onTimeUp: (() -> Unit)? = null
     var onTickSound: (() -> Unit)? = null
 
-    fun configure(durationMs: Long, maxExt: Int = 3) {
+    fun configure(durationMs: Long, maxExt: Int = 3, currentExtensionsUsed: Int = 0) {
         totalDuration = durationMs
         maxExtensions = maxExt
         _remainingMs.value = durationMs
         _effectiveTotalMs.value = durationMs
-        _extensionsUsed.value = 0
+        _extensionsUsed.value = currentExtensionsUsed
         _timerState.value = TimerState.STOPPED
     }
 
@@ -97,6 +97,10 @@ class TimerEngine @Inject constructor() {
 
     fun resetExtensions() {
         _extensionsUsed.value = 0
+    }
+
+    fun setExtensionsUsed(count: Int) {
+        _extensionsUsed.value = count.coerceIn(0, maxExtensions)
     }
 
     fun getRemainingExtensions(): Int = maxExtensions - _extensionsUsed.value

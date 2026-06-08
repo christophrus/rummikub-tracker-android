@@ -65,7 +65,14 @@ class ActiveGameViewModel @Inject constructor(
         scope.launch {
             // Get initial game to configure timer/audio once
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
-            timerEngine.configure(initialGame.timerDuration.toLong(), initialGame.maxExtensions)
+            val currentPlayerExtUsed = initialGame.players
+                .getOrNull(initialGame.currentPlayerIndex)
+                ?.extensionsUsed ?: 0
+            timerEngine.configure(
+                initialGame.timerDuration.toLong(),
+                initialGame.maxExtensions,
+                currentPlayerExtUsed
+            )
             audioEngine.setTtsLanguage(initialGame.ttsLanguage)
             audioEngine.initialize()
 
@@ -124,6 +131,7 @@ class ActiveGameViewModel @Inject constructor(
 
         // Timer operations must happen synchronously on the click
         timerEngine.reset()
+        timerEngine.setExtensionsUsed(nextPlayer.extensionsUsed)
         timerEngine.start()
 
         // DB update and audio run in background
@@ -179,11 +187,14 @@ class ActiveGameViewModel @Inject constructor(
         scope.launch {
             gameManager.saveRound(game, round)
 
-            // Announce next player
+            // Restore next player's extension count
             val updatedGame = gameRepository.getGameById(gameId).first()
             updatedGame?.let { g ->
                 val nextPlayer = g.players.getOrNull(g.currentPlayerIndex)
-                nextPlayer?.let { audioEngine.announcePlayer(it.name) }
+                nextPlayer?.let {
+                    timerEngine.setExtensionsUsed(it.extensionsUsed)
+                    audioEngine.announcePlayer(it.name)
+                }
             }
 
             audioEngine.playTurnNotification()
