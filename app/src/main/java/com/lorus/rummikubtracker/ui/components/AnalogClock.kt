@@ -1,5 +1,6 @@
 package com.lorus.rummikubtracker.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,8 @@ fun AnalogClock(
     totalMs: Long,
     isPaused: Boolean = false,
     modifier: Modifier = Modifier,
-    size: Dp = 200.dp
+    size: Dp = 200.dp,
+    onClick: (() -> Unit)? = null
 ) {
     val seconds = remainingMs / 1000f
     val totalSeconds = totalMs / 1000f
@@ -46,7 +48,9 @@ fun AnalogClock(
     val timeText = String.format("%d:%02d", minutes, secs)
 
     Column(
-        modifier = modifier,
+        modifier = modifier.then(
+            if (onClick != null) Modifier.clickable { onClick() } else Modifier
+        ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(contentAlignment = Alignment.Center) {

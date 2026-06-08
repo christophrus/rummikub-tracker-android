@@ -395,6 +395,7 @@ fun ActiveGameScreen(
                             totalMs = effectiveTotalMs,
                             isPaused = timerState == TimerState.PAUSED,
                             size = clockSize,
+                            onClick = { viewModel.skipPlayer() },
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
