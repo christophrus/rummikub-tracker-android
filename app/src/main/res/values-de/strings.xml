@@ -10,6 +10,12 @@
     <string name="game_history">Spielverlauf</string>
     <string name="settings">Einstellungen</string>
     <string name="counter">Steine Zähler</string>
+    <string name="new_game_desc">Neue Rummikub-Runde mit Timer starten</string>
+    <string name="manage_players_desc">Spieler hinzufügen, bearbeiten oder löschen</string>
+    <string name="game_history_desc">Vergangene Spiele und Ergebnisse anzeigen</string>
+    <string name="counter_desc">Steine mit KI erkennen und Punkte berechnen</string>
+    <string name="settings_desc">Sprache, Design und Datenverwaltung</string>
+    <string name="home_subtitle">Verfolge deine Rummikub-Spiele</string>
     <string name="new_game_title">Neues Spiel</string>
     <string name="game_name">Spielname</string>
     <string name="game_name_hint">Spielname eingeben (optional)</string>

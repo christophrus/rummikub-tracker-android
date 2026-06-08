@@ -12,6 +12,11 @@
     <string name="game_history">Game History</string>
     <string name="settings">Settings</string>
     <string name="counter">Tile Counter</string>
+    <string name="new_game_desc">Start a new Rummikub round with timer</string>
+    <string name="manage_players_desc">Add, edit or remove saved players</string>
+    <string name="game_history_desc">View past games and results</string>
+    <string name="counter_desc">Detect tiles with AI and calculate scores</string>
+    <string name="settings_desc">Language, theme and data management</string>
 
     <!-- New Game Screen -->
     <string name="new_game_title">New Game</string>
@@ -142,6 +147,7 @@
     <string name="analyzing">Analyzing…</string>
     <string name="points">Points</string>
     <string name="app_subtitle">Detect tiles &amp; calculate score</string>
+    <string name="home_subtitle">Track your Rummikub games</string>
     <string name="menu_new_photo">New Photo</string>
     <string name="menu_new_photo_desc">Take a photo or pick from gallery</string>
     <string name="menu_history">History</string>

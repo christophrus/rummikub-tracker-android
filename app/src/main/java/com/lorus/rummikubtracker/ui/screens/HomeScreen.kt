@@ -1,14 +1,19 @@
 package com.lorus.rummikubtracker.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
@@ -26,7 +31,6 @@ class HomeViewModel @Inject constructor(
         private set
 
     init {
-        // Collect active game in a coroutine
         kotlinx.coroutines.MainScope().launch {
             gameRepository.getActiveGame().collect { game ->
                 activeGame = game
@@ -56,27 +60,41 @@ fun HomeScreen(
     var showCancelDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.home_title)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(Modifier.height(48.dp))
+
+            // App icon
+            Icon(
+                imageVector = Icons.Default.Casino,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
             Spacer(Modifier.height(16.dp))
+
+            // Title
+            Text(
+                text = stringResource(R.string.home_title),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = stringResource(R.string.home_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Spacer(Modifier.height(32.dp))
 
             // Active game card
             if (activeGame != null) {
@@ -87,66 +105,88 @@ fun HomeScreen(
                     ),
                     onClick = { onResumeGame(activeGame.id) }
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(R.string.game_in_progress),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        Icon(
+                            Icons.Default.PlayCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = activeGame.name,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "Round ${activeGame.currentRound + 1}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TextButton(onClick = { onResumeGame(activeGame.id) }) {
-                                Text(stringResource(R.string.resume_game))
-                            }
-                            TextButton(
-                                onClick = { showCancelDialog = true },
-                                colors = ButtonDefaults.textButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                Text(stringResource(R.string.cancel_game))
-                            }
+                        Spacer(Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                activeGame.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "Round ${activeGame.currentRound + 1}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
+                        IconButton(onClick = { showCancelDialog = true }) {
+                            Icon(
+                                Icons.Default.Close,
+                                stringResource(R.string.cancel_game),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }
+
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
 
-            // Main action buttons
-            ActionButton(
+            Spacer(Modifier.height(16.dp))
+
+            // Menu items
+            MenuItem(
+                icon = Icons.Default.AddCircle,
                 title = stringResource(R.string.new_game),
+                description = stringResource(R.string.new_game_desc),
                 onClick = onNewGame
             )
-            ActionButton(
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            MenuItem(
+                icon = Icons.Default.People,
                 title = stringResource(R.string.manage_players),
+                description = stringResource(R.string.manage_players_desc),
                 onClick = onManagePlayers
             )
-            ActionButton(
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            MenuItem(
+                icon = Icons.Default.History,
                 title = stringResource(R.string.game_history),
+                description = stringResource(R.string.game_history_desc),
                 onClick = onGameHistory
             )
-            ActionButton(
-                title = stringResource(R.string.settings),
-                onClick = onSettings
-            )
-            ActionButton(
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            MenuItem(
+                icon = Icons.Default.CameraAlt,
                 title = stringResource(R.string.counter),
+                description = stringResource(R.string.counter_desc),
                 onClick = onCounter
             )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            MenuItem(
+                icon = Icons.Default.Settings,
+                title = stringResource(R.string.settings),
+                description = stringResource(R.string.settings_desc),
+                onClick = onSettings
+            )
+
+            Spacer(Modifier.height(32.dp))
         }
     }
 
@@ -181,19 +221,44 @@ fun HomeScreen(
 }
 
 @Composable
-private fun ActionButton(
+private fun MenuItem(
+    icon: ImageVector,
     title: String,
+    description: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth().height(56.dp),
-        shape = MaterialTheme.shapes.medium
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

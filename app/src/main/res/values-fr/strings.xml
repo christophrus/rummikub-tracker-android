@@ -10,6 +10,12 @@
     <string name="game_history">Historique des parties</string>
     <string name="settings">Paramètres</string>
     <string name="counter">Compteur</string>
+    <string name="new_game_desc">Démarrer une nouvelle partie avec minuteur</string>
+    <string name="manage_players_desc">Ajouter, modifier ou supprimer des joueurs</string>
+    <string name="game_history_desc">Voir les parties passées et résultats</string>
+    <string name="counter_desc">Détecter les tuiles avec l\'IA et calculer les scores</string>
+    <string name="settings_desc">Langue, thème et gestion des données</string>
+    <string name="home_subtitle">Suivez vos parties de Rummikub</string>
     <string name="new_game_title">Nouvelle partie</string>
     <string name="game_name">Nom de la partie</string>
     <string name="game_name_hint">Entrez le nom (optionnel)</string>
