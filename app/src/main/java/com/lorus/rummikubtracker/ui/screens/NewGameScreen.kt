@@ -2,9 +2,9 @@ package com.lorus.rummikubtracker.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -156,6 +156,7 @@ fun NewGameScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // Game name
             OutlinedTextField(
@@ -308,30 +309,29 @@ fun NewGameScreen(
             // Saved players quick-add
             if (showSavedPlayers && viewModel.savedPlayers.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
-                LazyColumn(
+                Column(
                     modifier = Modifier.heightIn(max = 150.dp)
                 ) {
-                    items(viewModel.savedPlayers.filter { sp ->
-                        viewModel.players.none { it.name == sp.name }
-                    }) { player ->
-                        Text(
-                            text = player.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.addSavedPlayer(player) }
-                                .padding(8.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    viewModel.savedPlayers
+                        .filter { sp -> viewModel.players.none { it.name == sp.name } }
+                        .forEach { player ->
+                            Text(
+                                text = player.name,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.addSavedPlayer(player) }
+                                    .padding(8.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                 }
             }
 
             // Player list
-            LazyColumn(
-                modifier = Modifier.weight(1f).padding(top = 8.dp)
+            Column(
+                modifier = Modifier.padding(top = 8.dp)
             ) {
-                items(viewModel.players.size) { index ->
-                    val player = viewModel.players[index]
+                viewModel.players.forEachIndexed { index, player ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
