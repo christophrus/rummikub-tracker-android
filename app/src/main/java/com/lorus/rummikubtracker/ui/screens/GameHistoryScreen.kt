@@ -230,9 +230,14 @@ fun GameHistoryScreen(
                                                             modifier = Modifier.padding(vertical = 2.dp)
                                                         )
                                                     }
+                                                    val playerTotal = game.getPlayerTotal(player.name)
+                                                    val allTotals = game.players.map { game.getPlayerTotal(it.name) }
+                                                    val minTotal = allTotals.minOrNull() ?: 0
+                                                    val isBestTotal = playerTotal == minTotal && game.players.size > 1
                                                     Text(
-                                                        text = "${game.getPlayerTotal(player.name)}",
+                                                        text = "$playerTotal",
                                                         style = MaterialTheme.typography.bodySmall,
+                                                        color = if (isBestTotal) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                 }
