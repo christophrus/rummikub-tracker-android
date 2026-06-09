@@ -81,19 +81,16 @@ class ActiveGameViewModel @Inject constructor(
 
     private val scope = kotlinx.coroutines.MainScope()
     private var gameId: Long = 0
-    private var gameLoaded = false
 
     fun loadGame(id: Long) {
-        val isNewGame = id != gameId || !gameLoaded
         gameId = id
-        gameLoaded = true
         // Wire timer callbacks (safe to set multiple times)
         timerEngine.onTickSound = { audioEngine.playTick() }
         timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
-            // Get initial game to configure timer/audio once per game load
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
-            if (isNewGame) {
+            // Only configure timer/audio on first load — singleton already preserves state
+            if (timerEngine.timerState.value == TimerState.STOPPED) {
                 val currentPlayerExtUsed = initialGame.players
                     .getOrNull(initialGame.currentPlayerIndex)
                     ?.extensionsUsed ?: 0
