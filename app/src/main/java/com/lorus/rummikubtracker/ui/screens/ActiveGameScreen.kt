@@ -228,9 +228,8 @@ class ActiveGameViewModel @Inject constructor(
             validationError = null
         )
 
-        // Timer operations must happen synchronously
+        // Reset timer for new round, but keep paused — user starts manually
         timerEngine.reset()
-        timerEngine.start()
 
         scope.launch {
             gameManager.saveRound(game, round)
