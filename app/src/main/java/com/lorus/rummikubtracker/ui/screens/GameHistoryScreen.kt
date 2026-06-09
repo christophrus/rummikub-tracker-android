@@ -307,8 +307,8 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             val totalW = boldMeasurePaint.measureText("${game.getPlayerTotal(player.name)}").toInt()
             maxOf(max, nameW, maxScore, totalW).coerceAtMost(maxColWidth)
         }
-        val tableWidth = roundLabelWidth + colWidth * game.players.size + pad * 2
-        val imgWidth = tableWidth
+        val tableContentWidth = roundLabelWidth + colWidth * game.players.size
+        val imgWidth = tableContentWidth + pad * 2
         val imgHeight = titleHeight + headerHeight + rowHeight * (game.rounds.size + 1) + pad * 4
 
         val bitmap = Bitmap.createBitmap(imgWidth, imgHeight, Bitmap.Config.ARGB_8888)
@@ -348,7 +348,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             it.style = android.graphics.Paint.Style.FILL
         }
         val tableBottom = (imgHeight - pad).toFloat()
-        canvas.drawRoundRect(pad.toFloat(), tableTop, (imgWidth - pad).toFloat(), tableBottom, 12f * density, 12f * density, cardPaint)
+        canvas.drawRoundRect((pad / 2).toFloat(), tableTop, (imgWidth - pad / 2).toFloat(), tableBottom, 12f * density, 12f * density, cardPaint)
 
         // Paints
         val headerPaint = android.graphics.Paint().also {
@@ -400,14 +400,15 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         }
 
         val startY = tableTop + pad
-        val startX = pad.toFloat() + pad
+        val startX = pad.toFloat()
+        val contentRight = startX + tableContentWidth
 
         // Header background
         val headerBgPaint = android.graphics.Paint().also {
             it.color = android.graphics.Color.parseColor("#0AFFFFFF")
             it.style = android.graphics.Paint.Style.FILL
         }
-        canvas.drawRect(startX, startY, startX + tableWidth - pad * 2, startY + headerHeight, headerBgPaint)
+        canvas.drawRect(startX, startY, contentRight, startY + headerHeight, headerBgPaint)
 
         // Header texts
         canvas.drawText("#", startX + roundLabelWidth / 2 - headerPaint.measureText("#") / 2, startY + headerHeight * 0.6f, headerPaint)
@@ -431,7 +432,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             it.color = android.graphics.Color.parseColor("#33FFFFFF")
             it.strokeWidth = 1.2f * density
         }
-        canvas.drawLine(startX, startY + headerHeight, startX + tableWidth - pad * 2, startY + headerHeight, headerLinePaint)
+        canvas.drawLine(startX, startY + headerHeight, contentRight, startY + headerHeight, headerLinePaint)
 
         // Cumulative tracking
         val cumulative = mutableMapOf<String, Int>()
@@ -440,11 +441,10 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         // Round rows
         game.rounds.forEachIndexed { rIdx, round ->
             val rowY = startY + headerHeight + rIdx * rowHeight
-            val rowRight = startX + tableWidth - pad * 2
 
             // Row background (alternating)
             if (rIdx % 2 == 0) {
-                canvas.drawRect(startX, rowY, rowRight, rowY + rowHeight, rowBgEven)
+                canvas.drawRect(startX, rowY, contentRight, rowY + rowHeight, rowBgEven)
             }
 
             // Round label
@@ -482,25 +482,24 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
 
             // Row separator
             if (rIdx < game.rounds.size - 1) {
-                canvas.drawLine(startX, rowY + rowHeight, rowRight, rowY + rowHeight, linePaint)
+                canvas.drawLine(startX, rowY + rowHeight, contentRight, rowY + rowHeight, linePaint)
             }
         }
 
         // Totals row
         val totalY = startY + headerHeight + game.rounds.size * rowHeight
-        val rowRight = startX + tableWidth - pad * 2
         val totalBgPaint = android.graphics.Paint().also {
             it.color = android.graphics.Color.parseColor("#12FFD700")
             it.style = android.graphics.Paint.Style.FILL
         }
-        canvas.drawRect(startX, totalY, rowRight, totalY + rowHeight, totalBgPaint)
+        canvas.drawRect(startX, totalY, contentRight, totalY + rowHeight, totalBgPaint)
 
         // Gold top line for totals
         val goldLinePaint = android.graphics.Paint().also {
             it.color = android.graphics.Color.parseColor("#FFD700")
             it.strokeWidth = 1.5f * density
         }
-        canvas.drawLine(startX, totalY, rowRight, totalY, goldLinePaint)
+        canvas.drawLine(startX, totalY, contentRight, totalY, goldLinePaint)
 
         // Total label with symbol
         val totalLabel = "∑"
@@ -521,9 +520,9 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             it.isAntiAlias = true
         }
         // Bottom-left corner
-        canvas.drawRect(startX - pad, tableBottom - cornerR, startX + cornerR, tableBottom + pad, cornerPaint)
+        canvas.drawRect(0f, tableBottom - cornerR, startX + cornerR, tableBottom + pad, cornerPaint)
         // Bottom-right corner
-        canvas.drawRect(rowRight - cornerR, tableBottom - cornerR, rowRight + pad, tableBottom + pad, cornerPaint)
+        canvas.drawRect(contentRight - cornerR, tableBottom - cornerR, imgWidth.toFloat(), tableBottom + pad, cornerPaint)
 
         // Save to gallery
         val filename = "Rummikub_${game.name.replace(" ", "_")}_${System.currentTimeMillis()}.png"
