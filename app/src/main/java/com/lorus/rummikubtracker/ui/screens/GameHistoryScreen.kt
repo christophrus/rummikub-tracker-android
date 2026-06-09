@@ -6,9 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -576,18 +573,17 @@ private fun drawStar(canvas: android.graphics.Canvas, cx: Float, cy: Float, r: F
     canvas.drawPath(path, paint)
 }
 
-/** Custom share bottom sheet showing all image-sharing apps in a 2-column grid. */
+/** Custom share bottom sheet showing 4 app icons + a "More" button in a single row. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val pm = remember { context.packageManager }
 
-    // Discover all apps that can handle image/png sharing
     val shareIntent = remember {
         Intent(Intent.ACTION_SEND).apply { type = "image/png" }
     }
-    val apps = remember {
+    val allApps = remember {
         pm.queryIntentActivities(shareIntent, PackageManager.MATCH_ALL).map { ri ->
             ShareAppInfo(
                 label = ri.loadLabel(pm).toString(),
@@ -597,6 +593,9 @@ private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
             )
         }.distinctBy { it.packageName }
     }
+
+    val visibleApps = allApps.take(4)
+    val hasMore = allApps.size > 4
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -610,7 +609,8 @@ private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
+                .padding(bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Share Scoreboard",
@@ -620,15 +620,16 @@ private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // 2-column grid of share targets
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.heightIn(max = 400.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            // Single row: 4 app icons + optional "More"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(apps) { app ->
-                    Surface(
+                visibleApps.forEach { app ->
+                    ShareAppItem(
+                        icon = app.icon,
+                        label = app.label,
                         onClick = {
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "image/png"
@@ -638,34 +639,73 @@ private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
                             }
                             context.startActivity(intent)
                             onDismiss()
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.06f)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Image(
-                                bitmap = drawableToBitmap(app.icon).asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier.size(36.dp)
-                            )
-                            Spacer(Modifier.width(10.dp))
-                            Text(
-                                text = app.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
-                    }
+                    )
+                }
+
+                if (hasMore) {
+                    ShareAppItem(
+                        icon = null,
+                        label = "More",
+                        onClick = {
+                            val chooser = Intent.createChooser(shareIntent.apply {
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }, "Share Scoreboard")
+                            context.startActivity(chooser)
+                            onDismiss()
+                        }
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ShareAppItem(
+    icon: Drawable?,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+            .width(64.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = RoundedCornerShape(14.dp),
+            color = Color.White.copy(alpha = 0.1f),
+            modifier = Modifier.size(52.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                if (icon != null) {
+                    Image(
+                        bitmap = drawableToBitmap(icon).asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
+                } else {
+                    Text(
+                        text = "•••",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.7f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
