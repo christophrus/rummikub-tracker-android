@@ -160,7 +160,6 @@ class ActiveGameViewModel @Inject constructor(
         val currentPlayer = game.players.getOrNull(game.currentPlayerIndex) ?: return
         timerEngine.stop()
         audioEngine.playVictory()
-        audioEngine.announcePlayer(currentPlayer.name)
         uiState = uiState.copy(
             showWinnerDeclaration = true,
             winnerPlayerName = currentPlayer.name,
