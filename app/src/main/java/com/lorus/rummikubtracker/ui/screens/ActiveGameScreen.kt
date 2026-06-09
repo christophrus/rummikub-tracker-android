@@ -842,14 +842,23 @@ private fun WinnerDeclarationView(
 
                     Spacer(Modifier.width(8.dp))
 
-                    IconButton(onClick = { onScanTile(player.name) }) {
-                        Icon(
-                            Icons.Default.CameraAlt,
-                            contentDescription = stringResource(R.string.scan_tile),
-                            tint = if (player.name in isScanning)
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.primary
-                        )
+                    IconButton(
+                        onClick = { onScanTile(player.name) },
+                        enabled = player.name !in isScanning
+                    ) {
+                        if (player.name in isScanning) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.CameraAlt,
+                                contentDescription = stringResource(R.string.scan_tile),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
