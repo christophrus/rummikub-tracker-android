@@ -21,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -125,6 +126,20 @@ fun GameHistoryScreen(
                                         text = game.name,
                                         style = MaterialTheme.typography.titleMedium
                                     )
+                                    // Duration
+                                    val duration = game.endTime?.let { end ->
+                                        val elapsed = end - game.startTime
+                                        val mins = (elapsed / 60000).toInt()
+                                        if (mins < 60) "${mins}m" else "${mins / 60}h ${mins % 60}m"
+                                    }
+                                    duration?.let {
+                                        Text(
+                                            text = it,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                     Text(
                                         text = game.endTime?.let {
                                             stringResource(R.string.date_label, dateFormat.format(Date(it)))
@@ -204,9 +219,14 @@ fun GameHistoryScreen(
                                                     val cumulatives = game.getCumulativeTotals()
                                                     game.rounds.forEach { round ->
                                                         val score = round.scores[player.name] ?: 0
+                                                        // Highlight lowest score in green
+                                                        val minScore = round.scores.values.minOrNull() ?: 0
+                                                        val isBest = score == minScore && round.scores.size > 1
                                                         Text(
                                                             text = "$score",
                                                             style = MaterialTheme.typography.bodySmall,
+                                                            color = if (isBest) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
+                                                            fontWeight = if (isBest) FontWeight.Bold else FontWeight.Normal,
                                                             modifier = Modifier.padding(vertical = 2.dp)
                                                         )
                                                     }
