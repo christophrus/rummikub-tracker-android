@@ -43,11 +43,9 @@ class NewGameViewModel @Inject constructor(
     var maxExtensions by mutableStateOf(3)
     var extensionReplenishEnabled by mutableStateOf(false)
     var extensionReplenishRounds by mutableStateOf(4)
-    var ttsLanguage by mutableStateOf("en")
     var players by mutableStateOf(listOf<NewPlayerEntry>())
     var savedPlayers by mutableStateOf<List<Player>>(emptyList())
     var showTimerDropdown by mutableStateOf(false)
-    var showTtsDropdown by mutableStateOf(false)
     var newPlayerName by mutableStateOf("")
     var errorMessage by mutableStateOf<String?>(null)
 
@@ -115,7 +113,7 @@ class NewGameViewModel @Inject constructor(
             originalTimerDuration = timerDuration,
             maxExtensions = maxExtensions,
             extensionReplenishRounds = if (extensionReplenishEnabled) extensionReplenishRounds else 0,
-            ttsLanguage = ttsLanguage,
+            ttsLanguage = preferencesDataStore.preferences.first().ttsLanguage,
             players = players.mapIndexed { index, entry ->
                 Player(name = entry.name, imagePath = entry.imagePath, order = index, maxExtensions = maxExtensions)
             }
@@ -235,37 +233,6 @@ fun NewGameScreen(
                             selected = viewModel.extensionReplenishRounds == rounds,
                             onClick = { viewModel.extensionReplenishRounds = rounds },
                             label = { Text(stringResource(R.string.every_n_rounds, rounds)) }
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // TTS Language
-            ExposedDropdownMenuBox(
-                expanded = viewModel.showTtsDropdown,
-                onExpandedChange = { viewModel.showTtsDropdown = it }
-            ) {
-                OutlinedTextField(
-                    value = getTtsLanguageName(viewModel.ttsLanguage),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.tts_language)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.showTtsDropdown) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = viewModel.showTtsDropdown,
-                    onDismissRequest = { viewModel.showTtsDropdown = false }
-                ) {
-                    Config.TTS_LANGUAGES.forEach { lang ->
-                        DropdownMenuItem(
-                            text = { Text(getTtsLanguageName(lang)) },
-                            onClick = {
-                                viewModel.ttsLanguage = lang
-                                viewModel.showTtsDropdown = false
-                            }
                         )
                     }
                 }
@@ -395,22 +362,6 @@ private fun formatDuration(ms: Int): String {
         180_000 -> "3m"
         300_000 -> "5m"
         else -> "${ms / 1000}s"
-    }
-}
-
-private fun getTtsLanguageName(code: String): String {
-    return when (code) {
-        "en" -> "English"
-        "de" -> "Deutsch"
-        "fr" -> "Français"
-        "es" -> "Español"
-        "it" -> "Italiano"
-        "nl" -> "Nederlands"
-        "pl" -> "Polski"
-        "ru" -> "Русский"
-        "tr" -> "Türkçe"
-        "cs" -> "Čeština"
-        else -> code
     }
 }
 
