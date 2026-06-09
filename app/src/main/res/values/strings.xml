@@ -150,7 +150,7 @@
     <string name="app_subtitle">Detect tiles &amp; calculate score</string>
     <string name="home_subtitle">Track your Rummikub games</string>
     <string name="menu_new_photo">New Photo</string>
-    <string name="menu_new_photo_desc">Take a photo or pick from gallery</string>
+    <string name="menu_new_photo_desc">Take a photo to analyze tiles</string>
     <string name="menu_history">History</string>
     <string name="menu_history_desc">View past analyses</string>
     <string name="menu_settings">Settings</string>
