@@ -68,25 +68,26 @@ fun BoundingBoxOverlay(
                 style = Stroke(width = 3f)
             )
 
-            // Label
+            // Label — only draw if it fits within canvas bounds
             val label = if (tile.isJoker) "J" else "${tile.number}"
             val confLabel = "${(tile.confidence * 100).toInt()}%"
             val fullLabel = "$label $confLabel"
-
-            // Draw label only if it fits within canvas bounds
             val labelHeight = 24f
-            val labelY = top - labelHeight
-            if (labelY + labelHeight > 0f && labelY < size.height) {
-                val clampedLabelY = labelY.coerceIn(0f, size.height - labelHeight)
+            val labelWidth = width.coerceAtLeast(60f)
+
+            val labelLeft = left.coerceIn(0f, size.width - labelWidth)
+            val labelTop = (top - labelHeight).coerceIn(0f, size.height - labelHeight)
+
+            if (labelLeft + labelWidth <= size.width && labelTop + labelHeight <= size.height) {
                 drawRect(
                     color = boxColor.copy(alpha = 0.7f),
-                    topLeft = Offset(left, clampedLabelY),
-                    size = Size(width.coerceAtLeast(60f), labelHeight)
+                    topLeft = Offset(labelLeft, labelTop),
+                    size = Size(labelWidth, labelHeight)
                 )
                 drawText(
                     textMeasurer = textMeasurer,
                     text = fullLabel,
-                    topLeft = Offset(left + 4f, clampedLabelY),
+                    topLeft = Offset(labelLeft + 4f, labelTop),
                     style = TextStyle(
                         color = Color.White,
                         fontSize = 12.sp,
