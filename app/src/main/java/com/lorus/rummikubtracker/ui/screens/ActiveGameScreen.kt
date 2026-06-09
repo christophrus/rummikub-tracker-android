@@ -234,9 +234,10 @@ class ActiveGameViewModel @Inject constructor(
         scope.launch {
             gameManager.saveRound(game, round)
 
-            // Restore next player's extension count
+            // Restore next player's extension count and updated maxExtensions
             val updatedGame = gameRepository.getGameById(gameId).first()
             updatedGame?.let { g ->
+                timerEngine.setMaxExtensions(g.maxExtensions)
                 val nextPlayer = g.players.getOrNull(g.currentPlayerIndex)
                 nextPlayer?.let {
                     timerEngine.setExtensionsUsed(it.extensionsUsed)

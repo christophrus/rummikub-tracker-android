@@ -30,6 +30,6 @@ interface GamePlayerDao {
     @Query("UPDATE game_players SET extensionsUsed = extensionsUsed + 1 WHERE gameId = :gameId AND playerName = :playerName AND extensionsUsed < maxExtensions")
     suspend fun incrementExtensionsUsed(gameId: Long, playerName: String): Int
 
-    @Query("UPDATE game_players SET extensionsUsed = 0 WHERE gameId = :gameId")
-    suspend fun resetAllExtensions(gameId: Long)
+    @Query("UPDATE game_players SET maxExtensions = maxExtensions + 1 WHERE gameId = :gameId AND maxExtensions < 10")
+    suspend fun incrementAllMaxExtensions(gameId: Long)
 }

@@ -18,17 +18,22 @@ class GameManager @Inject constructor(
         gameRepository.saveRound(round)
         val nextRound = game.currentRound + 1
         val nextPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
+
+        // Handle extension replenishment — increase maxExtensions for all players
+        val newMaxExtensions = if (game.extensionReplenishRounds > 0 && nextRound % game.extensionReplenishRounds == 0) {
+            gameRepository.incrementAllMaxExtensions(game.id)
+            game.maxExtensions + 1
+        } else {
+            game.maxExtensions
+        }
+
         gameRepository.updateGame(
             game.copy(
                 currentRound = nextRound,
-                currentPlayerIndex = nextPlayerIndex
+                currentPlayerIndex = nextPlayerIndex,
+                maxExtensions = newMaxExtensions
             )
         )
-
-        // Handle extension replenishment
-        if (game.extensionReplenishRounds > 0 && nextRound % game.extensionReplenishRounds == 0) {
-            gameRepository.resetAllExtensions(game.id)
-        }
     }
 
     suspend fun endGame(game: Game): Game {
@@ -55,8 +60,8 @@ class GameManager @Inject constructor(
         return result > 0
     }
 
-    suspend fun resetAllExtensions(gameId: Long) {
-        gameRepository.resetAllExtensions(gameId)
+    suspend fun incrementAllMaxExtensions(gameId: Long) {
+        gameRepository.incrementAllMaxExtensions(gameId)
     }
 }
 

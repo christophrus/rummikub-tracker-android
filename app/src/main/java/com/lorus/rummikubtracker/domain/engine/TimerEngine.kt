@@ -103,6 +103,12 @@ class TimerEngine @Inject constructor() {
         _extensionsUsed.value = count.coerceIn(0, maxExtensions)
     }
 
+    fun setMaxExtensions(max: Int) {
+        maxExtensions = max.coerceIn(0, Config.MAX_EXTENSIONS_LIMIT)
+        // Re-clamp extensionsUsed to new limit
+        _extensionsUsed.value = _extensionsUsed.value.coerceIn(0, maxExtensions)
+    }
+
     fun getRemainingExtensions(): Int = maxExtensions - _extensionsUsed.value
 
     fun isRunning(): Boolean = _timerState.value == TimerState.RUNNING

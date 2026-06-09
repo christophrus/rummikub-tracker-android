@@ -5,6 +5,8 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.media.ToneGenerator
+import android.os.Handler
+import android.os.Looper
 import android.speech.tts.TextToSpeech
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
@@ -67,7 +69,19 @@ class AudioEngine @Inject constructor(
     }
 
     fun playVictory() {
-        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PRESSHOLDKEY_LITE, 300)
+        // Four-note ascending "Ta-Taa-Taa-Daaa" fanfare
+        val tg = toneGenerator ?: return
+        val handler = Handler(Looper.getMainLooper())
+        tg.startTone(ToneGenerator.TONE_DTMF_1, 120)       // "Ta"
+        handler.postDelayed({
+            tg.startTone(ToneGenerator.TONE_DTMF_5, 120)   // "Taa"
+        }, 150)
+        handler.postDelayed({
+            tg.startTone(ToneGenerator.TONE_DTMF_9, 120)   // "Taa"
+        }, 300)
+        handler.postDelayed({
+            tg.startTone(ToneGenerator.TONE_DTMF_S, 400)   // "Daaa!"
+        }, 450)
     }
 
     fun announcePlayer(playerName: String) {

@@ -124,8 +124,8 @@ class GameRepository @Inject constructor(
         return gamePlayerDao.incrementExtensionsUsed(gameId, playerName)
     }
 
-    suspend fun resetAllExtensions(gameId: Long) {
-        gamePlayerDao.resetAllExtensions(gameId)
+    suspend fun incrementAllMaxExtensions(gameId: Long) {
+        gamePlayerDao.incrementAllMaxExtensions(gameId)
     }
 
     private suspend fun gameEntityToGame(entity: GameEntity): Game {
