@@ -14,11 +14,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
+import com.lorus.rummikubtracker.LocaleManager
 import com.lorus.rummikubtracker.data.local.datastore.PreferencesDataStore
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.data.repository.PlayerRepository
 import com.lorus.rummikubtracker.domain.model.Config
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +29,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val preferencesDataStore: PreferencesDataStore,
     private val gameRepository: GameRepository,
-    private val playerRepository: PlayerRepository
+    private val playerRepository: PlayerRepository,
+    @ApplicationContext private val appContext: android.content.Context
 ) : androidx.lifecycle.ViewModel() {
 
     var uiLanguage by mutableStateOf("en")
@@ -47,12 +50,18 @@ class SettingsViewModel @Inject constructor(
                 ttsLanguage = prefs.ttsLanguage
                 theme = prefs.theme
                 confidenceThreshold = prefs.confidenceThreshold
+                // Sync static locale so attachBaseContext works on first launch
+                LocaleManager.setLanguage(prefs.uiLanguage)
             }
         }
     }
 
     fun updateUiLanguage(lang: String) {
         uiLanguage = lang
+        LocaleManager.setLanguage(lang)
+        // Write to SharedPreferences for synchronous read at boot
+        appContext.getSharedPreferences("settings_prefs", android.content.Context.MODE_PRIVATE)
+            .edit().putString("ui_language", lang).apply()
         scope.launch { preferencesDataStore.setUiLanguage(lang) }
     }
 
