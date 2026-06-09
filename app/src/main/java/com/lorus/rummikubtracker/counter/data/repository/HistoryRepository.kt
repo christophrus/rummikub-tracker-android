@@ -44,8 +44,8 @@ class HistoryRepository(
             tileCount = result.tileCount,
             processingTimeMs = result.processingTimeMs,
             imagePath = imagePath,
-            imageWidth = bitmap?.width ?: 0,
-            imageHeight = bitmap?.height ?: 0
+            imageWidth = result.imageWidth,
+            imageHeight = result.imageHeight
         )
         val resultId = dao.insertResult(resultEntity)
 

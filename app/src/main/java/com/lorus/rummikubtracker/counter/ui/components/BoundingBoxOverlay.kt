@@ -39,9 +39,9 @@ fun BoundingBoxOverlay(
         // Draw the original image scaled to fill the canvas
         val canvasW = size.width
         val canvasH = size.height
-        // Use original image dimensions for tile coordinate scaling
-        val imgW = imageWidth.toFloat()
-        val imgH = imageHeight.toFloat()
+        // Use original image dimensions for tile coordinate scaling, fall back to bitmap size
+        val imgW = if (imageWidth > 0) imageWidth.toFloat() else bitmap.width.toFloat()
+        val imgH = if (imageHeight > 0) imageHeight.toFloat() else bitmap.height.toFloat()
 
         val scale = minOf(canvasW / imgW, canvasH / imgH)
         val drawW = imgW * scale
