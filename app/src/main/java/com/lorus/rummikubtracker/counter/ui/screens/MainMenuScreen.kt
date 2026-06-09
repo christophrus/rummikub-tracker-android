@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,7 +40,8 @@ import com.lorus.rummikubtracker.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainMenuScreen(
-    onNavigateToCamera: () -> Unit,
+    onTakePhoto: () -> Unit,
+    onPickGallery: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -95,9 +97,18 @@ fun MainMenuScreen(
             // Menu entries
             MenuItem(
                 icon = Icons.Default.CameraAlt,
-                title = stringResource(R.string.menu_new_photo),
+                title = stringResource(R.string.take_photo),
                 description = stringResource(R.string.menu_new_photo_desc),
-                onClick = onNavigateToCamera
+                onClick = onTakePhoto
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            MenuItem(
+                icon = Icons.Default.PhotoLibrary,
+                title = stringResource(R.string.pick_gallery),
+                description = stringResource(R.string.pick_gallery_desc),
+                onClick = onPickGallery
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))

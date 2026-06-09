@@ -1,10 +1,15 @@
 package com.lorus.rummikubtracker.ui.navigation
 
+import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,7 +21,6 @@ import com.lorus.rummikubtracker.counter.viewmodel.HistoryViewModel
 
 private object CounterRoutes {
     const val MAIN_MENU = "counter_main_menu"
-    const val CAMERA = "counter_camera"
     const val RESULT = "counter_result"
     const val HISTORY = "counter_history"
     const val HISTORY_DETAIL = "counter_history_detail"
@@ -31,6 +35,27 @@ fun CounterNavHost(
     val viewModel: AnalysisViewModel = viewModel()
     val historyViewModel: HistoryViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap -> bitmap?.let { viewModel.analyze(it) } }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            val bitmap = android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            viewModel.analyze(bitmap)
+        }
+    }
+
+    // Navigate to result when analysis completes
+    if (uiState.result != null && !uiState.isLoading) {
+        androidx.compose.runtime.LaunchedEffect(uiState.result) {
+            navController.navigate(CounterRoutes.RESULT) { launchSingleTop = true }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -39,31 +64,15 @@ fun CounterNavHost(
     ) {
         composable(CounterRoutes.MAIN_MENU) {
             MainMenuScreen(
-                onNavigateToCamera = { navController.navigate(CounterRoutes.CAMERA) },
+                onTakePhoto = { cameraLauncher.launch(null) },
+                onPickGallery = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
                 onNavigateToHistory = { navController.navigate(CounterRoutes.HISTORY) },
                 onBack = onBackToTracker
             )
-        }
-
-        composable(CounterRoutes.CAMERA) {
-            CameraScreen(
-                isLoading = uiState.isLoading,
-                error = uiState.error,
-                onImageCaptured = { bitmap -> viewModel.analyze(bitmap) },
-                onRetry = { viewModel.reset() },
-                onBack = {
-                    viewModel.reset()
-                    navController.popBackStack()
-                }
-            )
-
-            if (uiState.result != null && !uiState.isLoading) {
-                androidx.compose.runtime.LaunchedEffect(uiState.result) {
-                    navController.navigate(CounterRoutes.RESULT) {
-                        launchSingleTop = true
-                    }
-                }
-            }
         }
 
         composable(CounterRoutes.RESULT) {
@@ -80,7 +89,6 @@ fun CounterNavHost(
                     result = result,
                     onNewPhoto = {
                         viewModel.reset()
-                        navController.popBackStack(CounterRoutes.CAMERA, inclusive = false)
                     },
                     onBack = {
                         viewModel.reset()
@@ -120,7 +128,11 @@ fun CounterNavHost(
                 ResultScreen(
                     bitmap = bitmap,
                     result = result,
-                    onNewPhoto = { navController.navigate(CounterRoutes.CAMERA) },
+                    onNewPhoto = {
+                        historyViewModel.clearSelection()
+                        viewModel.reset()
+                        navController.popBackStack(CounterRoutes.MAIN_MENU, inclusive = false)
+                    },
                     onBack = {
                         historyViewModel.clearSelection()
                         navController.popBackStack()

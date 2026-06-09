@@ -132,6 +132,7 @@
     <!-- Counter (Tile Detection) -->
     <string name="take_photo">Take Photo</string>
     <string name="pick_gallery">Pick from Gallery</string>
+    <string name="pick_gallery_desc">Choose an existing photo</string>
     <string name="new_photo">New Photo</string>
     <string name="total_score">Total Score</string>
     <string name="tiles_detected">%d tiles detected</string>

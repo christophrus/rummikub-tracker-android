@@ -46,9 +46,8 @@ fun RummikubApp(
         // --- Main Menu ---
         composable(Routes.MAIN_MENU) {
             MainMenuScreen(
-                onNavigateToCamera = {
-                    navController.navigate(Routes.CAMERA)
-                },
+                onTakePhoto = { /* handled by CounterNavHost */ },
+                onPickGallery = { /* handled by CounterNavHost */ },
                 onNavigateToHistory = {
                     navController.navigate(Routes.HISTORY)
                 }
