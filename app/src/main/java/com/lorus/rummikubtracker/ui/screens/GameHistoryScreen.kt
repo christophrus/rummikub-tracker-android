@@ -503,10 +503,21 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         val totalLabel = "∑"
         canvas.drawText(totalLabel, startX + roundLabelWidth / 2 - totalPaint.measureText(totalLabel) / 2, totalY + rowHeight * 0.6f, totalPaint)
 
+        // Find winner (lowest total score)
+        val winnerName = game.players.minByOrNull { cumulative[it.name] ?: Int.MAX_VALUE }?.name
+
         var tx = startX + roundLabelWidth
         game.players.forEach { player ->
             val total = cumulative[player.name] ?: 0
-            canvas.drawText("$total", tx + colWidth / 2 - totalPaint.measureText("$total") / 2, totalY + rowHeight * 0.6f, totalPaint)
+            val isWinner = player.name == winnerName
+            val paint = if (isWinner) totalPaint else cellPaint
+            canvas.drawText("$total", tx + colWidth / 2 - paint.measureText("$total") / 2, totalY + rowHeight * 0.6f, paint)
+            if (isWinner) {
+                // Gold star next to winner's total
+                val starCx = tx + colWidth / 2 + paint.measureText("$total") / 2 + 6 * density
+                val starCy = totalY + rowHeight * 0.35f
+                drawStar(canvas, starCx, starCy, 5 * density, starPaint)
+            }
             tx += colWidth
         }
 
