@@ -81,6 +81,7 @@
     <string name="duration_label">Dauer</string>
     <string name="round_label">Runde %d</string>
     <string name="lock_screen">Sperren</string>
+    <string name="scoreboard">Spielstand</string>
     <string name="timer_30s">30 Sekunden</string>
     <string name="timer_45s">45 Sekunden</string>
     <string name="timer_1m">1 Minute</string>

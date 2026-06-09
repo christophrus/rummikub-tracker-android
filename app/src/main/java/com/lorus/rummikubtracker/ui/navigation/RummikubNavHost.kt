@@ -18,9 +18,11 @@ object Routes {
     const val GAME_HISTORY = "game_history"
     const val SETTINGS = "settings"
     const val COUNTER = "counter"
+    const val SCOREBOARD = "scoreboard/{gameId}"
 
     fun playerSelection(gameId: Long) = "player_selection/$gameId"
     fun activeGame(gameId: Long) = "active_game/$gameId"
+    fun scoreboard(gameId: Long) = "scoreboard/$gameId"
 }
 
 @Composable
@@ -81,7 +83,8 @@ fun RummikubNavHost(
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onScoreboard = { gid -> navController.navigate(Routes.scoreboard(gid)) }
             )
         }
 
@@ -107,6 +110,17 @@ fun RummikubNavHost(
         composable(Routes.COUNTER) {
             CounterNavHost(
                 onBackToTracker = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.SCOREBOARD,
+            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getLong("gameId") ?: return@composable
+            ScoreboardScreen(
+                gameId = gameId,
+                onBack = { navController.popBackStack() }
             )
         }
     }

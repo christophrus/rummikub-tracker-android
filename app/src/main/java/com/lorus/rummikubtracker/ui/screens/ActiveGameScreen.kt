@@ -364,6 +364,7 @@ fun ActiveGameScreen(
     gameId: Long,
     onGameEnded: () -> Unit,
     onBack: () -> Unit,
+    onScoreboard: (Long) -> Unit = {},
     viewModel: ActiveGameViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     val state = viewModel.uiState
@@ -672,10 +673,26 @@ fun ActiveGameScreen(
 
                     Spacer(Modifier.weight(1f))
 
-                    // === Bottom: score table + end game ===
+                    // === Bottom: Scoreboard button + end game ===
                     if (game.rounds.isNotEmpty()) {
-                        ScoreSummaryTable(game = game)
-                        Spacer(Modifier.height(8.dp))
+                        Button(
+                            onClick = { onScoreboard(gameId) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1565C0)
+                            ),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Icon(Icons.Default.TableView, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.scoreboard),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
 
                     OutlinedButton(

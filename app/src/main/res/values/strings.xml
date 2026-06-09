@@ -125,6 +125,7 @@
     <string name="duration_label">Duration</string>
     <string name="round_label">Round %d</string>
     <string name="lock_screen">Lock screen</string>
+    <string name="scoreboard">Scoreboard</string>
 
     <!-- Timer -->
     <string name="time_up">Time\'s up!</string>

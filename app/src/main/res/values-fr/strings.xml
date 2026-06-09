@@ -81,6 +81,7 @@
     <string name="duration_label">Durée</string>
     <string name="round_label">Tour %d</string>
     <string name="lock_screen">Verrouiller</string>
+    <string name="scoreboard">Tableau des scores</string>
     <string name="timer_30s">30 secondes</string>
     <string name="timer_45s">45 secondes</string>
     <string name="timer_1m">1 minute</string>
