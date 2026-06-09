@@ -13,10 +13,10 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -246,13 +246,13 @@ fun GameHistoryScreen(
                                         horizontalArrangement = Arrangement.End,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Screenshot button
+                                        // Share button
                                         IconButton(onClick = {
                                             takeScreenshot(context, game)
                                         }) {
                                             Icon(
-                                                Icons.Default.CameraAlt,
-                                                contentDescription = "Screenshot",
+                                                Icons.Default.Share,
+                                                contentDescription = "Share",
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
                                         }
