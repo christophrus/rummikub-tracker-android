@@ -1,19 +1,14 @@
 package com.lorus.rummikubtracker.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.compose.material.icons.Icons
@@ -26,13 +21,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
@@ -51,7 +43,6 @@ class GameHistoryViewModel @Inject constructor(
     var games by mutableStateOf<List<Game>>(emptyList())
     var gameToDelete by mutableStateOf<Long?>(null)
     var expandedGameId by mutableStateOf<Long?>(null)
-    var shareUri by mutableStateOf<Uri?>(null)
 
     private val scope = kotlinx.coroutines.MainScope()
 
@@ -237,8 +228,7 @@ fun GameHistoryScreen(
                                     ) {
                                         // Screenshot button
                                         IconButton(onClick = {
-                                            val uri = createScoreboardBitmap(context, game)
-                                            viewModel.shareUri = uri
+                                            takeScreenshot(context, game)
                                         }) {
                                             Icon(
                                                 Icons.Default.CameraAlt,
@@ -287,18 +277,9 @@ fun GameHistoryScreen(
             }
         )
     }
-
-    // Custom share bottom sheet
-    val shareUri = viewModel.shareUri
-    if (shareUri != null) {
-        ShareBottomSheet(
-            uri = shareUri,
-            onDismiss = { viewModel.shareUri = null }
-        )
-    }
 }
 
-private fun createScoreboardBitmap(context: android.content.Context, game: Game): Uri? {
+private fun takeScreenshot(context: android.content.Context, game: Game) {
     try {
         val density = context.resources.displayMetrics.density
         val pad = (20 * density).toInt()
@@ -551,10 +532,15 @@ private fun createScoreboardBitmap(context: android.content.Context, game: Game)
         }
         bitmap.recycle()
 
-        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(shareIntent, "Share Scoreboard"))
     } catch (e: Exception) {
         Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
-        return null
     }
 }
 
@@ -571,160 +557,4 @@ private fun drawStar(canvas: android.graphics.Canvas, cx: Float, cy: Float, r: F
     }
     path.close()
     canvas.drawPath(path, paint)
-}
-
-/** Custom share bottom sheet showing 4 app icons + a "More" button in a single row. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val pm = remember { context.packageManager }
-
-    val shareIntent = remember {
-        Intent(Intent.ACTION_SEND).apply { type = "image/png" }
-    }
-    val allApps = remember {
-        pm.queryIntentActivities(shareIntent, PackageManager.MATCH_ALL).map { ri ->
-            ShareAppInfo(
-                label = ri.loadLabel(pm).toString(),
-                icon = ri.loadIcon(pm),
-                packageName = ri.activityInfo.packageName,
-                activityName = ri.activityInfo.name
-            )
-        }.distinctBy { it.packageName }
-    }
-
-    val visibleApps = allApps.take(4)
-    val hasMore = allApps.size > 4
-
-    val sheetState = rememberModalBottomSheetState()
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color(0xFF1A1A2E),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Share Scoreboard",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // Single row: 4 app icons + optional "More"
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                visibleApps.forEach { app ->
-                    ShareAppItem(
-                        icon = app.icon,
-                        label = app.label,
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "image/png"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                setClassName(app.packageName, app.activityName)
-                            }
-                            context.startActivity(intent)
-                            onDismiss()
-                        }
-                    )
-                }
-
-                if (hasMore) {
-                    ShareAppItem(
-                        icon = null,
-                        label = "More",
-                        onClick = {
-                            val chooser = Intent.createChooser(shareIntent.apply {
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }, "Share Scoreboard")
-                            context.startActivity(chooser)
-                            onDismiss()
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShareAppItem(
-    icon: Drawable?,
-    label: String,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(8.dp)
-            .width(64.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = Color.White.copy(alpha = 0.1f),
-            modifier = Modifier.size(52.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                if (icon != null) {
-                    Image(
-                        bitmap = drawableToBitmap(icon).asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp)
-                    )
-                } else {
-                    Text(
-                        text = "•••",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.7f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-private data class ShareAppInfo(
-    val label: String,
-    val icon: Drawable,
-    val packageName: String,
-    val activityName: String
-)
-
-/** Safely converts any Drawable to a Bitmap (handles VectorDrawable, AdaptiveIconDrawable, etc.). */
-private fun drawableToBitmap(drawable: Drawable): Bitmap {
-    if (drawable is android.graphics.drawable.BitmapDrawable && drawable.bitmap != null) {
-        return drawable.bitmap
-    }
-    val size = 96
-    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-    val canvas = android.graphics.Canvas(bitmap)
-    drawable.setBounds(0, 0, size, size)
-    drawable.draw(canvas)
-    return bitmap
 }
