@@ -162,43 +162,6 @@ fun ScoreboardScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // === Player legend pills ===
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                g.players.forEachIndexed { idx, player ->
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = playerColors[idx].copy(alpha = 0.15f),
-                        modifier = Modifier.border(1.dp, playerColors[idx], RoundedCornerShape(20.dp))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(playerColors[idx])
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = player.name,
-                                color = playerColors[idx],
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
             // === Rounds table card ===
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -275,25 +238,13 @@ fun ScoreboardScreen(
                                 .padding(horizontal = 8.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Round number with trophy for winner
-                            Box(
-                                modifier = Modifier.width(44.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (round.winnerPlayerName != null) {
-                                    Text(
-                                        text = "🏆",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                            // Round label below
+                            // Round number
                             Text(
                                 text = "R${roundIdx + 1}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.4f),
-                                modifier = Modifier.width(44.dp).offset(y = 8.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.width(44.dp),
                                 textAlign = TextAlign.Center
                             )
 
@@ -309,28 +260,24 @@ fun ScoreboardScreen(
                                     modifier = Modifier.width(56.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    if (isWinner) {
-                                        // Gold badge for round winner
-                                        Surface(
-                                            shape = RoundedCornerShape(4.dp),
-                                            color = Color(0xFFFFB300).copy(alpha = 0.2f)
-                                        ) {
-                                            Text(
-                                                text = "$score",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFFFB300),
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    } else {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
                                         Text(
                                             text = "$score",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
                                             textAlign = TextAlign.Center
                                         )
+                                        if (isWinner) {
+                                            Text(
+                                                text = " 🏆",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
                                     }
                                     // Cumulative tiny hint
                                     cumTotal?.let { cum ->
