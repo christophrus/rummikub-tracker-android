@@ -128,6 +128,10 @@ class GameRepository @Inject constructor(
         gamePlayerDao.incrementAllMaxExtensions(gameId)
     }
 
+    suspend fun updateRoundScore(roundId: Long, playerName: String, score: Int) {
+        roundScoreDao.updateScore(roundId, playerName, score)
+    }
+
     private suspend fun gameEntityToGame(entity: GameEntity): Game {
         val gamePlayers = gamePlayerDao.getPlayersForGameOnce(entity.id)
         val rounds = roundDao.getRoundsForGameOnce(entity.id)

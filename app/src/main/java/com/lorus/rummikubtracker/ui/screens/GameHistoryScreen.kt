@@ -27,6 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.model.Game
@@ -45,6 +47,9 @@ class GameHistoryViewModel @Inject constructor(
     var gameToDelete by mutableStateOf<Long?>(null)
     var expandedGameId by mutableStateOf<Long?>(null)
 
+    // Edit score dialog state
+    var editingScore by mutableStateOf<EditingScore?>(null)
+
     private val scope = kotlinx.coroutines.MainScope()
 
     init {
@@ -61,7 +66,25 @@ class GameHistoryViewModel @Inject constructor(
             gameToDelete = null
         }
     }
+
+    fun updateScore(roundId: Long, playerName: String, newScore: Int) {
+        scope.launch {
+            gameRepository.updateRoundScore(roundId, playerName, newScore)
+            editingScore = null
+            // Refresh games list
+            gameRepository.getCompletedGames().collect { completed ->
+                games = completed
+            }
+        }
+    }
 }
+
+data class EditingScore(
+    val roundId: Long,
+    val playerName: String,
+    val currentScore: Int,
+    val gameId: Long
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -227,7 +250,16 @@ fun GameHistoryScreen(
                                                             style = MaterialTheme.typography.bodySmall,
                                                             color = if (isBest) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
                                                             fontWeight = if (isBest) FontWeight.Bold else FontWeight.Normal,
-                                                            modifier = Modifier.padding(vertical = 2.dp)
+                                                            modifier = Modifier
+                                                                .clickable {
+                                                                    viewModel.editingScore = EditingScore(
+                                                                        roundId = round.id,
+                                                                        playerName = player.name,
+                                                                        currentScore = score,
+                                                                        gameId = game.id
+                                                                    )
+                                                                }
+                                                                .padding(vertical = 2.dp)
                                                         )
                                                     }
                                                     val playerTotal = game.getPlayerTotal(player.name)
@@ -297,6 +329,50 @@ fun GameHistoryScreen(
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.gameToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Edit score dialog
+    viewModel.editingScore?.let { edit ->
+        var scoreText by remember { mutableStateOf(edit.currentScore.toString()) }
+        AlertDialog(
+            onDismissRequest = { viewModel.editingScore = null },
+            title = { Text("Edit Score") },
+            text = {
+                Column {
+                    Text(
+                        text = "${edit.playerName} · Round ${edit.roundId}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = scoreText,
+                        onValueChange = { scoreText = it.filter { c -> c.isDigit() || c == '-' } },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        label = { Text("Score") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val newScore = scoreText.toIntOrNull()
+                        if (newScore != null) {
+                            viewModel.updateScore(edit.roundId, edit.playerName, newScore)
+                        }
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.editingScore = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

@@ -20,4 +20,7 @@ interface RoundScoreDao {
 
     @Query("DELETE FROM round_scores WHERE roundId = :roundId")
     suspend fun deleteScoresForRound(roundId: Long)
+
+    @Query("UPDATE round_scores SET score = :score WHERE roundId = :roundId AND playerName = :playerName")
+    suspend fun updateScore(roundId: Long, playerName: String, score: Int)
 }
