@@ -580,7 +580,8 @@ fun ActiveGameScreen(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF1565C0),
-                                disabledContainerColor = Color(0xFF1565C0).copy(alpha = 0.4f)
+                                disabledContainerColor = Color(0xFF9E9E9E),
+                                disabledContentColor = Color.White.copy(alpha = 0.5f)
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
