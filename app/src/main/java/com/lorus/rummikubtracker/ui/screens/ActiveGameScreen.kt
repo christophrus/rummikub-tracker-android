@@ -113,6 +113,19 @@ class ActiveGameViewModel @Inject constructor(
                 }
             }
         }
+
+        // Observe TTS language changes from settings and sync to game + AudioEngine
+        scope.launch {
+            preferencesDataStore.preferences.collect { prefs ->
+                val game = uiState.game ?: return@collect
+                if (prefs.ttsLanguage != game.ttsLanguage) {
+                    audioEngine.setTtsLanguage(prefs.ttsLanguage)
+                    val updated = game.copy(ttsLanguage = prefs.ttsLanguage)
+                    gameRepository.updateGame(updated)
+                    uiState = uiState.copy(game = updated)
+                }
+            }
+        }
     }
 
     fun toggleTimer() {
