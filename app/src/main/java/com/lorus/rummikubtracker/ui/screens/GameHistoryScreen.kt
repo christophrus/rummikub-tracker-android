@@ -453,12 +453,11 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             val winnerText = "Winner: $overallWinner 🏆"
             val winnerPaint = android.graphics.Paint().also {
                 it.color = android.graphics.Color.parseColor("#FFD700")
-                it.textSize = smallSize
+                it.textSize = textSize
                 it.isAntiAlias = true
                 it.typeface = android.graphics.Typeface.DEFAULT_BOLD
             }
-            val winnerX = (imgWidth / 2f) - winnerPaint.measureText(winnerText) / 2f
-            canvas.drawText(winnerText, winnerX, pad + titleSize + smallSize * 2 + 12, winnerPaint)
+            canvas.drawText(winnerText, pad.toFloat(), pad + titleSize + smallSize * 2 + 14, winnerPaint)
         }
 
         val tableTop = pad.toFloat() + titleHeight
