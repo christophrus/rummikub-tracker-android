@@ -777,7 +777,7 @@ private fun WinnerDeclarationView(
             Spacer(Modifier.height(8.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.widthIn(min = 200.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
