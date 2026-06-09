@@ -349,8 +349,7 @@ class ActiveGameViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        timerEngine.stop()
-        audioEngine.destroy()
+        // TimerEngine and AudioEngine are singletons — they persist across navigation
     }
 }
 
