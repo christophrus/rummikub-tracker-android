@@ -81,25 +81,30 @@ class ActiveGameViewModel @Inject constructor(
 
     private val scope = kotlinx.coroutines.MainScope()
     private var gameId: Long = 0
+    private var gameLoaded = false
 
     fun loadGame(id: Long) {
+        val isNewGame = id != gameId || !gameLoaded
         gameId = id
-        // Wire timer callbacks
+        gameLoaded = true
+        // Wire timer callbacks (safe to set multiple times)
         timerEngine.onTickSound = { audioEngine.playTick() }
         timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
-            // Get initial game to configure timer/audio once
+            // Get initial game to configure timer/audio once per game load
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
-            val currentPlayerExtUsed = initialGame.players
-                .getOrNull(initialGame.currentPlayerIndex)
-                ?.extensionsUsed ?: 0
-            timerEngine.configure(
-                initialGame.timerDuration.toLong(),
-                initialGame.maxExtensions,
-                currentPlayerExtUsed
-            )
-            audioEngine.setTtsLanguage(initialGame.ttsLanguage)
-            audioEngine.initialize()
+            if (isNewGame) {
+                val currentPlayerExtUsed = initialGame.players
+                    .getOrNull(initialGame.currentPlayerIndex)
+                    ?.extensionsUsed ?: 0
+                timerEngine.configure(
+                    initialGame.timerDuration.toLong(),
+                    initialGame.maxExtensions,
+                    currentPlayerExtUsed
+                )
+                audioEngine.setTtsLanguage(initialGame.ttsLanguage)
+                audioEngine.initialize()
+            }
 
             // Collect subsequent changes for UI only — don't reconfigure timer
             gameRepository.getGameById(id).collect { game ->
