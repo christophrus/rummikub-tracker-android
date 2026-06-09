@@ -73,27 +73,27 @@ fun BoundingBoxOverlay(
             val confLabel = "${(tile.confidence * 100).toInt()}%"
             val fullLabel = "$label $confLabel"
 
-            // Label background — clamp to prevent negative coordinates
+            // Draw label only if it fits within canvas bounds
             val labelHeight = 24f
-            val labelTop = if (top > labelHeight) top - labelHeight else top
-            val labelY = if (top > labelHeight) top - labelHeight else top + 2f
-
-            drawRect(
-                color = boxColor.copy(alpha = 0.7f),
-                topLeft = Offset(left, labelTop),
-                size = Size(width.coerceAtLeast(60f), labelHeight)
-            )
-
-            drawText(
-                textMeasurer = textMeasurer,
-                text = fullLabel,
-                topLeft = Offset(left + 4f, labelY),
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+            val labelY = top - labelHeight
+            if (labelY + labelHeight > 0f && labelY < size.height) {
+                val clampedLabelY = labelY.coerceIn(0f, size.height - labelHeight)
+                drawRect(
+                    color = boxColor.copy(alpha = 0.7f),
+                    topLeft = Offset(left, clampedLabelY),
+                    size = Size(width.coerceAtLeast(60f), labelHeight)
                 )
-            )
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = fullLabel,
+                    topLeft = Offset(left + 4f, clampedLabelY),
+                    style = TextStyle(
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
         }
     }
 }
