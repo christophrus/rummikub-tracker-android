@@ -35,8 +35,8 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
     private val _uiState = MutableStateFlow(AnalysisUiState())
     val uiState: StateFlow<AnalysisUiState> = _uiState.asStateFlow()
 
-    private val detector: YoloDetector by lazy { YoloDetector(application) }
-    private val orientationDetector: OrientationDetector by lazy { OrientationDetector(application) }
+    private val detector: YoloDetector by lazy { YoloDetector.getInstance(application) }
+    private val orientationDetector: OrientationDetector by lazy { OrientationDetector.getInstance(application) }
     private val historyRepository: HistoryRepository by lazy {
         val db = AppDatabase.getInstance(application)
         HistoryRepository(db.analysisDao(), application)
@@ -54,27 +54,26 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch(Dispatchers.Default) {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
+            var safeBitmap: Bitmap? = null
+            var orientedBitmap: Bitmap? = null
             try {
                 val startTime = System.currentTimeMillis()
 
-                // Downscale large images to prevent OOM
-                val safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap)
-
-                // Step 1: Detect and correct orientation
-                val orientationInput = OrientationPreprocessor.preprocess(safeBitmap)
+                safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap, maxDimension = 1280)
+                val orientationInput = OrientationPreprocessor.preprocess(safeBitmap!!)
                 val detectedDegrees = orientationDetector.detect(orientationInput)
                 val correctionDegrees = orientationDetector.correctionDegrees(detectedDegrees)
-                val orientedBitmap = if (correctionDegrees != 0) {
-                    ImagePreprocessor.rotateBitmap(safeBitmap, correctionDegrees)
-                } else {
-                    safeBitmap
-                }
+                orientedBitmap = if (correctionDegrees != 0) {
+                    val rotated = ImagePreprocessor.rotateBitmap(safeBitmap!!, correctionDegrees)
+                    if (rotated != safeBitmap) safeBitmap!!.recycle()
+                    rotated
+                } else safeBitmap
 
                 // Step 2: YOLO tile detection
-                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap)
+                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap!!)
                 val rawOutput = detector.detect(inputArray)
                 val tiles = NmsProcessor.postProcess(
-                    rawOutput, letterboxInfo, orientedBitmap.width, orientedBitmap.height,
+                    rawOutput, letterboxInfo, orientedBitmap!!.width, orientedBitmap!!.height,
                     confThreshold = confThreshold
                 )
                 val elapsed = System.currentTimeMillis() - startTime
@@ -90,8 +89,9 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                     processingTimeMs = elapsed
                 )
 
-                // Save to history (with image)
-                historyRepository.saveResult(result, tiles, orientedBitmap)
+                // Save to history (scaled down thumbnail to save memory)
+                val thumbnail = Bitmap.createScaledBitmap(orientedBitmap!!, 400, 400, true)
+                historyRepository.saveResult(result, tiles, thumbnail)
 
                 _uiState.update {
                     it.copy(

@@ -11,7 +11,18 @@ import java.nio.FloatBuffer
  *
  * Classes: 0 → 0°, 1 → 90°, 2 → 180°, 3 → 270°
  */
-class OrientationDetector(context: Context) {
+class OrientationDetector private constructor(context: Context) {
+
+    companion object {
+        @Volatile
+        private var INSTANCE: OrientationDetector? = null
+
+        fun getInstance(context: Context): OrientationDetector {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: OrientationDetector(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 
     private val env: OrtEnvironment = OrtEnvironment.getEnvironment()
     private val session: OrtSession

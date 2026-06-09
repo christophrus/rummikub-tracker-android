@@ -258,8 +258,8 @@ class ActiveGameViewModel @Inject constructor(
     }
 
     // --- Tile Scanning ---
-    private val yoloDetector: YoloDetector by lazy { YoloDetector(appContext) }
-    private val orientationDetector: OrientationDetector by lazy { OrientationDetector(appContext) }
+    private val yoloDetector: YoloDetector by lazy { YoloDetector.getInstance(appContext) }
+    private val orientationDetector: OrientationDetector by lazy { OrientationDetector.getInstance(appContext) }
     private val historyRepository: HistoryRepository by lazy {
         val db = AppDatabase.getInstance(appContext)
         HistoryRepository(db.analysisDao(), appContext)
@@ -292,17 +292,21 @@ class ActiveGameViewModel @Inject constructor(
         )
 
         kotlinx.coroutines.MainScope().launch(Dispatchers.Default) {
+            var safeBitmap: Bitmap? = null
+            var orientedBitmap: Bitmap? = null
             try {
                 val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold
-                val safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap)
-                val orientationInput = OrientationPreprocessor.preprocess(safeBitmap)
+                safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap, maxDimension = 1280)
+                val orientationInput = OrientationPreprocessor.preprocess(safeBitmap!!)
                 val detectedDegrees = orientationDetector.detect(orientationInput)
                 val correctionDegrees = orientationDetector.correctionDegrees(detectedDegrees)
-                val orientedBitmap = if (correctionDegrees != 0) {
-                    ImagePreprocessor.rotateBitmap(safeBitmap, correctionDegrees)
+                orientedBitmap = if (correctionDegrees != 0) {
+                    val rotated = ImagePreprocessor.rotateBitmap(safeBitmap!!, correctionDegrees)
+                    if (rotated != safeBitmap) safeBitmap!!.recycle()
+                    rotated
                 } else safeBitmap
 
-                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap)
+                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap!!)
                 val rawOutput = yoloDetector.detect(inputArray)
                 val tiles = NmsProcessor.postProcess(
                     rawOutput, letterboxInfo, orientedBitmap.width, orientedBitmap.height,
@@ -317,12 +321,12 @@ class ActiveGameViewModel @Inject constructor(
                     processingTimeMs = elapsed
                 )
 
-                // Save to counter history
+                // Save to counter history (thumbnail to save memory)
                 try {
-                    historyRepository.saveResult(result, tiles, orientedBitmap)
-                } catch (_: Exception) {
-                    // History save is best-effort, don't fail the scan
-                }
+                    val thumbnail = Bitmap.createScaledBitmap(orientedBitmap!!, 400, 400, true)
+                    historyRepository.saveResult(result, tiles, thumbnail)
+                    thumbnail.recycle()
+                } catch (_: Exception) { }
 
                 uiState = uiState.copy(
                     isScanning = uiState.isScanning - playerName,

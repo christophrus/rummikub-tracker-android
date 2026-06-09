@@ -6,7 +6,18 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import java.nio.FloatBuffer
 
-class YoloDetector(context: Context) {
+class YoloDetector private constructor(context: Context) {
+
+    companion object {
+        @Volatile
+        private var INSTANCE: YoloDetector? = null
+
+        fun getInstance(context: Context): YoloDetector {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: YoloDetector(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 
     private val env: OrtEnvironment = OrtEnvironment.getEnvironment()
     private val session: OrtSession
