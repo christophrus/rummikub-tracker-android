@@ -7,8 +7,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -66,6 +73,7 @@ fun GameHistoryScreen(
 ) {
     val scope = rememberCoroutineScope()
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -217,8 +225,20 @@ fun GameHistoryScreen(
                                     Spacer(Modifier.height(8.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
+                                        horizontalArrangement = Arrangement.End,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        // Screenshot button
+                                        IconButton(onClick = {
+                                            takeScreenshot(context, game.name)
+                                        }) {
+                                            Icon(
+                                                Icons.Default.CameraAlt,
+                                                contentDescription = "Screenshot",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                        // Delete button
                                         IconButton(onClick = { viewModel.gameToDelete = game.id }) {
                                             Icon(
                                                 Icons.Default.Delete,
@@ -258,5 +278,45 @@ fun GameHistoryScreen(
                 }
             }
         )
+    }
+}
+
+private fun takeScreenshot(context: android.content.Context, gameName: String) {
+    try {
+        val view = (context as? android.app.Activity)?.window?.decorView?.rootView ?: return
+        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        view.draw(canvas)
+
+        val filename = "Rummikub_${gameName.replace(" ", "_")}_${System.currentTimeMillis()}.png"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Rummikub")
+            }
+            val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            uri?.let {
+                context.contentResolver.openOutputStream(it)?.use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+            }
+        } else {
+            val dir = java.io.File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "Rummikub"
+            )
+            dir.mkdirs()
+            val file = java.io.File(dir, filename)
+            java.io.FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+        }
+
+        bitmap.recycle()
+        Toast.makeText(context, "Screenshot saved to Pictures/Rummikub", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 }
