@@ -106,6 +106,8 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
     <string name="close">Close</string>
     <string name="back">Back</string>
     <string name="play">Play</string>
