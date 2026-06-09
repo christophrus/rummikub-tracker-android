@@ -649,8 +649,7 @@ private fun ShareBottomSheet(uri: Uri, onDismiss: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
-                                bitmap = (app.icon as android.graphics.drawable.BitmapDrawable).bitmap
-                                    .asImageBitmap(),
+                                bitmap = drawableToBitmap(app.icon).asImageBitmap(),
                                 contentDescription = null,
                                 modifier = Modifier.size(36.dp)
                             )
@@ -676,3 +675,16 @@ private data class ShareAppInfo(
     val packageName: String,
     val activityName: String
 )
+
+/** Safely converts any Drawable to a Bitmap (handles VectorDrawable, AdaptiveIconDrawable, etc.). */
+private fun drawableToBitmap(drawable: Drawable): Bitmap {
+    if (drawable is android.graphics.drawable.BitmapDrawable && drawable.bitmap != null) {
+        return drawable.bitmap
+    }
+    val size = 96
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    drawable.setBounds(0, 0, size, size)
+    drawable.draw(canvas)
+    return bitmap
+}
