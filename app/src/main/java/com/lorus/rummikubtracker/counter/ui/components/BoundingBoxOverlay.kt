@@ -68,21 +68,26 @@ fun BoundingBoxOverlay(
                 style = Stroke(width = 3f)
             )
 
-            // Label background
+            // Label
             val label = if (tile.isJoker) "J" else "${tile.number}"
             val confLabel = "${(tile.confidence * 100).toInt()}%"
             val fullLabel = "$label $confLabel"
 
+            // Label background — clamp to prevent negative coordinates
+            val labelHeight = 24f
+            val labelTop = if (top > labelHeight) top - labelHeight else top
+            val labelY = if (top > labelHeight) top - labelHeight else top + 2f
+
             drawRect(
                 color = boxColor.copy(alpha = 0.7f),
-                topLeft = Offset(left, top - 24f),
-                size = Size(width.coerceAtLeast(60f), 24f)
+                topLeft = Offset(left, labelTop),
+                size = Size(width.coerceAtLeast(60f), labelHeight)
             )
 
             drawText(
                 textMeasurer = textMeasurer,
                 text = fullLabel,
-                topLeft = Offset(left + 4f, top - 24f),
+                topLeft = Offset(left + 4f, labelY),
                 style = TextStyle(
                     color = Color.White,
                     fontSize = 12.sp,
