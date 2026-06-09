@@ -536,9 +536,13 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TITLE, "Rummikub: ${game.name}")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(shareIntent, "Share Scoreboard"))
+        // Use chooser with empty initial intents to suppress direct-share row
+        val chooser = Intent.createChooser(shareIntent, "Share Scoreboard")
+        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, emptyArray<android.os.Parcelable>())
+        context.startActivity(chooser)
     } catch (e: Exception) {
         Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
     }
