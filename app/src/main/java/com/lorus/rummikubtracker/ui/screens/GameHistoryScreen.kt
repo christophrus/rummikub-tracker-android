@@ -284,27 +284,39 @@ fun GameHistoryScreen(
 private fun takeScreenshot(context: android.content.Context, game: Game) {
     try {
         val density = context.resources.displayMetrics.density
-        val pad = (16 * density).toInt()
-        val colWidth = (70 * density).toInt()
-        val rowHeight = (36 * density).toInt()
-        val headerHeight = (40 * density).toInt()
-        val roundLabelWidth = (60 * density).toInt()
-        val titleHeight = (52 * density).toInt()
-        val textSize = 12f * density
-        val titleSize = 16f * density
-        val smallSize = 10f * density
+        val pad = (20 * density).toInt()
+        val rowHeight = (44 * density).toInt()
+        val headerHeight = (44 * density).toInt()
+        val roundLabelWidth = (52 * density).toInt()
+        val titleHeight = (60 * density).toInt()
+        val textSize = 14f * density
+        val titleSize = 18f * density
+        val smallSize = 11f * density
 
-        val numCols = 1 + game.players.size // round label + players
-        val numRows = 1 + game.rounds.size + 1 // header + rounds + total
-        val imgWidth = roundLabelWidth + colWidth * game.players.size + pad * 2
-        val imgHeight = titleHeight + headerHeight + rowHeight * (game.rounds.size + 1) + pad * 3
+        // Calculate column width dynamically based on longest content
+        val measurePaint = android.graphics.Paint().also { it.textSize = textSize }
+        val boldMeasurePaint = android.graphics.Paint().also {
+            it.textSize = textSize
+            it.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        }
+        val minColWidth = (72 * density).toInt()
+        val maxColWidth = (120 * density).toInt()
+        val colWidth = game.players.fold(minColWidth) { max, player ->
+            val nameW = measurePaint.measureText(player.name).toInt() + (8 * density).toInt()
+            val maxScore = game.rounds.maxOfOrNull { it.scores[player.name]?.toString()?.let { s -> measurePaint.measureText(s).toInt() } ?: 0 } ?: 0
+            val totalW = boldMeasurePaint.measureText("${game.getPlayerTotal(player.name)}").toInt()
+            maxOf(max, nameW, maxScore, totalW).coerceAtMost(maxColWidth)
+        }
+        val tableWidth = roundLabelWidth + colWidth * game.players.size + pad * 2
+        val imgWidth = tableWidth
+        val imgHeight = titleHeight + headerHeight + rowHeight * (game.rounds.size + 1) + pad * 4
 
         val bitmap = Bitmap.createBitmap(imgWidth, imgHeight, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(bitmap)
 
-        // Background
+        // Background gradient
         val bgPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#1A1A2E")
+            it.color = android.graphics.Color.parseColor("#16213E")
             it.style = android.graphics.Paint.Style.FILL
         }
         canvas.drawRect(0f, 0f, imgWidth.toFloat(), imgHeight.toFloat(), bgPaint)
@@ -312,73 +324,114 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         // Title
         val titlePaint = android.graphics.Paint().also {
             it.color = android.graphics.Color.WHITE
-            it.textSize = titleSize.toFloat()
+            it.textSize = titleSize
             it.isAntiAlias = true
             it.typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
-        canvas.drawText(game.name, pad.toFloat(), pad + titleSize, titlePaint)
+        val titleX = (imgWidth / 2f) - titlePaint.measureText(game.name) / 2f
+        canvas.drawText(game.name, titleX, pad + titleSize, titlePaint)
+
         val subPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#B0B0B0")
-            it.textSize = smallSize.toFloat()
+            it.color = android.graphics.Color.parseColor("#8899AA")
+            it.textSize = smallSize
             it.isAntiAlias = true
         }
-        canvas.drawText("${game.rounds.size} rounds · ${game.players.size} players", pad.toFloat(), pad + titleSize + smallSize + 4, subPaint)
+        val subText = "${game.rounds.size} rounds · ${game.players.size} players"
+        val subX = (imgWidth / 2f) - subPaint.measureText(subText) / 2f
+        canvas.drawText(subText, subX, pad + titleSize + smallSize + 6, subPaint)
 
         val tableTop = pad.toFloat() + titleHeight
 
-        // Table background card
+        // Table card background
         val cardPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#0F3460")
+            it.color = android.graphics.Color.parseColor("#1A1A2E")
             it.style = android.graphics.Paint.Style.FILL
         }
-        canvas.drawRoundRect(pad.toFloat(), tableTop, (imgWidth - pad).toFloat(), (imgHeight - pad).toFloat(), 16f * density, 16f * density, cardPaint)
+        val tableBottom = (imgHeight - pad).toFloat()
+        canvas.drawRoundRect(pad.toFloat(), tableTop, (imgWidth - pad).toFloat(), tableBottom, 12f * density, 12f * density, cardPaint)
 
+        // Paints
         val headerPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#B0B0B0")
-            it.textSize = smallSize.toFloat()
+            it.color = android.graphics.Color.parseColor("#8899AA")
+            it.textSize = smallSize
             it.isAntiAlias = true
             it.typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
         val cellPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.WHITE
-            it.textSize = textSize.toFloat()
+            it.color = android.graphics.Color.parseColor("#E0E0E0")
+            it.textSize = textSize
             it.isAntiAlias = true
         }
-        val goldPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#FFB300")
-            it.textSize = textSize.toFloat()
+        val winnerPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#FFD700")
+            it.textSize = textSize
             it.isAntiAlias = true
             it.typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
         val totalPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#FFB300")
-            it.textSize = textSize.toFloat()
+            it.color = android.graphics.Color.parseColor("#FFD700")
+            it.textSize = textSize
+            it.isAntiAlias = true
+            it.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        }
+        val totalLabelPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#FFD700")
+            it.textSize = smallSize
             it.isAntiAlias = true
             it.typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
         val linePaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#33FFFFFF")
-            it.strokeWidth = 1f
+            it.color = android.graphics.Color.parseColor("#1FFFFFFF")
+            it.strokeWidth = 0.5f * density
         }
-        val rowBgPaint = android.graphics.Paint().also {
+        val rowBgEven = android.graphics.Paint().also {
             it.color = android.graphics.Color.parseColor("#08FFFFFF")
             it.style = android.graphics.Paint.Style.FILL
+        }
+        val winnerBgPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#15FFD700")
+            it.style = android.graphics.Paint.Style.FILL
+        }
+        // Small star paint for winners
+        val starPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#FFD700")
+            it.style = android.graphics.Paint.Style.FILL
+            it.isAntiAlias = true
         }
 
         val startY = tableTop + pad
         val startX = pad.toFloat() + pad
 
-        // Header
-        canvas.drawText("#", startX + roundLabelWidth / 2 - cellPaint.measureText("#") / 2, startY + headerHeight * 0.65f, headerPaint)
+        // Header background
+        val headerBgPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#0AFFFFFF")
+            it.style = android.graphics.Paint.Style.FILL
+        }
+        canvas.drawRect(startX, startY, startX + tableWidth - pad * 2, startY + headerHeight, headerBgPaint)
+
+        // Header texts
+        canvas.drawText("#", startX + roundLabelWidth / 2 - headerPaint.measureText("#") / 2, startY + headerHeight * 0.6f, headerPaint)
         var x = startX + roundLabelWidth
         game.players.forEach { player ->
-            val text = player.name.take(8)
-            canvas.drawText(text, x + colWidth / 2 - cellPaint.measureText(text) / 2, startY + headerHeight * 0.65f, headerPaint)
+            val nameText = player.name
+            // Truncate with ellipsis if needed
+            val displayName = if (headerPaint.measureText(nameText) > colWidth - 8 * density) {
+                var truncated = nameText
+                while (headerPaint.measureText(truncated + "…") > colWidth - 8 * density && truncated.length > 1) {
+                    truncated = truncated.dropLast(1)
+                }
+                truncated + "…"
+            } else nameText
+            canvas.drawText(displayName, x + colWidth / 2 - headerPaint.measureText(displayName) / 2, startY + headerHeight * 0.6f, headerPaint)
             x += colWidth
         }
 
-        // Header line
-        canvas.drawLine(startX, startY + headerHeight, startX + roundLabelWidth + colWidth * game.players.size, startY + headerHeight, linePaint)
+        // Header bottom line
+        val headerLinePaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#33FFFFFF")
+            it.strokeWidth = 1.2f * density
+        }
+        canvas.drawLine(startX, startY + headerHeight, startX + tableWidth - pad * 2, startY + headerHeight, headerLinePaint)
 
         // Cumulative tracking
         val cumulative = mutableMapOf<String, Int>()
@@ -387,53 +440,90 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         // Round rows
         game.rounds.forEachIndexed { rIdx, round ->
             val rowY = startY + headerHeight + rIdx * rowHeight
-            // Alternating row background
+            val rowRight = startX + tableWidth - pad * 2
+
+            // Row background (alternating)
             if (rIdx % 2 == 0) {
-                canvas.drawRect(startX, rowY, startX + roundLabelWidth + colWidth * game.players.size, rowY + rowHeight, rowBgPaint)
+                canvas.drawRect(startX, rowY, rowRight, rowY + rowHeight, rowBgEven)
             }
 
             // Round label
-            canvas.drawText("R${rIdx + 1}", startX + roundLabelWidth / 2 - cellPaint.measureText("R${rIdx + 1}") / 2, rowY + rowHeight * 0.65f, cellPaint)
+            val roundLabel = "R${rIdx + 1}"
+            canvas.drawText(roundLabel, startX + roundLabelWidth / 2 - cellPaint.measureText(roundLabel) / 2, rowY + rowHeight * 0.6f, cellPaint)
 
             var px = startX + roundLabelWidth
             game.players.forEach { player ->
                 val score = round.scores[player.name] ?: 0
                 cumulative[player.name] = (cumulative[player.name] ?: 0) + score
                 val isWinner = round.winnerPlayerName == player.name
-                val paint = if (isWinner) goldPaint else cellPaint
-                val displayText = if (isWinner) "0 🏆" else "$score"
-                canvas.drawText(displayText, px + colWidth / 2 - paint.measureText(displayText) / 2, rowY + rowHeight * 0.65f, paint)
+
+                if (isWinner) {
+                    // Gold background for winner cell
+                    canvas.drawRect(px + 2 * density, rowY + 2 * density, px + colWidth - 2 * density, rowY + rowHeight - 2 * density, winnerBgPaint)
+                }
+
+                val scoreText = "$score"
+                val scoreX = px + colWidth / 2 - cellPaint.measureText(scoreText) / 2
+                val scoreY = rowY + rowHeight * 0.6f
+
+                if (isWinner) {
+                    // "0" in gold bold
+                    canvas.drawText(scoreText, scoreX, scoreY, winnerPaint)
+                    // Draw small gold star next to score
+                    val starCx = scoreX + winnerPaint.measureText(scoreText) + 6 * density
+                    val starCy = scoreY - 5 * density
+                    val starR = 5 * density
+                    drawStar(canvas, starCx, starCy, starR, starPaint)
+                } else {
+                    canvas.drawText(scoreText, scoreX, scoreY, cellPaint)
+                }
                 px += colWidth
             }
 
+            // Row separator
             if (rIdx < game.rounds.size - 1) {
-                canvas.drawLine(startX, rowY + rowHeight, startX + roundLabelWidth + colWidth * game.players.size, rowY + rowHeight, linePaint)
+                canvas.drawLine(startX, rowY + rowHeight, rowRight, rowY + rowHeight, linePaint)
             }
         }
 
         // Totals row
         val totalY = startY + headerHeight + game.rounds.size * rowHeight
+        val rowRight = startX + tableWidth - pad * 2
         val totalBgPaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#10FFB300")
+            it.color = android.graphics.Color.parseColor("#12FFD700")
             it.style = android.graphics.Paint.Style.FILL
         }
-        canvas.drawRect(startX, totalY, startX + roundLabelWidth + colWidth * game.players.size, totalY + rowHeight, totalBgPaint)
+        canvas.drawRect(startX, totalY, rowRight, totalY + rowHeight, totalBgPaint)
 
+        // Gold top line for totals
         val goldLinePaint = android.graphics.Paint().also {
-            it.color = android.graphics.Color.parseColor("#FFB300")
-            it.strokeWidth = 2f
+            it.color = android.graphics.Color.parseColor("#FFD700")
+            it.strokeWidth = 1.5f * density
         }
-        canvas.drawLine(startX, totalY, startX + roundLabelWidth + colWidth * game.players.size, totalY, goldLinePaint)
+        canvas.drawLine(startX, totalY, rowRight, totalY, goldLinePaint)
 
-        val totalLabel = "Total"
-        canvas.drawText(totalLabel, startX + roundLabelWidth / 2 - totalPaint.measureText(totalLabel) / 2, totalY + rowHeight * 0.65f, totalPaint)
+        // Total label with symbol
+        val totalLabel = "∑"
+        canvas.drawText(totalLabel, startX + roundLabelWidth / 2 - totalPaint.measureText(totalLabel) / 2, totalY + rowHeight * 0.6f, totalPaint)
 
         var tx = startX + roundLabelWidth
         game.players.forEach { player ->
             val total = cumulative[player.name] ?: 0
-            canvas.drawText("$total", tx + colWidth / 2 - totalPaint.measureText("$total") / 2, totalY + rowHeight * 0.65f, totalPaint)
+            canvas.drawText("$total", tx + colWidth / 2 - totalPaint.measureText("$total") / 2, totalY + rowHeight * 0.6f, totalPaint)
             tx += colWidth
         }
+
+        // Rounded bottom corners on table (overdraw corners)
+        val cornerR = 12f * density
+        val cornerPaint = android.graphics.Paint().also {
+            it.color = android.graphics.Color.parseColor("#16213E")
+            it.style = android.graphics.Paint.Style.FILL
+            it.isAntiAlias = true
+        }
+        // Bottom-left corner
+        canvas.drawRect(startX - pad, tableBottom - cornerR, startX + cornerR, tableBottom + pad, cornerPaint)
+        // Bottom-right corner
+        canvas.drawRect(rowRight - cornerR, tableBottom - cornerR, rowRight + pad, tableBottom + pad, cornerPaint)
 
         // Save to gallery
         val filename = "Rummikub_${game.name.replace(" ", "_")}_${System.currentTimeMillis()}.png"
@@ -466,4 +556,19 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
     } catch (e: Exception) {
         Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
     }
+}
+
+/** Draws a 5-pointed star at (cx, cy) with the given radius. */
+private fun drawStar(canvas: android.graphics.Canvas, cx: Float, cy: Float, r: Float, paint: android.graphics.Paint) {
+    val path = android.graphics.Path()
+    val innerR = r * 0.4f
+    for (i in 0 until 10) {
+        val radius = if (i % 2 == 0) r else innerR
+        val angle = (Math.PI / 5 * i) - Math.PI / 2
+        val x = cx + (radius * kotlin.math.cos(angle)).toFloat()
+        val y = cy + (radius * kotlin.math.sin(angle)).toFloat()
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    canvas.drawPath(path, paint)
 }
