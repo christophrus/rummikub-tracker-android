@@ -101,6 +101,9 @@ class ActiveGameViewModel @Inject constructor(
                 )
                 audioEngine.setTtsLanguage(initialGame.ttsLanguage)
                 audioEngine.initialize()
+            } else if (timerEngine.isPaused()) {
+                // Auto-resume timer when returning from main menu
+                timerEngine.resume()
             }
 
             // Collect subsequent changes for UI only — don't reconfigure timer
@@ -349,7 +352,10 @@ class ActiveGameViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        // TimerEngine and AudioEngine are singletons — they persist across navigation
+        // Pause timer on back navigation — singleton persists, auto-resumes on return
+        if (timerEngine.isRunning()) {
+            timerEngine.pause()
+        }
     }
 }
 
