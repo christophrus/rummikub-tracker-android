@@ -328,9 +328,10 @@ class ActiveGameViewModel @Inject constructor(
                     scores = uiState.scores + (playerName to totalScore.toString()),
                     validationError = null
                 )
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 uiState = uiState.copy(
-                    isScanning = uiState.isScanning - playerName
+                    isScanning = uiState.isScanning - playerName,
+                    validationError = "Scan failed: ${e.message?.take(60) ?: "unknown"}"
                 )
             }
         }
