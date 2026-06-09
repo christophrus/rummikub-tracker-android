@@ -630,7 +630,7 @@ fun ActiveGameScreen(
 
                     Spacer(Modifier.height(12.dp))
 
-                    // === Control row: play/pause, reset, skip, lock ===
+                    // === Control row: play/pause, reset ===
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -641,7 +641,7 @@ fun ActiveGameScreen(
                         // Play/Pause
                         FilledIconButton(
                             onClick = { viewModel.toggleTimer() },
-                            modifier = Modifier.size(52.dp),
+                            modifier = Modifier.size(64.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -649,13 +649,13 @@ fun ActiveGameScreen(
                             Icon(
                                 if (timerState == TimerState.RUNNING) Icons.Default.Pause else Icons.Default.PlayArrow,
                                 contentDescription = if (timerState == TimerState.RUNNING) stringResource(R.string.pause) else stringResource(R.string.play),
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(36.dp)
                             )
                         }
                         // Reset
                         FilledIconButton(
                             onClick = { viewModel.resetTimer() },
-                            modifier = Modifier.size(52.dp),
+                            modifier = Modifier.size(64.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -663,23 +663,7 @@ fun ActiveGameScreen(
                             Icon(
                                 Icons.Default.Refresh,
                                 contentDescription = stringResource(R.string.reset),
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        // Lock/fullscreen
-                        FilledIconButton(
-                            onClick = { viewModel.toggleScrollLock() },
-                            modifier = Modifier.size(52.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = if (state.scrollLocked)
-                                    MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Icon(
-                                if (state.scrollLocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                                contentDescription = stringResource(R.string.lock_screen),
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(36.dp)
                             )
                         }
                     }
