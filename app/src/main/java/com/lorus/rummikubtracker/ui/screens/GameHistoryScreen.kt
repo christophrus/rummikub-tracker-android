@@ -387,7 +387,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         val rowHeight = (44 * density).toInt()
         val headerHeight = (44 * density).toInt()
         val roundLabelWidth = (52 * density).toInt()
-        val titleHeight = (60 * density).toInt()
+        val titleHeight = (76 * density).toInt()
         val textSize = 14f * density
         val titleSize = 18f * density
         val smallSize = 11f * density
@@ -446,6 +446,20 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         }
         val subX = (imgWidth / 2f) - subPaint.measureText(subText) / 2f
         canvas.drawText(subText, subX, pad + titleSize + smallSize + 6, subPaint)
+
+        // Winner line
+        val overallWinner = game.computeWinner()
+        if (overallWinner != null) {
+            val winnerText = "Winner: $overallWinner 🏆"
+            val winnerPaint = android.graphics.Paint().also {
+                it.color = android.graphics.Color.parseColor("#FFD700")
+                it.textSize = smallSize
+                it.isAntiAlias = true
+                it.typeface = android.graphics.Typeface.DEFAULT_BOLD
+            }
+            val winnerX = (imgWidth / 2f) - winnerPaint.measureText(winnerText) / 2f
+            canvas.drawText(winnerText, winnerX, pad + titleSize + smallSize * 2 + 12, winnerPaint)
+        }
 
         val tableTop = pad.toFloat() + titleHeight
 
