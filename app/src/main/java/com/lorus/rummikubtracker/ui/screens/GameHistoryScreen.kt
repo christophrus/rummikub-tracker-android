@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
@@ -524,34 +522,23 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         // Bottom-right corner
         canvas.drawRect(contentRight - cornerR, tableBottom - cornerR, imgWidth.toFloat(), tableBottom + pad, cornerPaint)
 
-        // Save to gallery
-        val filename = "Rummikub_${game.name.replace(" ", "_")}_${System.currentTimeMillis()}.png"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Rummikub")
-            }
-            val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            uri?.let {
-                context.contentResolver.openOutputStream(it)?.use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                }
-            }
-        } else {
-            val dir = java.io.File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                "Rummikub"
-            )
-            dir.mkdirs()
-            val file = java.io.File(dir, filename)
-            java.io.FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            }
+        // Save to cache and share
+        val filename = "Rummikub_${game.name.replace(" ", "_")}.png"
+        val cacheDir = java.io.File(context.cacheDir, "share")
+        cacheDir.mkdirs()
+        val file = java.io.File(cacheDir, filename)
+        java.io.FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
-
         bitmap.recycle()
-        Toast.makeText(context, "Scoreboard saved to Pictures/Rummikub", Toast.LENGTH_SHORT).show()
+
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(shareIntent, "Share Scoreboard"))
     } catch (e: Exception) {
         Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
     }
