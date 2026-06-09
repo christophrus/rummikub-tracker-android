@@ -4,13 +4,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.lorus.rummikubtracker.counter.data.appDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 data class AppPreferences(
     val uiLanguage: String = "en",
@@ -42,7 +41,7 @@ class PreferencesDataStore @Inject constructor(
         private val KEY_CONFIDENCE_THRESHOLD = floatPreferencesKey("confidence_threshold")
     }
 
-    val preferences: Flow<AppPreferences> = context.dataStore.data.map { prefs ->
+    val preferences: Flow<AppPreferences> = context.appDataStore.data.map { prefs ->
         AppPreferences(
             uiLanguage = prefs[KEY_UI_LANGUAGE] ?: "en",
             ttsLanguage = prefs[KEY_TTS_LANGUAGE] ?: "en",
@@ -58,36 +57,36 @@ class PreferencesDataStore @Inject constructor(
     }
 
     suspend fun setUiLanguage(language: String) {
-        context.dataStore.edit { it[KEY_UI_LANGUAGE] = language }
+        context.appDataStore.edit { it[KEY_UI_LANGUAGE] = language }
     }
 
     suspend fun setTtsLanguage(language: String) {
-        context.dataStore.edit { it[KEY_TTS_LANGUAGE] = language }
+        context.appDataStore.edit { it[KEY_TTS_LANGUAGE] = language }
     }
 
     suspend fun setTheme(theme: String) {
-        context.dataStore.edit { it[KEY_THEME] = theme }
+        context.appDataStore.edit { it[KEY_THEME] = theme }
     }
 
     suspend fun setTimerDuration(duration: Int) {
-        context.dataStore.edit { it[KEY_TIMER_DURATION] = duration }
+        context.appDataStore.edit { it[KEY_TIMER_DURATION] = duration }
     }
 
     suspend fun setMaxExtensions(max: Int) {
-        context.dataStore.edit { it[KEY_MAX_EXTENSIONS] = max }
+        context.appDataStore.edit { it[KEY_MAX_EXTENSIONS] = max }
     }
 
     suspend fun setScrollLock(locked: Boolean) {
-        context.dataStore.edit { it[KEY_SCROLL_LOCK] = locked }
+        context.appDataStore.edit { it[KEY_SCROLL_LOCK] = locked }
     }
 
     suspend fun setExtensionReplenishRounds(rounds: Int) {
-        context.dataStore.edit { it[KEY_EXTENSION_REPLENISH_ROUNDS] = rounds }
+        context.appDataStore.edit { it[KEY_EXTENSION_REPLENISH_ROUNDS] = rounds }
     }
 
     suspend fun incrementAndGetGameNumber(): Int {
         var number = 1
-        context.dataStore.edit { prefs ->
+        context.appDataStore.edit { prefs ->
             number = (prefs[KEY_GAME_NUMBER_SEQ] ?: 1) + 1
             prefs[KEY_GAME_NUMBER_SEQ] = number
         }
@@ -95,14 +94,14 @@ class PreferencesDataStore @Inject constructor(
     }
 
     suspend fun setPreferredSettings(settings: String) {
-        context.dataStore.edit { it[KEY_PREFERRED_SETTINGS] = settings }
+        context.appDataStore.edit { it[KEY_PREFERRED_SETTINGS] = settings }
     }
 
     suspend fun setConfidenceThreshold(threshold: Float) {
-        context.dataStore.edit { it[KEY_CONFIDENCE_THRESHOLD] = threshold }
+        context.appDataStore.edit { it[KEY_CONFIDENCE_THRESHOLD] = threshold }
     }
 
     suspend fun clearAll() {
-        context.dataStore.edit { it.clear() }
+        context.appDataStore.edit { it.clear() }
     }
 }
