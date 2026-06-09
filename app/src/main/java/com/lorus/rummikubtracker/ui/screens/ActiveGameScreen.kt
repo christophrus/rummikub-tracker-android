@@ -790,7 +790,8 @@ private fun WinnerDeclarationView(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    PlayerAvatar(name = winnerName, size = 64)
+                    val winnerPlayer = players.find { it.name == winnerName }
+                    PlayerAvatar(name = winnerName, imagePath = winnerPlayer?.imagePath, size = 64)
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = winnerName,
