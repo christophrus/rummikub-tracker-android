@@ -1,5 +1,8 @@
 package com.lorus.rummikubtracker.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,19 +10,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.domain.model.Player
 import com.lorus.rummikubtracker.domain.usecase.PlayerManager
+import com.lorus.rummikubtracker.ui.components.PlayerAvatar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +38,8 @@ class ManagePlayersViewModel @Inject constructor(
     var editingPlayer by mutableStateOf<Player?>(null)
     var newPlayerName by mutableStateOf("")
     var showAddDialog by mutableStateOf(false)
+    var pendingImageUri by mutableStateOf<Uri?>(null)
+    var pendingImagePath by mutableStateOf<String?>(null)
 
     private val scope = kotlinx.coroutines.MainScope()
 
@@ -53,29 +60,70 @@ class ManagePlayersViewModel @Inject constructor(
 
     fun openAddDialog() {
         newPlayerName = ""
+        editingPlayer = null
+        pendingImageUri = null
+        pendingImagePath = null
         showAddDialog = true
     }
 
     fun openEditDialog(player: Player) {
         editingPlayer = player
         newPlayerName = player.name
+        pendingImageUri = null
+        pendingImagePath = player.imagePath
         showAddDialog = true
     }
 
-    fun savePlayer() {
+    fun onImageSelected(uri: Uri) {
+        // Copy to temp file for preview
+        pendingImageUri = uri
+    }
+
+    fun getPreviewPath(context: android.content.Context): String? {
+        return pendingImagePath ?: pendingImageUri?.let { uri ->
+            try {
+                val tempFile = java.io.File(context.cacheDir, "preview_avatar")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    java.io.FileOutputStream(tempFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                tempFile.absolutePath
+            } catch (_: Exception) { null }
+        }
+    }
+
+    fun savePlayer(context: android.content.Context) {
         val name = newPlayerName.trim()
         if (name.isEmpty()) return
 
         scope.launch {
+            // Compress and save image if a new one was picked
+            var imagePath = editingPlayer?.imagePath
+            val uri = pendingImageUri
+            if (uri != null) {
+                // Copy to temp file first for compressAndSaveImage
+                val tempFile = java.io.File(context.cacheDir, "temp_avatar_${System.currentTimeMillis()}")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    java.io.FileOutputStream(tempFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                imagePath = playerManager.compressAndSaveImage(name, tempFile.absolutePath)
+                tempFile.delete()
+            }
+
             // If editing and name changed, delete old name first
             val oldName = editingPlayer?.name
             if (oldName != null && oldName != name) {
                 playerManager.deletePlayer(oldName)
             }
-            playerManager.savePlayer(name)
+            playerManager.savePlayer(name, imagePath)
             showAddDialog = false
             editingPlayer = null
             newPlayerName = ""
+            pendingImageUri = null
+            pendingImagePath = null
         }
     }
 
@@ -83,6 +131,8 @@ class ManagePlayersViewModel @Inject constructor(
         showAddDialog = false
         editingPlayer = null
         newPlayerName = ""
+        pendingImageUri = null
+        pendingImagePath = null
     }
 }
 
@@ -93,6 +143,12 @@ fun ManagePlayersScreen(
     viewModel: ManagePlayersViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Gallery picker for avatar
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { viewModel.onImageSelected(it) } }
 
     Scaffold(
         topBar = {
@@ -140,6 +196,9 @@ fun ManagePlayersScreen(
                 items(viewModel.players) { player ->
                     ListItem(
                         headlineContent = { Text(player.name) },
+                        leadingContent = {
+                            PlayerAvatar(name = player.name, imagePath = player.imagePath, size = 40)
+                        },
                         trailingContent = {
                             Row {
                                 IconButton(onClick = { viewModel.openEditDialog(player) }) {
@@ -168,22 +227,29 @@ fun ManagePlayersScreen(
     // Add/Edit dialog
     if (viewModel.showAddDialog) {
         val isEditing = viewModel.editingPlayer != null
+        val previewPath = viewModel.pendingImagePath
         AlertDialog(
             onDismissRequest = { viewModel.dismissDialog() },
             title = {
                 Text(
-                    if (isEditing) "Edit Player"
+                    if (isEditing) stringResource(R.string.edit)
                     else stringResource(R.string.add_player)
                 )
             },
             text = {
-                Column {
-                    Text(
-                        text = if (isEditing) "Change the name for ${viewModel.editingPlayer?.name}"
-                               else "Enter a name for the new player",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Avatar preview
+                    PlayerAvatar(
+                        name = viewModel.newPlayerName.ifEmpty { "?" },
+                        imagePath = viewModel.getPreviewPath(context),
+                        size = 72
                     )
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = { imagePicker.launch("image/*") }) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Select Photo")
+                    }
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
                         value = viewModel.newPlayerName,
@@ -196,7 +262,7 @@ fun ManagePlayersScreen(
             },
             confirmButton = {
                 TextButton(
-                    onClick = { viewModel.savePlayer() },
+                    onClick = { viewModel.savePlayer(context) },
                     enabled = viewModel.newPlayerName.trim().isNotEmpty()
                 ) {
                     Text(stringResource(R.string.save))
