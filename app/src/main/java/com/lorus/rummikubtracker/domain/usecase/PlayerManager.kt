@@ -3,6 +3,8 @@ package com.lorus.rummikubtracker.domain.usecase
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import androidx.exifinterface.media.ExifInterface
 import com.lorus.rummikubtracker.data.repository.PlayerRepository
 import com.lorus.rummikubtracker.domain.model.Config
 import com.lorus.rummikubtracker.domain.model.Player
@@ -36,7 +38,11 @@ class PlayerManager @Inject constructor(
 
     suspend fun compressAndSaveImage(playerName: String, sourcePath: String): String? {
         return try {
-            val bitmap = BitmapFactory.decodeFile(sourcePath) ?: return null
+            var bitmap = BitmapFactory.decodeFile(sourcePath) ?: return null
+
+            // Fix EXIF rotation so the saved image has correct orientation
+            bitmap = fixExifRotation(sourcePath, bitmap)
+
             val compressed = resizeAndCompress(bitmap)
 
             val dir = File(context.filesDir, "avatars")
@@ -51,6 +57,30 @@ class PlayerManager @Inject constructor(
             file.absolutePath
         } catch (e: Exception) {
             null
+        }
+    }
+
+    private fun fixExifRotation(sourcePath: String, bitmap: Bitmap): Bitmap {
+        return try {
+            val exif = ExifInterface(sourcePath)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+            val degrees = when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                else -> 0f
+            }
+            if (degrees != 0f) {
+                val matrix = Matrix().apply { postRotate(degrees) }
+                val rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                if (rotated != bitmap) bitmap.recycle()
+                rotated
+            } else bitmap
+        } catch (_: Exception) {
+            bitmap
         }
     }
 

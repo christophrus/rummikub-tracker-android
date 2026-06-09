@@ -99,6 +99,7 @@ dependencies {
 
     // Image Loading
     implementation(libs.coil.compose)
+    implementation(libs.exifinterface)
 
     // Networking
     implementation(libs.retrofit)
