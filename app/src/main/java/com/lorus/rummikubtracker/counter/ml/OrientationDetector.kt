@@ -20,7 +20,7 @@ class OrientationDetector(context: Context) {
     val orientationDegrees = intArrayOf(0, 90, 180, 270)
 
     init {
-        val modelBytes = context.assets.open("orientation_cnn_q8.onnx").readBytes()
+        val modelBytes = context.assets.open("orientation_cnn_fp16.onnx").readBytes()
         val options = OrtSession.SessionOptions()
         session = env.createSession(modelBytes, options)
     }
