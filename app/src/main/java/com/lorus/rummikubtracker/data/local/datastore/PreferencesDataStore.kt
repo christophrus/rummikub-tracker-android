@@ -21,7 +21,7 @@ data class AppPreferences(
     val extensionReplenishRounds: Int = 0,
     val gameNumberSeq: Int = 1,
     val preferredSettings: String = "{}",
-    val confidenceThreshold: Float = 0.25f
+    val confidenceThreshold: Float = 0.70f
 )
 
 @Singleton
@@ -52,7 +52,7 @@ class PreferencesDataStore @Inject constructor(
             extensionReplenishRounds = prefs[KEY_EXTENSION_REPLENISH_ROUNDS] ?: 0,
             gameNumberSeq = prefs[KEY_GAME_NUMBER_SEQ] ?: 1,
             preferredSettings = prefs[KEY_PREFERRED_SETTINGS] ?: "{}",
-            confidenceThreshold = prefs[KEY_CONFIDENCE_THRESHOLD] ?: 0.25f
+            confidenceThreshold = prefs[KEY_CONFIDENCE_THRESHOLD] ?: 0.70f
         )
     }
 

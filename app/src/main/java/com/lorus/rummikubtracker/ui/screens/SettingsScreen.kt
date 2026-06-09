@@ -36,7 +36,7 @@ class SettingsViewModel @Inject constructor(
     var uiLanguage by mutableStateOf("en")
     var ttsLanguage by mutableStateOf("en")
     var theme by mutableStateOf("system")
-    var confidenceThreshold by mutableStateOf(0.25f)
+    var confidenceThreshold by mutableStateOf(0.70f)
     var showClearDialog by mutableStateOf(false)
     var showUiLangDropdown by mutableStateOf(false)
     var showTtsDropdown by mutableStateOf(false)

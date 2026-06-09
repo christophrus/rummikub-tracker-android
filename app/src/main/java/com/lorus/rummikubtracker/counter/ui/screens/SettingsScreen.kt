@@ -48,7 +48,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val settingsDataStore = androidx.compose.runtime.remember { SettingsDataStore(context) }
-    val confidenceThreshold by settingsDataStore.confidenceThreshold.collectAsState(initial = 0.25f)
+    val confidenceThreshold by settingsDataStore.confidenceThreshold.collectAsState(initial = 0.70f)
     val themeMode by settingsDataStore.themeMode.collectAsState(initial = "system")
     val coroutineScope = rememberCoroutineScope()
 
