@@ -118,7 +118,6 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
 
     override fun onCleared() {
         super.onCleared()
-        orientationDetector.close()
-        detector.close()
+        // Detectors are singletons shared with ActiveGameViewModel — do NOT close them here
     }
 }
