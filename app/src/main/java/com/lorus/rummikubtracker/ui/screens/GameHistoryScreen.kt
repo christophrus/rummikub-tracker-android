@@ -354,7 +354,15 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             it.textSize = smallSize
             it.isAntiAlias = true
         }
-        val subText = "${game.rounds.size} rounds · ${game.players.size} players"
+        val subText = buildString {
+            append("${game.rounds.size} rounds · ${game.players.size} players")
+            game.endTime?.let { end ->
+                val elapsed = end - game.startTime
+                val mins = (elapsed / 60000).toInt()
+                val dur = if (mins < 60) "${mins}m" else "${mins / 60}h ${mins % 60}m"
+                append(" · $dur")
+            }
+        }
         val subX = (imgWidth / 2f) - subPaint.measureText(subText) / 2f
         canvas.drawText(subText, subX, pad + titleSize + smallSize + 6, subPaint)
 
