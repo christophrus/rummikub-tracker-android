@@ -447,7 +447,9 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         val subX = (imgWidth / 2f) - subPaint.measureText(subText) / 2f
         canvas.drawText(subText, subX, pad + titleSize + smallSize + 6, subPaint)
 
-        // Winner line
+        val tableTop = pad.toFloat() + titleHeight
+
+        // Winner line — just above the table
         val overallWinner = game.computeWinner()
         if (overallWinner != null) {
             val winnerText = "Winner: $overallWinner 🏆"
@@ -457,10 +459,8 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
                 it.isAntiAlias = true
                 it.typeface = android.graphics.Typeface.DEFAULT_BOLD
             }
-            canvas.drawText(winnerText, pad.toFloat(), pad + titleSize + smallSize * 2 + 14, winnerPaint)
+            canvas.drawText(winnerText, pad.toFloat(), tableTop - smallSize - 2, winnerPaint)
         }
-
-        val tableTop = pad.toFloat() + titleHeight
 
         // Table card background
         val cardPaint = android.graphics.Paint().also {
