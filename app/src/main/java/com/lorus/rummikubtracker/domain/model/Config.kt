@@ -24,7 +24,7 @@ object Config {
     const val MAX_IMAGE_SIZE = 200
     const val JPEG_QUALITY = 80
 
-    const val TICK_START_SECONDS = 15
+    const val TICK_START_SECONDS = 10
     const val CLOCK_COLOR_YELLOW_SECONDS = 15
     const val CLOCK_COLOR_RED_SECONDS = 10
 
