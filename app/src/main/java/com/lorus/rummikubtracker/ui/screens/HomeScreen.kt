@@ -58,6 +58,7 @@ fun HomeScreen(
 ) {
     val activeGame = viewModel.activeGame
     var showCancelDialog by remember { mutableStateOf(false) }
+    var showActiveGameWarning by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     Scaffold { padding ->
@@ -151,7 +152,13 @@ fun HomeScreen(
                 icon = Icons.Default.AddCircle,
                 title = stringResource(R.string.new_game),
                 description = stringResource(R.string.new_game_desc),
-                onClick = onNewGame
+                onClick = {
+                    if (activeGame != null) {
+                        showActiveGameWarning = true
+                    } else {
+                        onNewGame()
+                    }
+                }
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
@@ -188,6 +195,36 @@ fun HomeScreen(
 
             Spacer(Modifier.height(32.dp))
         }
+    }
+
+    // New game while active game warning
+    if (showActiveGameWarning) {
+        AlertDialog(
+            onDismissRequest = { showActiveGameWarning = false },
+            title = { Text(stringResource(R.string.game_in_progress)) },
+            text = { Text(stringResource(R.string.confirm_cancel_game)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            viewModel.cancelGame()
+                            showActiveGameWarning = false
+                            onNewGame()
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.yes))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showActiveGameWarning = false }) {
+                    Text(stringResource(R.string.no))
+                }
+            }
+        )
     }
 
     // Cancel game dialog
