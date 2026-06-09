@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -155,7 +156,7 @@ class ActiveGameViewModel @Inject constructor(
         uiState = uiState.copy(
             showWinnerDeclaration = true,
             winnerPlayerName = currentPlayer.name,
-            scores = game.players.associate { it.name to "" }
+            scores = game.players.associate { it.name to if (it.name == currentPlayer.name) "0" else "" }
         )
     }
 
@@ -778,14 +779,27 @@ private fun WinnerDeclarationView(
             Spacer(Modifier.height(8.dp))
 
             players.forEach { player ->
+                val isWinner = player.name == winnerName
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .then(
+                            if (isWinner) Modifier.background(
+                                Color(0xFF4CAF50).copy(alpha = 0.15f),
+                                MaterialTheme.shapes.medium
+                            )
+                            else Modifier
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = player.name,
                         modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isWinner) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurface
                     )
 
                     OutlinedTextField(
