@@ -83,14 +83,13 @@ class ActiveGameViewModel @Inject constructor(
     private var gameId: Long = 0
 
     fun loadGame(id: Long) {
-        val isDifferentGame = id != gameId
         gameId = id
         timerEngine.onTickSound = { audioEngine.playTick() }
         timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
-            // Configure only for new game or if timer was stopped
-            if (timerEngine.timerState.value == TimerState.STOPPED || isDifferentGame) {
+            // Configure only for truly new game or if timer was stopped
+            if (timerEngine.timerState.value == TimerState.STOPPED) {
                 val currentPlayerExtUsed = initialGame.players
                     .getOrNull(initialGame.currentPlayerIndex)
                     ?.extensionsUsed ?: 0
