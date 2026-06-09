@@ -783,7 +783,9 @@ private fun WinnerDeclarationView(
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     PlayerAvatar(name = winnerName, size = 64)
