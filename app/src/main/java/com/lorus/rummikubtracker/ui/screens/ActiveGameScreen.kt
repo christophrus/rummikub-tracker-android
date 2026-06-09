@@ -84,6 +84,9 @@ class ActiveGameViewModel @Inject constructor(
 
     fun loadGame(id: Long) {
         gameId = id
+        // Wire timer callbacks
+        timerEngine.onTickSound = { audioEngine.playTick() }
+        timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
             // Get initial game to configure timer/audio once
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch

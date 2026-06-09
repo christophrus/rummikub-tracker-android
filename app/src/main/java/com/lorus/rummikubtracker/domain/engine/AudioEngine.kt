@@ -2,9 +2,10 @@ package com.lorus.rummikubtracker.domain.engine
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.SoundPool
+import android.media.ToneGenerator
 import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
 import javax.inject.Inject
@@ -14,30 +15,13 @@ import javax.inject.Singleton
 class AudioEngine @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private var soundPool: SoundPool? = null
     private var tts: TextToSpeech? = null
-
-    private var tickSoundId: Int = 0
-    private var turnSoundId: Int = 0
-    private var extendSoundId: Int = 0
-    private var victorySoundId: Int = 0
+    private var toneGenerator: ToneGenerator? = null
 
     private var currentTtsLanguage: Locale = Locale.ENGLISH
 
     fun initialize() {
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_GAME)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(4)
-            .setAudioAttributes(audioAttributes)
-            .build()
-
-        // Sound IDs will be loaded when audio resource files are added to res/raw
-        // For now, sounds are disabled gracefully
-
+        toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
         initTts()
     }
 
@@ -71,19 +55,19 @@ class AudioEngine @Inject constructor(
     }
 
     fun playTick() {
-        soundPool?.play(tickSoundId, 0.5f, 0.5f, 1, 0, 1.0f)
+        toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
     }
 
     fun playTurnNotification() {
-        soundPool?.play(turnSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 150)
     }
 
     fun playExtend() {
-        soundPool?.play(extendSoundId, 0.8f, 0.8f, 1, 0, 1.0f)
+        toneGenerator?.startTone(ToneGenerator.TONE_PROP_NACK, 100)
     }
 
     fun playVictory() {
-        soundPool?.play(victorySoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        toneGenerator?.startTone(ToneGenerator.TONE_CDMA_PRESSHOLDKEY_LITE, 300)
     }
 
     fun announcePlayer(playerName: String) {
@@ -91,8 +75,8 @@ class AudioEngine @Inject constructor(
     }
 
     fun destroy() {
-        soundPool?.release()
-        soundPool = null
+        toneGenerator?.release()
+        toneGenerator = null
         tts?.stop()
         tts?.shutdown()
         tts = null
