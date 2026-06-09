@@ -129,7 +129,7 @@ class NewGameViewModel @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NewGameScreen(
     onStartGame: (Long) -> Unit,
@@ -228,7 +228,7 @@ fun NewGameScreen(
             }
             if (viewModel.extensionReplenishEnabled) {
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Config.REPLENISH_ROUNDS_OPTIONS.forEach { rounds ->
                         FilterChip(
                             selected = viewModel.extensionReplenishRounds == rounds,
