@@ -11,5 +11,7 @@ data class AnalysisResultEntity(
     val totalScore: Int,
     val tileCount: Int,
     val processingTimeMs: Long,
-    val imagePath: String?
+    val imagePath: String?,
+    val imageWidth: Int = 0,
+    val imageHeight: Int = 0
 )

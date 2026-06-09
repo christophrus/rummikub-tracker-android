@@ -338,12 +338,14 @@ class ActiveGameViewModel @Inject constructor(
                     tiles = tiles,
                     totalScore = totalScore,
                     tileCount = tiles.size,
-                    processingTimeMs = elapsed
+                    processingTimeMs = elapsed,
+                    imageWidth = orientedBitmap!!.width,
+                    imageHeight = orientedBitmap.height
                 )
 
-                // Save to counter history (thumbnail to save memory)
+                // Save to counter history (thumbnail for storage, original dims preserved)
                 try {
-                    val thumbnail = Bitmap.createScaledBitmap(orientedBitmap!!, 400, 400, true)
+                    val thumbnail = Bitmap.createScaledBitmap(orientedBitmap, 400, 400, true)
                     historyRepository.saveResult(result, tiles, thumbnail)
                     thumbnail.recycle()
                 } catch (_: Exception) { }

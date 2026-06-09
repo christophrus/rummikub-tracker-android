@@ -72,7 +72,9 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     tiles = tiles,
                     totalScore = totalScore,
                     tileCount = entry.result.tileCount,
-                    processingTimeMs = entry.result.processingTimeMs
+                    processingTimeMs = entry.result.processingTimeMs,
+                    imageWidth = entry.result.imageWidth,
+                    imageHeight = entry.result.imageHeight
                 )
 
                 _detailState.update {

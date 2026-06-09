@@ -28,7 +28,9 @@ import com.lorus.rummikubtracker.counter.ui.theme.TileRed
 fun BoundingBoxOverlay(
     bitmap: Bitmap,
     tiles: List<DetectedTile>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    imageWidth: Int = bitmap.width,
+    imageHeight: Int = bitmap.height
 ) {
     val imageBitmap = bitmap.asImageBitmap()
     val textMeasurer = rememberTextMeasurer()
@@ -37,8 +39,9 @@ fun BoundingBoxOverlay(
         // Draw the original image scaled to fill the canvas
         val canvasW = size.width
         val canvasH = size.height
-        val imgW = bitmap.width.toFloat()
-        val imgH = bitmap.height.toFloat()
+        // Use original image dimensions for tile coordinate scaling
+        val imgW = imageWidth.toFloat()
+        val imgH = imageHeight.toFloat()
 
         val scale = minOf(canvasW / imgW, canvasH / imgH)
         val drawW = imgW * scale

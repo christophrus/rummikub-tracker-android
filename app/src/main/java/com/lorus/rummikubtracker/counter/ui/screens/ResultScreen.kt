@@ -100,7 +100,9 @@ fun ResultScreen(
                 ) {
                     BoundingBoxOverlay(
                         bitmap = bitmap,
-                        tiles = result.tiles
+                        tiles = result.tiles,
+                        imageWidth = result.imageWidth,
+                        imageHeight = result.imageHeight
                     )
                 }
             }

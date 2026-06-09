@@ -86,7 +86,9 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                     tiles = tiles,
                     totalScore = totalScore,
                     tileCount = tiles.size,
-                    processingTimeMs = elapsed
+                    processingTimeMs = elapsed,
+                    imageWidth = orientedBitmap!!.width,
+                    imageHeight = orientedBitmap.height
                 )
 
                 // Save to history (scaled down thumbnail to save memory)
