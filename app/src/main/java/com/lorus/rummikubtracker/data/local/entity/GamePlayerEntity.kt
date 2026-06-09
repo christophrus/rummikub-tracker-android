@@ -22,5 +22,6 @@ data class GamePlayerEntity(
     val playerName: String,
     val playerOrder: Int,
     val maxExtensions: Int = 3,
-    val extensionsUsed: Int = 0
+    val extensionsUsed: Int = 0,
+    val imagePath: String? = null
 )

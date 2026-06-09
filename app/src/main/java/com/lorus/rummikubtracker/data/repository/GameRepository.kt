@@ -57,7 +57,8 @@ class GameRepository @Inject constructor(
                 playerName = player.name,
                 playerOrder = index,
                 maxExtensions = game.maxExtensions,
-                extensionsUsed = 0
+                extensionsUsed = 0,
+                imagePath = player.imagePath
             )
         }
         gamePlayerDao.insertGamePlayers(gamePlayers)
@@ -161,7 +162,7 @@ class GameRepository @Inject constructor(
             currentPlayerIndex = entity.currentPlayerIndex,
             currentRound = entity.currentRound,
             players = gamePlayers.map {
-                Player(name = it.playerName, order = it.playerOrder, maxExtensions = it.maxExtensions, extensionsUsed = it.extensionsUsed)
+                Player(name = it.playerName, imagePath = it.imagePath, order = it.playerOrder, maxExtensions = it.maxExtensions, extensionsUsed = it.extensionsUsed)
             },
             rounds = roundsWithScores
         )

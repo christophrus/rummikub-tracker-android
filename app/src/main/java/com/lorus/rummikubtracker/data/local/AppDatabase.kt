@@ -13,7 +13,7 @@ import com.lorus.rummikubtracker.data.local.entity.*
         RoundScoreEntity::class,
         GamePlayerEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
