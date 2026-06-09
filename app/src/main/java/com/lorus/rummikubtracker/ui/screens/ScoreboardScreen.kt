@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.model.Game
+import com.lorus.rummikubtracker.domain.usecase.GameManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -42,17 +43,28 @@ private val PLAYER_COLORS = listOf(
 
 @HiltViewModel
 class ScoreboardViewModel @Inject constructor(
-    private val gameRepository: GameRepository
+    private val gameRepository: GameRepository,
+    private val gameManager: GameManager
 ) : androidx.lifecycle.ViewModel() {
 
     var game by mutableStateOf<Game?>(null)
         private set
 
     private val scope = kotlinx.coroutines.MainScope()
+    private var gameId: Long = 0
 
-    fun loadGame(gameId: Long) {
+    fun loadGame(id: Long) {
+        gameId = id
         scope.launch {
             game = gameRepository.getGameById(gameId).first()
+        }
+    }
+
+    fun endGame(onDone: () -> Unit) {
+        val g = game ?: return
+        scope.launch {
+            gameManager.endGame(g)
+            onDone()
         }
     }
 }
@@ -62,6 +74,7 @@ class ScoreboardViewModel @Inject constructor(
 fun ScoreboardScreen(
     gameId: Long,
     onBack: () -> Unit,
+    onGameEnded: () -> Unit = {},
     viewModel: ScoreboardViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     LaunchedEffect(gameId) {
@@ -373,76 +386,24 @@ fun ScoreboardScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // === Leaderboard card ===
-            val ranked = g.players
-                .map { p -> p.name to (cumulativeByPlayer[p.name]?.lastOrNull() ?: 0) }
-                .sortedBy { it.second }
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F3460))
+            // === End Game button ===
+            Button(
+                onClick = { viewModel.endGame(onGameEnded) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFC62828)
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Leaderboard",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    ranked.forEachIndexed { idx, (name, total) ->
-                        val playerIdx = g.players.indexOfFirst { it.name == name }
-                        val color = playerColors.getOrElse(playerIdx) { Color.White }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp)
-                                .background(
-                                    Color.White.copy(alpha = if (idx == 0) 0.08f else 0.03f),
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Rank badge
-                            Surface(
-                                shape = CircleShape,
-                                color = when (idx) {
-                                    0 -> Color(0xFFFFB300)
-                                    1 -> Color(0xFFB0BEC5)
-                                    2 -> Color(0xFF8D6E63)
-                                    else -> Color.White.copy(alpha = 0.2f)
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = "${idx + 1}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                text = name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (idx == 0) FontWeight.Bold else FontWeight.Normal,
-                                color = color,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = "$total",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFB300)
-                            )
-                        }
-                    }
-                }
+                Icon(Icons.Default.Stop, contentDescription = null, tint = Color.White)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.end_game),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
             }
 
             Spacer(Modifier.height(16.dp))

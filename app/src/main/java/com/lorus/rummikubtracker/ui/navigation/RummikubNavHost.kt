@@ -120,7 +120,12 @@ fun RummikubNavHost(
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: return@composable
             ScoreboardScreen(
                 gameId = gameId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onGameEnded = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                    }
+                }
             )
         }
     }
