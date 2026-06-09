@@ -7,11 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.rotate
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
+
+enum class ConfettiShape { RECT, CIRCLE, STAR }
 
 data class ConfettiParticle(
     var x: Float,
@@ -22,36 +27,40 @@ data class ConfettiParticle(
     var rotationSpeed: Float,
     var opacity: Float,
     var color: Color,
-    var size: Float
+    var size: Float,
+    var shape: ConfettiShape
 )
 
 @Composable
 fun ConfettiEffect(
     modifier: Modifier = Modifier,
-    particleCount: Int = 100,
+    particleCount: Int = 200,
     colors: List<Color> = listOf(
-        Color(0xFFFF6B6B),
-        Color(0xFF4ECDC4),
-        Color(0xFFFFE66D),
-        Color(0xFF6C5CE7),
-        Color(0xFFA8E6CF),
-        Color(0xFFFF8A5C),
-        Color(0xFF45B7D1),
-        Color(0xFFF7DC6F)
+        Color(0xFFFF4757), // bright red
+        Color(0xFF2ED573), // bright green
+        Color(0xFFFFA502), // orange
+        Color(0xFF5352ED), // purple
+        Color(0xFF1E90FF), // dodger blue
+        Color(0xFFFF6B81), // pink
+        Color(0xFF7BED9F), // mint
+        Color(0xFFFFD700), // gold
+        Color(0xFFFF6348), // tomato
+        Color(0xFF00D2D3)  // cyan
     )
 ) {
     val particles = remember {
         List(particleCount) {
             ConfettiParticle(
                 x = Random.nextFloat(),
-                y = Random.nextFloat() * -1f,
-                velocityX = (Random.nextFloat() - 0.5f) * 0.3f,
-                velocityY = Random.nextFloat() * 0.4f + 0.1f,
+                y = Random.nextFloat() * -1.5f,
+                velocityX = (Random.nextFloat() - 0.5f) * 0.6f,
+                velocityY = Random.nextFloat() * 0.7f + 0.2f,
                 rotation = Random.nextFloat() * 360f,
-                rotationSpeed = (Random.nextFloat() - 0.5f) * 4f,
-                opacity = Random.nextFloat() * 0.5f + 0.5f,
+                rotationSpeed = (Random.nextFloat() - 0.5f) * 6f,
+                opacity = Random.nextFloat() * 0.3f + 0.7f,
                 color = colors[Random.nextInt(colors.size)],
-                size = Random.nextFloat() * 8f + 4f
+                size = Random.nextFloat() * 16f + 10f,
+                shape = ConfettiShape.entries[Random.nextInt(ConfettiShape.entries.size)]
             )
         }
     }
@@ -68,31 +77,74 @@ fun ConfettiEffect(
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val sway = sin(frame * 0.02f) * 0.3f
+        val sway = sin(frame * 0.025f) * 0.8f
 
         particles.forEach { particle ->
             val px = (particle.x + sway * particle.velocityY) * width
             val py = particle.y * height
 
-            if (particle.opacity > 0) {
+            if (particle.opacity > 0 && py < height + particle.size && py > -particle.size) {
                 rotate(particle.rotation, Offset(px, py)) {
-                    drawRect(
-                        color = particle.color.copy(alpha = particle.opacity),
-                        topLeft = Offset(px - particle.size / 2, py - particle.size / 2),
-                        size = Size(particle.size, particle.size * 0.6f)
-                    )
+                    val alpha = particle.opacity
+                    val halfSize = particle.size / 2f
+                    when (particle.shape) {
+                        ConfettiShape.RECT -> {
+                            drawRect(
+                                color = particle.color.copy(alpha = alpha),
+                                topLeft = Offset(px - halfSize, py - halfSize * 0.5f),
+                                size = Size(particle.size, particle.size * 0.55f)
+                            )
+                        }
+                        ConfettiShape.CIRCLE -> {
+                            drawCircle(
+                                color = particle.color.copy(alpha = alpha),
+                                radius = halfSize * 0.6f,
+                                center = Offset(px, py)
+                            )
+                        }
+                        ConfettiShape.STAR -> {
+                            drawStar(
+                                color = particle.color.copy(alpha = alpha),
+                                center = Offset(px, py),
+                                radius = halfSize
+                            )
+                        }
+                    }
                 }
             }
 
-            // Update
-            particle.x += particle.velocityX * 0.01f
-            particle.y += particle.velocityY * 0.01f
+            // Update physics
+            particle.x += particle.velocityX * 0.008f
+            particle.y += particle.velocityY * 0.012f
+            particle.velocityY += 0.002f // gravity
             particle.rotation += particle.rotationSpeed
-            if (particle.y > 1.2f) {
-                particle.y = -0.1f
+            if (particle.y > 1.3f) {
+                particle.y = -0.15f - Random.nextFloat() * 0.2f
                 particle.x = Random.nextFloat()
-                particle.opacity = Random.nextFloat() * 0.5f + 0.5f
+                particle.velocityX = (Random.nextFloat() - 0.5f) * 0.6f
+                particle.velocityY = Random.nextFloat() * 0.7f + 0.2f
+                particle.opacity = Random.nextFloat() * 0.3f + 0.7f
+                particle.color = colors[Random.nextInt(colors.size)]
             }
         }
     }
+}
+
+private fun DrawScope.drawStar(
+    color: Color,
+    center: Offset,
+    radius: Float,
+    points: Int = 5
+) {
+    val path = Path()
+    val innerRadius = radius * 0.4f
+    for (i in 0 until points * 2) {
+        val r = if (i % 2 == 0) radius else innerRadius
+        val angle = (PI / points * i) - PI / 2
+        val x = center.x + (r * cos(angle)).toFloat()
+        val y = center.y + (r * sin(angle)).toFloat()
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    drawPath(path, color, style = Fill)
 }
