@@ -1,6 +1,9 @@
 package com.lorus.rummikubtracker.ui.navigation
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -10,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -50,6 +54,28 @@ fun CounterNavHost(
         }
     }
 
+    // Camera permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            cameraLauncher.launch(null)
+        } else {
+            Toast.makeText(context, "Camera permission is required to take photos", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun launchCamera() {
+        when {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                cameraLauncher.launch(null)
+            }
+            else -> {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
     // Navigate to result when analysis completes
     if (uiState.result != null && !uiState.isLoading) {
         androidx.compose.runtime.LaunchedEffect(uiState.result) {
@@ -64,7 +90,7 @@ fun CounterNavHost(
     ) {
         composable(CounterRoutes.MAIN_MENU) {
             MainMenuScreen(
-                onTakePhoto = { cameraLauncher.launch(null) },
+                onTakePhoto = { launchCamera() },
                 onPickGallery = {
                     galleryLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
