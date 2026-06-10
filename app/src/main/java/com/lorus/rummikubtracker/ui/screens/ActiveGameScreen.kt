@@ -671,15 +671,16 @@ fun ActiveGameScreen(
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1565C0)
+                                containerColor = Color(0xFF1E232F)
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Icon(Icons.Default.TableView, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.TableView, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color(0xFF3788C3))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.scoreboard),
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color(0xFFC9CCCF)
                             )
                         }
                     }
