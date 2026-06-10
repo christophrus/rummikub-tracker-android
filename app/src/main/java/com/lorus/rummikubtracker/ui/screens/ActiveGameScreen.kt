@@ -54,7 +54,6 @@ import javax.inject.Inject
 
 data class ActiveGameUiState(
     val game: Game? = null,
-    val showEndGameDialog: Boolean = false,
     val showWinnerDeclaration: Boolean = false,
     val winnerPlayerName: String? = null,
     val scores: Map<String, String> = emptyMap(),
@@ -266,14 +265,6 @@ class ActiveGameViewModel @Inject constructor(
             gameManager.endGame(game)
             timerEngine.stop()
         }
-    }
-
-    fun showEndGameDialog() {
-        uiState = uiState.copy(showEndGameDialog = true)
-    }
-
-    fun dismissEndGameDialog() {
-        uiState = uiState.copy(showEndGameDialog = false)
     }
 
     // --- Tile Scanning ---
@@ -693,50 +684,10 @@ fun ActiveGameScreen(
                         }
                     }
 
-                    OutlinedButton(
-                        onClick = { viewModel.showEndGameDialog() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(stringResource(R.string.end_game))
-                    }
                     Spacer(Modifier.height(8.dp))
                 }
             }
         }
-    }
-
-    // End Game dialog
-    if (state.showEndGameDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissEndGameDialog() },
-            title = { Text(stringResource(R.string.end_game)) },
-            text = { Text(stringResource(R.string.confirm_end_game)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            viewModel.endGame()
-                            onGameEnded()
-                        }
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.dismissEndGameDialog() }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
     }
 }
 
