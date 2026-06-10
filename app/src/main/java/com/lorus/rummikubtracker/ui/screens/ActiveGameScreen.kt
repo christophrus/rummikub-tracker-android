@@ -448,13 +448,13 @@ fun ActiveGameScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             state.game?.name ?: "",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                         Text(
                             text = buildString {
@@ -465,7 +465,8 @@ fun ActiveGameScreen(
                                 append(" · $dur")
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
                         )
                     }
                 },
