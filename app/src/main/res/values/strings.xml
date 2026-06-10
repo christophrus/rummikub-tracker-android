@@ -123,7 +123,7 @@
 
     <!-- Active Game -->
     <string name="turn_label">Turn:</string>
-    <string name="add_30_seconds">+ 30s add</string>
+    <string name="add_30_seconds">30s add</string>
     <string name="duration_label">Duration</string>
     <string name="round_label">Round %d</string>
     <string name="lock_screen">Lock screen</string>

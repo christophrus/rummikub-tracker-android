@@ -77,7 +77,7 @@
     <string name="lang_tr">Türkçe</string>
     <string name="lang_cs">Čeština</string>
     <string name="turn_label">Am Zug:</string>
-    <string name="add_30_seconds">+ 30s hinzufügen</string>
+    <string name="add_30_seconds">30s hinzufügen</string>
     <string name="duration_label">Dauer</string>
     <string name="round_label">Runde %d</string>
     <string name="lock_screen">Sperren</string>

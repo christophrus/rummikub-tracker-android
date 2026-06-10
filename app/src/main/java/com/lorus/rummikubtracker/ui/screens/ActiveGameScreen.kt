@@ -600,7 +600,7 @@ fun ActiveGameScreen(
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp))
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp), tint = Color(0xFF4195ED))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.add_30_seconds),
