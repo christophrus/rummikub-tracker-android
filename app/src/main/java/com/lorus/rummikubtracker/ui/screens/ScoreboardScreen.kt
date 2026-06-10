@@ -82,6 +82,7 @@ fun ScoreboardScreen(
     }
 
     val game = viewModel.game
+    var showEndGameDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -344,7 +345,7 @@ fun ScoreboardScreen(
 
             // === End Game button ===
             Button(
-                onClick = { viewModel.endGame(onGameEnded) },
+                onClick = { showEndGameDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -364,5 +365,32 @@ fun ScoreboardScreen(
 
             Spacer(Modifier.height(16.dp))
         }
+    }
+
+    // End Game confirmation dialog
+    if (showEndGameDialog) {
+        AlertDialog(
+            onDismissRequest = { showEndGameDialog = false },
+            title = { Text(stringResource(R.string.end_game)) },
+            text = { Text(stringResource(R.string.confirm_end_game)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showEndGameDialog = false
+                        viewModel.endGame(onGameEnded)
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndGameDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
