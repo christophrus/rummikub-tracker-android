@@ -460,7 +460,9 @@ fun ActiveGameScreen(
                             text = buildString {
                                 append(stringResource(R.string.round_label, (state.game?.currentRound ?: 0) + 1))
                                 val elapsed = ((System.currentTimeMillis() - (state.game?.startTime ?: 0L)) / 1000).toInt()
-                                append(" · ${elapsed / 60}m")
+                                val mins = elapsed / 60
+                                val dur = if (mins < 60) "${mins}m" else "${mins / 60}h ${mins % 60}m"
+                                append(" · $dur")
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
