@@ -109,7 +109,7 @@ fun AnalogClock(
                         color = clockColor,
                         start = center,
                         end = Offset(handX, handY),
-                        strokeWidth = strokeWidth * 0.5f,
+                        strokeWidth = strokeWidth * 0.3f,
                         cap = StrokeCap.Round
                     )
                     // Center dot
