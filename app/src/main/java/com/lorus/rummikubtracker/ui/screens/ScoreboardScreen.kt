@@ -261,32 +261,18 @@ fun ScoreboardScreen(
                                     modifier = Modifier.weight(1f),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
+                                    Text(
+                                        text = "$score",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    if (isWinner) {
                                         Text(
-                                            text = "$score",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                        if (isWinner) {
-                                            Text(
-                                                text = " 🏆",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    }
-                                    // Cumulative tiny hint
-                                    cumTotal?.let { cum ->
-                                        Text(
-                                            text = "$cum",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = Color.White.copy(alpha = 0.3f),
-                                            modifier = Modifier.offset(y = 18.dp),
+                                            text = "🏆",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier = Modifier.offset(x = 18.dp),
                                             textAlign = TextAlign.Center
                                         )
                                     }
