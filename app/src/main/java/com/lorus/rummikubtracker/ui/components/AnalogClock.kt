@@ -122,20 +122,24 @@ fun AnalogClock(
             }
 
             // Digital time overlay
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(size * 0.25f))
-                Text(
-                    text = timeText,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (size.value / 6.5f).sp
-                    ),
-                    color = clockColor
-                )
+            Box(contentAlignment = Alignment.TopCenter) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(size * 0.32f))
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (size.value / 6.5f).sp
+                        ),
+                        color = clockColor
+                    )
+                }
                 if (isPaused) {
                     Text(
                         text = "⏸",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .padding(top = size * 0.32f + (size / 6.5f) * 1.2f)
                     )
                 }
             }
