@@ -594,7 +594,7 @@ fun ActiveGameScreen(
                             enabled = game.maxExtensions - extensionsUsed > 0,
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1976D2),
+                                containerColor = Color(0xFF1E399F),
                                 disabledContainerColor = Color(0xFF9E9E9E),
                                 disabledContentColor = Color.White.copy(alpha = 0.5f)
                             ),
