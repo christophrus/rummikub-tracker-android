@@ -182,9 +182,7 @@ fun ScoreboardScreen(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .horizontalScroll(rememberScrollState())
+                    modifier = Modifier.padding(12.dp)
                 ) {
                     // --- Table header ---
                     Row(
