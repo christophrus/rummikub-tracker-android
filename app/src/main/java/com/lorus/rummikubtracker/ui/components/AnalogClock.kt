@@ -123,7 +123,7 @@ fun AnalogClock(
 
             // Digital time overlay
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(size * 0.08f))
+                Spacer(Modifier.height(size * 0.25f))
                 Text(
                     text = timeText,
                     style = MaterialTheme.typography.headlineMedium.copy(
