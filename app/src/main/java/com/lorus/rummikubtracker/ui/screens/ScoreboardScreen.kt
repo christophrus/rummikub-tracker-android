@@ -155,20 +155,24 @@ fun ScoreboardScreen(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF0F3460))
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = g.name,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = "${g.rounds.size} ${stringResource(R.string.round_label, 0).replace("0", "").trim()} · ${g.players.size} Players",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = Color.White.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
