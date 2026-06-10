@@ -212,11 +212,11 @@ fun ScoreboardScreen(
                         // Player score columns
                         g.players.forEachIndexed { idx, player ->
                             Text(
-                                text = player.name.take(6),
+                                text = player.name.take(8),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = playerColors[idx],
-                                modifier = Modifier.width(56.dp),
+                                modifier = Modifier.weight(1f),
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
                             )
@@ -224,16 +224,6 @@ fun ScoreboardScreen(
                                 Spacer(Modifier.width(4.dp))
                             }
                         }
-                        Spacer(Modifier.width(8.dp))
-                        // Cumulative total column
-                        Text(
-                            text = "∑",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFB300),
-                            modifier = Modifier.width(44.dp),
-                            textAlign = TextAlign.Center
-                        )
                     }
 
                     HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
@@ -270,7 +260,7 @@ fun ScoreboardScreen(
                                 val cumTotal = cumulativeByPlayer[player.name]?.getOrNull(roundIdx)
 
                                 Box(
-                                    modifier = Modifier.width(56.dp),
+                                    modifier = Modifier.weight(1f),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Row(
@@ -308,19 +298,6 @@ fun ScoreboardScreen(
                                     Spacer(Modifier.width(4.dp))
                                 }
                             }
-
-                            Spacer(Modifier.width(8.dp))
-
-                            // Round total sum
-                            val roundSum = round.scores.values.sum()
-                            Text(
-                                text = "$roundSum",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFB300).copy(alpha = 0.7f),
-                                modifier = Modifier.width(44.dp),
-                                textAlign = TextAlign.Center
-                            )
                         }
 
                         if (roundIdx < g.rounds.size - 1) {
@@ -364,22 +341,13 @@ fun ScoreboardScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFFB300),
-                                modifier = Modifier.width(56.dp),
+                                modifier = Modifier.weight(1f),
                                 textAlign = TextAlign.Center
                             )
                             if (idx < g.players.size - 1) {
                                 Spacer(Modifier.width(4.dp))
                             }
                         }
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFB300).copy(alpha = 0.4f),
-                            modifier = Modifier.width(44.dp),
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
