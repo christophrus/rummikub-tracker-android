@@ -251,11 +251,16 @@ class ActiveGameViewModel @Inject constructor(
                 val nextPlayer = g.players.getOrNull(g.currentPlayerIndex)
                 nextPlayer?.let {
                     timerEngine.setExtensionsUsed(it.extensionsUsed)
-                    audioEngine.announcePlayer(it.name)
                 }
             }
 
             audioEngine.playTurnNotification()
+            updatedGame?.let { g ->
+                val nextPlayer = g.players.getOrNull(g.currentPlayerIndex)
+                nextPlayer?.let {
+                    audioEngine.announcePlayer(it.name)
+                }
+            }
         }
     }
 

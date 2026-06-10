@@ -62,8 +62,8 @@ class AudioEngine @Inject constructor(
         toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
     }
 
-    fun playTurnNotification() {
-        CoroutineScope(Dispatchers.IO).launch {
+    suspend fun playTurnNotification() {
+        withContext(Dispatchers.IO) {
             playTurnJingle()
         }
     }
