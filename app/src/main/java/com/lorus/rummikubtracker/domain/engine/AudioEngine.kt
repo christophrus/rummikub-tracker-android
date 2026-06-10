@@ -63,7 +63,63 @@ class AudioEngine @Inject constructor(
     }
 
     fun playTurnNotification() {
-        toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 150)
+        CoroutineScope(Dispatchers.IO).launch {
+            playTurnJingle()
+        }
+    }
+
+    private fun playTurnJingle() {
+        val sampleRate = 44100
+        val minBuffer = AudioTrack.getMinBufferSize(
+            sampleRate,
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        )
+        val track = AudioTrack.Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setSampleRate(sampleRate)
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .build()
+            )
+            .setBufferSizeInBytes(minBuffer)
+            .build()
+
+        // C5 (523.25 Hz) at 0ms, E5 (659.25 Hz) at 150ms
+        val notes = listOf(
+            Triple(523.25, 0.0, 0.15),
+            Triple(659.25, 0.15, 0.15),
+        )
+        val totalDuration = 0.3
+        val totalSamples = (totalDuration * sampleRate).toInt()
+        val buffer = ShortArray(totalSamples)
+
+        for ((freq, start, duration) in notes) {
+            val startSample = (start * sampleRate).toInt()
+            val noteSamples = (duration * sampleRate).toInt()
+            for (i in 0 until noteSamples) {
+                val t = i.toDouble() / sampleRate
+                val attack = (i.toDouble() / (0.005 * sampleRate)).coerceIn(0.0, 1.0)
+                val release = ((noteSamples - i).toDouble() / (0.01 * sampleRate)).coerceIn(0.0, 1.0)
+                val envelope = attack * release
+                val sample = (sin(2 * PI * freq * t) * 0.5 * envelope * Short.MAX_VALUE).toInt()
+                    .coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                buffer[startSample + i] = sample.toShort()
+            }
+        }
+
+        track.play()
+        track.write(buffer, 0, totalSamples)
+        Thread.sleep(350)
+        track.stop()
+        track.release()
     }
 
     fun playExtend() {
