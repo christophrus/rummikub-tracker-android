@@ -445,7 +445,7 @@ fun ActiveGameScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
