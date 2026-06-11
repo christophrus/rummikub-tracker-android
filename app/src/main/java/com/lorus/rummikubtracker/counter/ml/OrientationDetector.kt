@@ -7,7 +7,7 @@ import ai.onnxruntime.OrtSession
 import java.nio.FloatBuffer
 
 /**
- * Detects image orientation using a fine-tuned ResNet-18 model.
+ * Detects image orientation using a fine-tuned MobileNetV3-Small model.
  *
  * Classes: 0 → 0°, 1 → 90°, 2 → 180°, 3 → 270°
  */

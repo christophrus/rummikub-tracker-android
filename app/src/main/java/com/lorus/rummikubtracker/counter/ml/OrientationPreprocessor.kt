@@ -15,7 +15,7 @@ object OrientationPreprocessor {
     private const val STD_B = 0.225f
 
     /**
-     * Preprocesses a Bitmap for the ResNet-18 orientation model.
+     * Preprocesses a Bitmap for the MobileNetV3-Small orientation model.
      *
      * 1. Resizes to 224×224 (simple stretch, no letterbox needed for orientation)
      * 2. Converts pixels to CHW float array
