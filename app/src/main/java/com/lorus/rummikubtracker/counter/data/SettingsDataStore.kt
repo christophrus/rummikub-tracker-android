@@ -22,7 +22,7 @@ object SettingsKeys {
 }
 
 object SettingsDefaults {
-    const val CONFIDENCE_THRESHOLD = 0.25f
+    const val CONFIDENCE_THRESHOLD = 0.70f
     const val THEME_MODE = "system"
 }
 

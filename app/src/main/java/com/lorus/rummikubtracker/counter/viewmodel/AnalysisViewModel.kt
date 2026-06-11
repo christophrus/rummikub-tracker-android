@@ -50,6 +50,7 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
         val confThreshold = runBlocking {
             settingsDataStore.confidenceThreshold.first()
         }
+        Log.d("AnalysisViewModel", "Confidence threshold: ${confThreshold * 100}%")
 
         viewModelScope.launch(Dispatchers.Default) {
             _uiState.update { it.copy(isLoading = true, error = null) }

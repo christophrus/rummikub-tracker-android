@@ -26,6 +26,7 @@ object NmsProcessor {
         origHeight: Int,
         confThreshold: Float = 0.25f
     ): List<DetectedTile> {
+        Log.d(TAG, "postProcess with confThreshold=${confThreshold * 100}%")
         val candidates = mutableListOf<DetectedTile>()
 
         // Debug: log first 3 raw outputs
