@@ -310,6 +310,7 @@ class ActiveGameViewModel @Inject constructor(
             var safeBitmap: Bitmap? = null
             var orientedBitmap: Bitmap? = null
             try {
+                val startTime = System.currentTimeMillis()
                 val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold
                 safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap, maxDimension = 1280)
                 val orientationInput = OrientationPreprocessor.preprocess(safeBitmap!!)
@@ -328,7 +329,7 @@ class ActiveGameViewModel @Inject constructor(
                     confThreshold = confThreshold
                 )
                 val totalScore = tiles.sumOf { if (it.isJoker) 20 else (it.number ?: 0) }
-                val elapsed = 0L // processing time not critical here
+                val elapsed = System.currentTimeMillis() - startTime
                 val result = com.lorus.rummikubtracker.counter.model.AnalysisResult(
                     tiles = tiles,
                     totalScore = totalScore,
