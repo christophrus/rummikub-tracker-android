@@ -170,7 +170,7 @@ fun ScoreboardScreen(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${g.rounds.size} ${stringResource(R.string.rounds_label, 0).substringBefore(\":\")} · ${g.players.size} ${stringResource(R.string.players)}",
+                        text = "${g.rounds.size} ${stringResource(R.string.rounds_label, 0).substringBefore(':')} · ${g.players.size} ${stringResource(R.string.players)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center

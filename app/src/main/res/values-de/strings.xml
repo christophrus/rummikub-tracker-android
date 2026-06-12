@@ -165,7 +165,7 @@
     <string name="select_photo">Foto auswählen</string>
     <string name="default_game_name">Spiel #%d</string>
     <string name="duration_minutes">%d Min.</string>
-    <string name="duration_hours">%d Std. %d Min.</string>
+    <string name="duration_hours">%1$d Std. %2$d Min.</string>
     <string name="scan_failed_reason">Scan fehlgeschlagen: %s</string>
     <string name="unknown_error">Unbekannter Fehler</string>
 </resources>

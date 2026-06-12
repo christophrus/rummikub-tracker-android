@@ -113,7 +113,7 @@
     <string name="select_photo">Select Photo</string>
     <string name="default_game_name">Game #%d</string>
     <string name="duration_minutes">%dm</string>
-    <string name="duration_hours">%dh %dm</string>
+    <string name="duration_hours">%1$dh %2$dm</string>
     <string name="scan_failed_reason">Scan failed: %s</string>
     <string name="unknown_error">Unknown error</string>
 
