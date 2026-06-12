@@ -125,7 +125,7 @@ fun SettingsScreen(
                 onExpandedChange = { viewModel.showUiLangDropdown = it }
             ) {
                 OutlinedTextField(
-                    value = getUiLanguageName(viewModel.uiLanguage),
+                    value = stringResource(getUiLanguageResId(viewModel.uiLanguage)),
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.showUiLangDropdown) },
@@ -137,7 +137,7 @@ fun SettingsScreen(
                 ) {
                     Config.UI_LANGUAGES.forEach { lang ->
                         DropdownMenuItem(
-                            text = { Text(getUiLanguageName(lang)) },
+                            text = { Text(stringResource(getUiLanguageResId(lang))) },
                             onClick = {
                                 viewModel.updateUiLanguage(lang)
                                 viewModel.showUiLangDropdown = false
@@ -162,7 +162,7 @@ fun SettingsScreen(
                 onExpandedChange = { viewModel.showTtsDropdown = it }
             ) {
                 OutlinedTextField(
-                    value = getTtsLanguageName(viewModel.ttsLanguage),
+                    value = stringResource(getTtsLanguageResId(viewModel.ttsLanguage)),
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = viewModel.showTtsDropdown) },
@@ -174,7 +174,7 @@ fun SettingsScreen(
                 ) {
                     Config.TTS_LANGUAGES.forEach { lang ->
                         DropdownMenuItem(
-                            text = { Text(getTtsLanguageName(lang)) },
+                            text = { Text(stringResource(getTtsLanguageResId(lang))) },
                             onClick = {
                                 viewModel.updateTtsLanguage(lang)
                                 viewModel.showTtsDropdown = false
@@ -314,26 +314,28 @@ private fun ThemeOption(
     }
 }
 
-private fun getUiLanguageName(code: String): String {
+@androidx.annotation.StringRes
+private fun getUiLanguageResId(code: String): Int {
     return when (code) {
-        "de" -> "Deutsch"
-        "fr" -> "Français"
-        else -> "English"
+        "de" -> R.string.lang_de
+        "fr" -> R.string.lang_fr
+        else -> R.string.lang_en
     }
 }
 
-private fun getTtsLanguageName(code: String): String {
+@androidx.annotation.StringRes
+private fun getTtsLanguageResId(code: String): Int {
     return when (code) {
-        "en" -> "English"
-        "de" -> "Deutsch"
-        "fr" -> "Français"
-        "es" -> "Español"
-        "it" -> "Italiano"
-        "nl" -> "Nederlands"
-        "pl" -> "Polski"
-        "ru" -> "Русский"
-        "tr" -> "Türkçe"
-        "cs" -> "Čeština"
-        else -> code
+        "en" -> R.string.lang_en
+        "de" -> R.string.lang_de
+        "fr" -> R.string.lang_fr
+        "es" -> R.string.lang_es
+        "it" -> R.string.lang_it
+        "nl" -> R.string.lang_nl
+        "pl" -> R.string.lang_pl
+        "ru" -> R.string.lang_ru
+        "tr" -> R.string.lang_tr
+        "cs" -> R.string.lang_cs
+        else -> R.string.lang_en
     }
 }

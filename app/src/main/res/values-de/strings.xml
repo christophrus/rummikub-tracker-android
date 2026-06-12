@@ -152,4 +152,20 @@
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_light">Hell</string>
     <string name="settings_theme_dark">Dunkel</string>
+
+    <!-- Scoreboard Screen -->
+    <string name="no_rounds_played">Noch keine Runden gespielt</string>
+    <string name="round_abbr">R</string>
+
+    <!-- Edit Score Dialog -->
+    <string name="edit_score">Punkte bearbeiten</string>
+    <string name="share_label">Teilen</string>
+    <string name="share_scoreboard">Spielstand teilen</string>
+    <string name="screenshot_failed">Screenshot fehlgeschlagen</string>
+    <string name="select_photo">Foto auswählen</string>
+    <string name="default_game_name">Spiel #%d</string>
+    <string name="duration_minutes">%d Min.</string>
+    <string name="duration_hours">%d Std. %d Min.</string>
+    <string name="scan_failed_reason">Scan fehlgeschlagen: %s</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
 </resources>

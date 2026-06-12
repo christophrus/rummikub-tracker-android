@@ -101,6 +101,22 @@
     <string name="timer_3m">3 minutes</string>
     <string name="timer_5m">5 minutes</string>
 
+    <!-- Scoreboard Screen -->
+    <string name="no_rounds_played">No rounds played yet</string>
+    <string name="round_abbr">R</string>
+
+    <!-- Edit Score Dialog -->
+    <string name="edit_score">Edit Score</string>
+    <string name="share_label">Share</string>
+    <string name="share_scoreboard">Share Scoreboard</string>
+    <string name="screenshot_failed">Screenshot failed</string>
+    <string name="select_photo">Select Photo</string>
+    <string name="default_game_name">Game #%d</string>
+    <string name="duration_minutes">%dm</string>
+    <string name="duration_hours">%dh %dm</string>
+    <string name="scan_failed_reason">Scan failed: %s</string>
+    <string name="unknown_error">Unknown error</string>
+
     <!-- Common -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

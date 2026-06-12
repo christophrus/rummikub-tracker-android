@@ -17,7 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
+import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.ui.theme.Indigo40
 import com.lorus.rummikubtracker.ui.theme.Purple40
 import java.io.File
@@ -109,7 +111,7 @@ fun PlayerCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Score: $score",
+                    text = "${stringResource(R.string.score)}: $score",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isCurrentPlayer) Color.White.copy(alpha = 0.8f)
                     else MaterialTheme.colorScheme.onSurfaceVariant

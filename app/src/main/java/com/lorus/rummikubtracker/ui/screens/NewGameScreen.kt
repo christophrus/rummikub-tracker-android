@@ -22,6 +22,7 @@ import com.lorus.rummikubtracker.domain.model.Game
 import com.lorus.rummikubtracker.domain.model.Player
 import com.lorus.rummikubtracker.domain.usecase.PlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,7 +36,8 @@ data class NewPlayerEntry(
 class NewGameViewModel @Inject constructor(
     private val gameRepository: GameRepository,
     private val playerManager: PlayerManager,
-    private val preferencesDataStore: PreferencesDataStore
+    private val preferencesDataStore: PreferencesDataStore,
+    @ApplicationContext private val appContext: android.content.Context
 ) : androidx.lifecycle.ViewModel() {
 
     var gameName by mutableStateOf("")
@@ -97,7 +99,7 @@ class NewGameViewModel @Inject constructor(
 
         val gameName = gameName.ifBlank {
             val seq = preferencesDataStore.incrementAndGetGameNumber()
-            "Game #$seq"
+            appContext.getString(R.string.default_game_name, seq)
         }
 
         // Save all new players
@@ -174,7 +176,7 @@ fun NewGameScreen(
                 onExpandedChange = { viewModel.showTimerDropdown = it }
             ) {
                 OutlinedTextField(
-                    value = formatDuration(viewModel.timerDuration),
+                    value = stringResource(getTimerDurationResId(viewModel.timerDuration)),
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.timer_duration)) },
@@ -352,16 +354,17 @@ fun NewGameScreen(
     }
 }
 
-private fun formatDuration(ms: Int): String {
+@androidx.annotation.StringRes
+private fun getTimerDurationResId(ms: Int): Int {
     return when (ms) {
-        30_000 -> "30s"
-        45_000 -> "45s"
-        60_000 -> "1m"
-        90_000 -> "1m 30s"
-        120_000 -> "2m"
-        180_000 -> "3m"
-        300_000 -> "5m"
-        else -> "${ms / 1000}s"
+        30_000 -> R.string.timer_30s
+        45_000 -> R.string.timer_45s
+        60_000 -> R.string.timer_1m
+        90_000 -> R.string.timer_1_5m
+        120_000 -> R.string.timer_2m
+        180_000 -> R.string.timer_3m
+        300_000 -> R.string.timer_5m
+        else -> R.string.app_name
     }
 }
 

@@ -116,7 +116,7 @@ fun ScoreboardScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No rounds played yet",
+                    text = stringResource(R.string.no_rounds_played),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.6f)
                 )
@@ -170,7 +170,7 @@ fun ScoreboardScreen(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${g.rounds.size} ${stringResource(R.string.round_label, 0).replace("0", "").trim()} · ${g.players.size} Players",
+                        text = "${g.rounds.size} ${stringResource(R.string.rounds_label, 0).substringBefore(\":\")} · ${g.players.size} ${stringResource(R.string.players)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
@@ -246,7 +246,7 @@ fun ScoreboardScreen(
                         ) {
                             // Round number
                             Text(
-                                text = "R${roundIdx + 1}",
+                                text = "${stringResource(R.string.round_abbr)}${roundIdx + 1}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontWeight = FontWeight.SemiBold,

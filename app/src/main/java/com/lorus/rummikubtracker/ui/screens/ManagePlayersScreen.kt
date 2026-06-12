@@ -248,7 +248,7 @@ fun ManagePlayersScreen(
                     TextButton(onClick = { imagePicker.launch("image/*") }) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Select Photo")
+                        Text(stringResource(R.string.select_photo))
                     }
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(

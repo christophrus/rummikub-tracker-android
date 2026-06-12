@@ -108,7 +108,7 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "Unbekannter Fehler"
+                        error = e.message ?: "Unknown error"
                     )
                 }
             }

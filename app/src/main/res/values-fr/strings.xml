@@ -152,4 +152,20 @@
     <string name="settings_theme_system">Système</string>
     <string name="settings_theme_light">Clair</string>
     <string name="settings_theme_dark">Sombre</string>
+
+    <!-- Scoreboard Screen -->
+    <string name="no_rounds_played">Aucun tour joué</string>
+    <string name="round_abbr">T</string>
+
+    <!-- Edit Score Dialog -->
+    <string name="edit_score">Modifier le score</string>
+    <string name="share_label">Partager</string>
+    <string name="share_scoreboard">Partager le score</string>
+    <string name="screenshot_failed">Échec de la capture</string>
+    <string name="select_photo">Sélectionner une photo</string>
+    <string name="default_game_name">Partie #%d</string>
+    <string name="duration_minutes">%d min</string>
+    <string name="duration_hours">%dh %d min</string>
+    <string name="scan_failed_reason">Échec du scan: %s</string>
+    <string name="unknown_error">Erreur inconnue</string>
 </resources>

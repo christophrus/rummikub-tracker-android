@@ -354,7 +354,7 @@ class ActiveGameViewModel @Inject constructor(
             } catch (e: Exception) {
                 uiState = uiState.copy(
                     isScanning = uiState.isScanning - playerName,
-                    validationError = "Scan failed: ${e.message?.take(60) ?: "unknown"}"
+                    validationError = e.message?.let { "Scan failed: ${it.take(60)}" } ?: "scan_failed"
                 )
             }
         }
@@ -467,7 +467,7 @@ fun ActiveGameScreen(
                                 append(stringResource(R.string.round_label, (state.game?.currentRound ?: 0) + 1))
                                 val elapsed = ((System.currentTimeMillis() - (state.game?.startTime ?: 0L)) / 1000).toInt()
                                 val mins = elapsed / 60
-                                val dur = if (mins < 60) "${mins}m" else "${mins / 60}h ${mins % 60}m"
+                                val dur = if (mins < 60) stringResource(R.string.duration_minutes, mins) else stringResource(R.string.duration_hours, mins / 60, mins % 60)
                                 append(" · $dur")
                             },
                             style = MaterialTheme.typography.bodySmall,
@@ -832,7 +832,7 @@ private fun WinnerDeclarationView(
             // Validation error
             validationError?.let { error ->
                 Text(
-                    text = error,
+                    text = stringResource(getValidationErrorResId(error)),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp)
@@ -889,7 +889,7 @@ private fun ScoreSummaryTable(game: Game) {
         game.rounds.forEach { round ->
             Row {
                 Text(
-                    text = "R${round.roundNumber + 1}",
+                    text = "${stringResource(R.string.round_abbr)}${round.roundNumber + 1}",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.width(40.dp),
                     textAlign = TextAlign.Center
@@ -942,5 +942,15 @@ private fun formatDurationShort(ms: Int): String {
         180_000 -> "3m"
         300_000 -> "5m"
         else -> "${ms / 1000}s"
+    }
+}
+
+@androidx.annotation.StringRes
+private fun getValidationErrorResId(key: String): Int {
+    return when (key) {
+        "all_scores_required" -> R.string.all_scores_required
+        "one_zero_required" -> R.string.one_zero_required
+        "scan_failed" -> R.string.scan_failed
+        else -> R.string.error_occurred
     }
 }

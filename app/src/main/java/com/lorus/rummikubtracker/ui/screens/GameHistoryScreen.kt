@@ -216,7 +216,7 @@ fun GameHistoryScreen(
                                                 )
                                                 game.rounds.forEach { round ->
                                                     Text(
-                                                        text = "R${round.roundNumber + 1}",
+                                                        text = "${stringResource(R.string.round_abbr)}${round.roundNumber + 1}",
                                                         style = MaterialTheme.typography.bodySmall,
                                                         modifier = Modifier.padding(vertical = 2.dp)
                                                     )
@@ -289,7 +289,7 @@ fun GameHistoryScreen(
                                         }) {
                                             Icon(
                                                 Icons.Default.Share,
-                                                contentDescription = "Share",
+                                                contentDescription = stringResource(R.string.share_label),
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
                                         }
@@ -340,11 +340,11 @@ fun GameHistoryScreen(
         var scoreText by remember { mutableStateOf(edit.currentScore.toString()) }
         AlertDialog(
             onDismissRequest = { viewModel.editingScore = null },
-            title = { Text("Edit Score") },
+            title = { Text(stringResource(R.string.edit_score)) },
             text = {
                 Column {
                     Text(
-                        text = "${edit.playerName} · Round ${edit.roundId}",
+                        text = "${edit.playerName} · ${stringResource(R.string.round_label, edit.roundId)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -354,7 +354,7 @@ fun GameHistoryScreen(
                         onValueChange = { scoreText = it.filter { c -> c.isDigit() || c == '-' } },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        label = { Text("Score") },
+                        label = { Text(stringResource(R.string.score)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -368,7 +368,7 @@ fun GameHistoryScreen(
                         }
                     }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.save))
                 }
             },
             dismissButton = {
@@ -436,11 +436,14 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             it.isAntiAlias = true
         }
         val subText = buildString {
-            append("${game.rounds.size} rounds · ${game.players.size} players")
+            append("${game.rounds.size} ")
+            append(context.getString(R.string.rounds_label, 0).substringBefore(":"))
+            append(" · ${game.players.size} ")
+            append(context.getString(R.string.players))
             game.endTime?.let { end ->
                 val elapsed = end - game.startTime
                 val mins = (elapsed / 60000).toInt()
-                val dur = if (mins < 60) "${mins}m" else "${mins / 60}h ${mins % 60}m"
+                val dur = if (mins < 60) context.getString(R.string.duration_minutes, mins) else context.getString(R.string.duration_hours, mins / 60, mins % 60)
                 append(" · $dur")
             }
         }
@@ -452,7 +455,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         // Winner line — just above the table
         val overallWinner = game.computeWinner()
         if (overallWinner != null) {
-            val winnerText = "Winner: $overallWinner 🏆"
+            val winnerText = "${context.getString(R.string.winner_label, overallWinner)} 🏆"
             val winnerPaint = android.graphics.Paint().also {
                 it.color = android.graphics.Color.parseColor("#FFD700")
                 it.textSize = textSize
@@ -568,7 +571,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             }
 
             // Round label
-            val roundLabel = "R${rIdx + 1}"
+            val roundLabel = "${context.getString(R.string.round_abbr)}${rIdx + 1}"
             canvas.drawText(roundLabel, startX + roundLabelWidth / 2 - cellPaint.measureText(roundLabel) / 2, rowY + rowHeight * 0.6f, cellPaint)
 
             var px = startX + roundLabelWidth
@@ -671,9 +674,9 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(shareIntent, "Share Scoreboard"))
+        context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_scoreboard)))
     } catch (e: Exception) {
-        Toast.makeText(context, "Screenshot failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.screenshot_failed), Toast.LENGTH_SHORT).show()
     }
 }
 
