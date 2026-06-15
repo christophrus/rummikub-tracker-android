@@ -574,7 +574,7 @@ fun ActiveGameScreen(
                             // Trophy button — declare winner
                             Card(
                                 onClick = { viewModel.declareWinner() },
-                                modifier = Modifier.size(48.dp),
+                                modifier = Modifier.size(56.dp),
                                 shape = MaterialTheme.shapes.medium,
                                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                                 colors = CardDefaults.cardColors(
@@ -583,14 +583,14 @@ fun ActiveGameScreen(
                                 border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFFB300))
                             ) {
                                 Box(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize().padding(6.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         Icons.Default.EmojiEvents,
                                         contentDescription = stringResource(R.string.declare_winner),
                                         tint = Color(0xFFFFB300),
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(34.dp)
                                     )
                                 }
                             }
