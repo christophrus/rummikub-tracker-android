@@ -282,9 +282,7 @@ fun NewGameScreen(
             // Saved players quick-add
             if (showSavedPlayers && viewModel.savedPlayers.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
-                Column(
-                    modifier = Modifier.heightIn(max = 150.dp)
-                ) {
+                Column {
                     viewModel.savedPlayers
                         .filter { sp -> viewModel.players.none { it.name == sp.name } }
                         .forEach { player ->
