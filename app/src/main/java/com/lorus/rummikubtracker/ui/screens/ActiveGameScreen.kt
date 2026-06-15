@@ -7,12 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -30,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -894,29 +887,18 @@ private fun WinnerDeclarationView(
             }
         }
 
-        // Scroll indicator: bottom fade + animated chevron when more content below
+        // Scroll indicator: subtle bottom fade + chevron when more content below
         if (canScrollForward) {
-            val infiniteTransition = rememberInfiniteTransition(label = "scrollIndicator")
-            val arrowOffset by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 6f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(800, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "arrowBounce"
-            )
-
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(48.dp)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.92f)
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
                             )
                         )
                     ),
@@ -926,10 +908,9 @@ private fun WinnerDeclarationView(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = stringResource(R.string.scroll_for_more),
                     modifier = Modifier
-                        .size(24.dp)
-                        .padding(bottom = 4.dp)
-                        .graphicsLayer { translationY = arrowOffset },
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+                        .size(20.dp)
+                        .padding(bottom = 4.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             }
         }
