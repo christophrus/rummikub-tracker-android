@@ -92,9 +92,8 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                     imageHeight = orientedBitmap.height
                 )
 
-                // Save to history (scaled down thumbnail to save memory)
-                val thumbnail = Bitmap.createScaledBitmap(orientedBitmap!!, 400, 400, true)
-                historyRepository.saveResult(result, tiles, thumbnail)
+                // Save to history with original image
+                historyRepository.saveResult(result, tiles, orientedBitmap)
 
                 _uiState.update {
                     it.copy(
