@@ -39,6 +39,7 @@
     <string name="enter_scores">Entrer les scores</string>
     <string name="score">Score</string>
     <string name="save_round">Enregistrer le tour</string>
+    <string name="scroll_for_more">Faites défiler pour plus</string>
     <string name="scan_tile">Scanner les tuiles</string>
     <string name="end_game">Terminer la partie</string>
     <string name="confirm_end_game">Voulez-vous vraiment terminer la partie?</string>

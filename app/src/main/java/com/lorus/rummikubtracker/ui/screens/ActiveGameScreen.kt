@@ -22,6 +22,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -744,11 +745,14 @@ private fun WinnerDeclarationView(
         // Confetti background
         ConfettiEffect()
 
+        val scrollState = rememberScrollState()
+        val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Trophy icon and winner name
@@ -879,6 +883,34 @@ private fun WinnerDeclarationView(
                 Text(
                     text = stringResource(R.string.save_round),
                     style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+
+        // Scroll indicator: subtle bottom fade + chevron when more content below
+        if (canScrollForward) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = stringResource(R.string.scroll_for_more),
+                    modifier = Modifier
+                        .size(20.dp)
+                        .padding(bottom = 4.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             }
         }

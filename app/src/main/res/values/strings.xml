@@ -46,6 +46,7 @@
     <string name="enter_scores">Enter Scores</string>
     <string name="score">Score</string>
     <string name="save_round">Save Round</string>
+    <string name="scroll_for_more">Scroll for more</string>
     <string name="scan_tile">Scan Tiles</string>
     <string name="end_game">End Game</string>
     <string name="confirm_end_game">Are you sure you want to end the game?</string>

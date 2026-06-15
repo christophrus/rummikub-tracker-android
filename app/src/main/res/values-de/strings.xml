@@ -39,6 +39,7 @@
     <string name="enter_scores">Punkte eingeben</string>
     <string name="score">Punkte</string>
     <string name="save_round">Runde speichern</string>
+    <string name="scroll_for_more">Scrollen für mehr</string>
     <string name="scan_tile">Steine scannen</string>
     <string name="end_game">Spiel beenden</string>
     <string name="confirm_end_game">Möchtest du das Spiel wirklich beenden?</string>
