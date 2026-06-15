@@ -84,13 +84,14 @@ class ActiveGameViewModel @Inject constructor(
     private var gameId: Long = 0
 
     fun loadGame(id: Long) {
+        val isSameGame = gameId != 0L && gameId == id
         gameId = id
         timerEngine.onTickSound = { audioEngine.playTick() }
         timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
-            // Configure only for truly new game or if timer was stopped
-            if (timerEngine.timerState.value == TimerState.STOPPED) {
+            // Configure for new game, or if timer was stopped (e.g. first load)
+            if (!isSameGame || timerEngine.timerState.value == TimerState.STOPPED) {
                 val currentPlayerExtUsed = initialGame.players
                     .getOrNull(initialGame.currentPlayerIndex)
                     ?.extensionsUsed ?: 0
@@ -102,7 +103,7 @@ class ActiveGameViewModel @Inject constructor(
                 audioEngine.setTtsLanguage(initialGame.ttsLanguage)
                 audioEngine.initialize()
             } else if (timerEngine.isPaused()) {
-                // Auto-resume timer when returning from main menu
+                // Auto-resume timer when returning from main menu for the same game
                 timerEngine.resume()
             }
 
