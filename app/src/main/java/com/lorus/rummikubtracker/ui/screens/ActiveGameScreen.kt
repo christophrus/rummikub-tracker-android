@@ -582,7 +582,10 @@ fun ActiveGameScreen(
                                 ),
                                 border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFFB300))
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Icon(
                                         Icons.Default.EmojiEvents,
                                         contentDescription = stringResource(R.string.declare_winner),
