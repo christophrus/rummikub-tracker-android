@@ -580,13 +580,9 @@ fun ActiveGameScreen(
                             Box(
                                 modifier = Modifier
                                     .size(56.dp)
-                                    .shadow(4.dp, MaterialTheme.shapes.medium)
-                                    .background(
-                                        color = Color(0xFFFFB300).copy(alpha = 0.2f),
-                                        shape = MaterialTheme.shapes.medium
-                                    )
-                                    .border(2.dp, Color(0xFFFFB300), MaterialTheme.shapes.medium)
                                     .clip(MaterialTheme.shapes.medium)
+                                    .background(Color(0xFFFFB300).copy(alpha = 0.2f))
+                                    .border(2.dp, Color(0xFFFFB300), MaterialTheme.shapes.medium)
                                     .clickable(
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() }
