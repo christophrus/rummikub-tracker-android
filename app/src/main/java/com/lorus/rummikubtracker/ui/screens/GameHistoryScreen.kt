@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import android.content.Intent
 import android.graphics.Bitmap
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.model.Game
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -122,11 +124,14 @@ fun GameHistoryScreen(
                 )
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
+            val lazyListState = rememberLazyListState()
+            val canScrollForward by remember { derivedStateOf { lazyListState.canScrollForward } }
+
+            Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 items(viewModel.games) { game ->
                     val isExpanded = viewModel.expandedGameId == game.id
 
@@ -307,6 +312,12 @@ fun GameHistoryScreen(
                         }
                     }
                 }
+            }
+
+                ScrollIndicator(
+                    canScrollForward = canScrollForward,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

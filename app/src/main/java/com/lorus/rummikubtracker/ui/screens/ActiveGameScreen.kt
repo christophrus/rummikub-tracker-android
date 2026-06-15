@@ -50,7 +50,7 @@ import com.lorus.rummikubtracker.domain.usecase.ScoreValidator
 import com.lorus.rummikubtracker.ui.components.AnalogClock
 import com.lorus.rummikubtracker.ui.components.ConfettiEffect
 import com.lorus.rummikubtracker.ui.components.PlayerAvatar
-import com.lorus.rummikubtracker.ui.components.PlayerCard
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -887,34 +887,11 @@ private fun WinnerDeclarationView(
             }
         }
 
-        // Scroll indicator: bottom fade + chevron when more content below
-        if (canScrollForward) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = stringResource(R.string.scroll_for_more),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(bottom = 4.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
-        }
+        // Scroll indicator
+        ScrollIndicator(
+            canScrollForward = canScrollForward,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 

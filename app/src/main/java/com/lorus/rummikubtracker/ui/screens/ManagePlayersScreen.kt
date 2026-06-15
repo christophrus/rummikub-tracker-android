@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,6 +26,7 @@ import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.domain.model.Player
 import com.lorus.rummikubtracker.domain.usecase.PlayerManager
 import com.lorus.rummikubtracker.ui.components.PlayerAvatar
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -188,11 +190,14 @@ fun ManagePlayersScreen(
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
+            val lazyListState = rememberLazyListState()
+            val canScrollForward by remember { derivedStateOf { lazyListState.canScrollForward } }
+
+            Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 items(viewModel.players) { player ->
                     ListItem(
                         headlineContent = { Text(player.name) },
@@ -220,6 +225,12 @@ fun ManagePlayersScreen(
                     )
                     HorizontalDivider()
                 }
+            }
+
+                ScrollIndicator(
+                    canScrollForward = canScrollForward,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

@@ -26,6 +26,7 @@ import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.model.Game
 import com.lorus.rummikubtracker.domain.usecase.GameManager
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -142,13 +143,16 @@ fun ScoreboardScreen(
             PLAYER_COLORS[idx % PLAYER_COLORS.size]
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(12.dp)
-        ) {
+        val scrollState = rememberScrollState()
+        val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
+
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(12.dp)
+            ) {
             // === Header card ===
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -365,7 +369,13 @@ fun ScoreboardScreen(
 
             Spacer(Modifier.height(16.dp))
         }
+
+        ScrollIndicator(
+            canScrollForward = canScrollForward,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
+}
 
     // End Game confirmation dialog
     if (showEndGameDialog) {

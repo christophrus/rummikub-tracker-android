@@ -21,6 +21,7 @@ import com.lorus.rummikubtracker.domain.model.Config
 import com.lorus.rummikubtracker.domain.model.Game
 import com.lorus.rummikubtracker.domain.model.Player
 import com.lorus.rummikubtracker.domain.usecase.PlayerManager
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -151,13 +152,16 @@ fun NewGameScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
+        val scrollState = rememberScrollState()
+        val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
+
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(scrollState)
+            ) {
             // Game name
             OutlinedTextField(
                 value = viewModel.gameName,
@@ -350,6 +354,12 @@ fun NewGameScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+        }
+
+            ScrollIndicator(
+                canScrollForward = canScrollForward,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 }

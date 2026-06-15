@@ -19,6 +19,7 @@ import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.engine.TimerEngine
 import com.lorus.rummikubtracker.domain.model.Game
+import com.lorus.rummikubtracker.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -67,14 +68,17 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        val scrollState = rememberScrollState()
+        val canScrollForward by remember { derivedStateOf { scrollState.canScrollForward } }
+
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
             Spacer(Modifier.height(48.dp))
 
             // App icon
@@ -199,6 +203,12 @@ fun HomeScreen(
             )
 
             Spacer(Modifier.height(32.dp))
+            }
+
+            ScrollIndicator(
+                canScrollForward = canScrollForward,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 
