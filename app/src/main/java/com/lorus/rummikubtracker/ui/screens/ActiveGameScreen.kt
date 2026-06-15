@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,6 +25,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -574,31 +577,28 @@ fun ActiveGameScreen(
                                 )
                             }
                             // Trophy button — declare winner
-                            Card(
+                            Box(
                                 modifier = Modifier
                                     .size(56.dp)
+                                    .shadow(4.dp, MaterialTheme.shapes.medium)
+                                    .background(
+                                        color = Color(0xFFFFB300).copy(alpha = 0.2f),
+                                        shape = MaterialTheme.shapes.medium
+                                    )
+                                    .border(2.dp, Color(0xFFFFB300), MaterialTheme.shapes.medium)
+                                    .clip(MaterialTheme.shapes.medium)
                                     .clickable(
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() }
                                     ) { viewModel.declareWinner() },
-                                shape = MaterialTheme.shapes.medium,
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFFB300).copy(alpha = 0.2f)
-                                ),
-                                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFFB300))
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize().padding(6.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.EmojiEvents,
-                                        contentDescription = stringResource(R.string.declare_winner),
-                                        tint = Color(0xFFFFB300),
-                                        modifier = Modifier.size(34.dp)
-                                    )
-                                }
+                                Icon(
+                                    Icons.Default.EmojiEvents,
+                                    contentDescription = stringResource(R.string.declare_winner),
+                                    tint = Color(0xFFFFB300),
+                                    modifier = Modifier.size(34.dp)
+                                )
                             }
                             // Next Player button
                             IconButton(
