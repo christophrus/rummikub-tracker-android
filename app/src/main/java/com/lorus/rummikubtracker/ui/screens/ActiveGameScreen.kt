@@ -571,17 +571,25 @@ fun ActiveGameScreen(
                                     color = Color.White
                                 )
                             }
-                            // Trophy button
-                            IconButton(
+                            // Trophy button — declare winner
+                            Card(
                                 onClick = { viewModel.declareWinner() },
-                                modifier = Modifier.size(44.dp)
+                                modifier = Modifier.size(48.dp),
+                                shape = MaterialTheme.shapes.medium,
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFFFB300).copy(alpha = 0.2f)
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFFB300))
                             ) {
-                                Icon(
-                                    Icons.Default.EmojiEvents,
-                                    contentDescription = stringResource(R.string.declare_winner),
-                                    tint = Color(0xFFFFB300),
-                                    modifier = Modifier.size(32.dp)
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        Icons.Default.EmojiEvents,
+                                        contentDescription = stringResource(R.string.declare_winner),
+                                        tint = Color(0xFFFFB300),
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
                             }
                             // Next Player button
                             IconButton(
