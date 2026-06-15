@@ -596,6 +596,7 @@ fun ActiveGameScreen(
                                     modifier = Modifier.size(34.dp)
                                 )
                             }
+                            Spacer(Modifier.width(12.dp))
                             // Next Player button
                             IconButton(
                                 onClick = { viewModel.skipPlayer() },
