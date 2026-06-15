@@ -49,6 +49,7 @@ fun ResultScreen(
     result: AnalysisResult,
     onNewPhoto: () -> Unit,
     onBack: () -> Unit = {},
+    showFab: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     var showFullscreen by remember { mutableStateOf(false) }
@@ -72,15 +73,17 @@ fun ResultScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNewPhoto,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(R.string.new_photo),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            if (showFab) {
+                FloatingActionButton(
+                    onClick = onNewPhoto,
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = stringResource(R.string.new_photo),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     ) { paddingValues ->

@@ -178,7 +178,8 @@ fun CounterNavHost(
                     onBack = {
                         historyViewModel.clearSelection()
                         navController.popBackStack()
-                    }
+                    },
+                    showFab = false
                 )
             }
         }
