@@ -8,7 +8,9 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -573,8 +575,12 @@ fun ActiveGameScreen(
                             }
                             // Trophy button — declare winner
                             Card(
-                                onClick = { viewModel.declareWinner() },
-                                modifier = Modifier.size(56.dp),
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { viewModel.declareWinner() },
                                 shape = MaterialTheme.shapes.medium,
                                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                                 colors = CardDefaults.cardColors(
