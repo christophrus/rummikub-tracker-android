@@ -350,11 +350,9 @@ class ActiveGameViewModel @Inject constructor(
                     imageHeight = orientedBitmap.height
                 )
 
-                // Save to counter history (thumbnail for storage, original dims preserved)
+                // Save to counter history with original image
                 try {
-                    val thumbnail = Bitmap.createScaledBitmap(orientedBitmap, 400, 400, true)
-                    historyRepository.saveResult(result, tiles, thumbnail)
-                    thumbnail.recycle()
+                    historyRepository.saveResult(result, tiles, orientedBitmap)
                 } catch (_: Exception) { }
 
                 uiState = uiState.copy(
