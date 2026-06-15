@@ -145,6 +145,9 @@
     <string name="history_tiles">%d Steine</string>
     <string name="history_time">%d ms</string>
     <string name="history_delete">Löschen</string>
+    <string name="save_to_gallery">In Galerie speichern</string>
+    <string name="save_to_gallery_success">Bild in Galerie gespeichert</string>
+    <string name="save_to_gallery_failed">Fehler beim Speichern</string>
     <string name="settings_confidence">Konfidenzschwelle</string>
     <string name="settings_confidence_desc">Minimale Konfidenz für Erkennung (%.0f%%)</string>
     <string name="fullscreen_image">Vollbild</string>

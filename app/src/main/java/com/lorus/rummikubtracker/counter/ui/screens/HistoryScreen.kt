@@ -1,7 +1,11 @@
 package com.lorus.rummikubtracker.counter.ui.screens
 
+import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +58,7 @@ import com.lorus.rummikubtracker.counter.data.local.AnalysisResultWithTiles
 import com.lorus.rummikubtracker.counter.ui.components.FullscreenImageDialog
 import com.lorus.rummikubtracker.counter.viewmodel.HistoryViewModel
 import java.text.SimpleDateFormat
+import java.io.File
 import java.util.Date
 import java.util.Locale
 
@@ -149,6 +156,7 @@ private fun HistoryEntryCard(
 ) {
     val dateFormat = rememberDateFormat()
     var showFullscreen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val thumbnail = remember(entry.result.imagePath) {
         entry.result.imagePath?.let { path ->
@@ -240,6 +248,17 @@ private fun HistoryEntryCard(
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                 )
             }
+            IconButton(onClick = {
+                entry.result.imagePath?.let { path ->
+                    saveToGallery(context, path)
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.SaveAlt,
+                    contentDescription = stringResource(R.string.save_to_gallery),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 
@@ -255,6 +274,51 @@ private fun HistoryEntryCard(
 private fun rememberDateFormat(): SimpleDateFormat {
     return androidx.compose.runtime.remember {
         SimpleDateFormat("dd.MM.yyyy  HH:mm", Locale.getDefault())
+    }
+}
+
+/**
+ * Copies the image at [sourcePath] to the device's gallery (Pictures/RummikubTracker).
+ */
+private fun saveToGallery(context: android.content.Context, sourcePath: String) {
+    try {
+        val sourceFile = File(sourcePath)
+        if (!sourceFile.exists()) {
+            Toast.makeText(context, R.string.save_to_gallery_failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val fileName = "Rummikub_${System.currentTimeMillis()}.jpg"
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/RummikubTracker")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+            val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            uri?.let {
+                context.contentResolver.openOutputStream(it)?.use { output ->
+                    sourceFile.inputStream().use { input -> input.copyTo(output) }
+                }
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                context.contentResolver.update(it, values, null, null)
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.Images.Media.insertImage(
+                context.contentResolver,
+                sourceFile.absolutePath,
+                fileName,
+                "Rummikub Tracker"
+            )
+        }
+
+        Toast.makeText(context, R.string.save_to_gallery_success, Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, R.string.save_to_gallery_failed, Toast.LENGTH_SHORT).show()
     }
 }
 

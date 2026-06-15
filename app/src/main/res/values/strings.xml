@@ -185,6 +185,9 @@
     <string name="history_tiles">%d tiles</string>
     <string name="history_time">%d ms</string>
     <string name="history_delete">Delete</string>
+    <string name="save_to_gallery">Save to gallery</string>
+    <string name="save_to_gallery_success">Image saved to gallery</string>
+    <string name="save_to_gallery_failed">Failed to save image</string>
     <string name="settings_confidence">Confidence Threshold</string>
     <string name="settings_confidence_desc">Minimum confidence for detection (%.0f%%)</string>
     <string name="fullscreen_image">Fullscreen image</string>

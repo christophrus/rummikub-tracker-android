@@ -145,6 +145,9 @@
     <string name="history_tiles">%d tuiles</string>
     <string name="history_time">%d ms</string>
     <string name="history_delete">Supprimer</string>
+    <string name="save_to_gallery">Enregistrer dans la galerie</string>
+    <string name="save_to_gallery_success">Image enregistrée dans la galerie</string>
+    <string name="save_to_gallery_failed">Échec de l\'enregistrement</string>
     <string name="settings_confidence">Seuil de confiance</string>
     <string name="settings_confidence_desc">Confiance minimale pour la détection (%.0f%%)</string>
     <string name="fullscreen_image">Image plein écran</string>
