@@ -887,18 +887,19 @@ private fun WinnerDeclarationView(
             }
         }
 
-        // Scroll indicator: subtle bottom fade + chevron when more content below
+        // Scroll indicator: bottom fade + chevron when more content below
         if (canScrollForward) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(56.dp)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
                             )
                         )
                     ),
@@ -908,9 +909,9 @@ private fun WinnerDeclarationView(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = stringResource(R.string.scroll_for_more),
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(24.dp)
                         .padding(bottom = 4.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
             }
         }
