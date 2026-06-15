@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.repository.GameRepository
+import com.lorus.rummikubtracker.domain.engine.TimerEngine
 import com.lorus.rummikubtracker.domain.model.Game
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
@@ -25,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val gameRepository: GameRepository
+    private val gameRepository: GameRepository,
+    private val timerEngine: TimerEngine
 ) : androidx.lifecycle.ViewModel() {
     var activeGame by mutableStateOf<Game?>(null)
         private set
@@ -40,7 +42,10 @@ class HomeViewModel @Inject constructor(
 
     fun cancelGame() {
         kotlinx.coroutines.MainScope().launch {
-            activeGame?.let { gameRepository.deleteGame(it.id) }
+            activeGame?.let {
+                timerEngine.stop()
+                gameRepository.deleteGame(it.id)
+            }
         }
     }
 }
