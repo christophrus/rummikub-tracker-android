@@ -121,6 +121,7 @@
     <string name="processing_time">Verarbeitung: %d ms</string>
     <string name="camera_permission_title">Kamera-Berechtigung erforderlich</string>
     <string name="camera_permission_text">Kamera-Zugriff wird benötigt, um Rummikub-Steine zu erkennen.</string>
+    <string name="camera_permission_required">Kamera-Berechtigung wird zum Fotografieren benötigt.</string>
     <string name="grant_permission">Berechtigung erteilen</string>
     <string name="no_detections">Keine Steine erkannt</string>
     <string name="error_occurred">Ein Fehler ist aufgetreten</string>

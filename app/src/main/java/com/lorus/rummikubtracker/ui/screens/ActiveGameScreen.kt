@@ -1,6 +1,8 @@
 package com.lorus.rummikubtracker.ui.screens
 
+import android.Manifest
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -406,6 +408,17 @@ fun ActiveGameScreen(
         bitmap?.let { viewModel.onImageCaptured(it) }
     }
 
+    // Camera permission launcher
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch(null)
+        } else {
+            Toast.makeText(context, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // Show scan source dialog when triggered
     if (state.showScanSourceDialog) {
         AlertDialog(
@@ -416,7 +429,15 @@ fun ActiveGameScreen(
                     TextButton(
                         onClick = {
                             viewModel.onDialogLaunchCamera()
-                            cameraLauncher.launch(null)
+                            val hasPermission = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M ||
+                                androidx.core.content.ContextCompat.checkSelfPermission(
+                                    context, Manifest.permission.CAMERA
+                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            if (hasPermission) {
+                                cameraLauncher.launch(null)
+                            } else {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

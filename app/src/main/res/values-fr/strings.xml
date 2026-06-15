@@ -121,6 +121,7 @@
     <string name="processing_time">Traitement: %d ms</string>
     <string name="camera_permission_title">Autorisation caméra requise</string>
     <string name="camera_permission_text">L\'accès à la caméra est nécessaire pour détecter les tuiles.</string>
+    <string name="camera_permission_required">L\'autorisation de la caméra est nécessaire pour prendre une photo.</string>
     <string name="grant_permission">Accorder l\'autorisation</string>
     <string name="no_detections">Aucune tuile détectée</string>
     <string name="error_occurred">Une erreur est survenue</string>

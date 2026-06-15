@@ -160,6 +160,7 @@
     <string name="processing_time">Processing: %d ms</string>
     <string name="camera_permission_title">Camera Permission Required</string>
     <string name="camera_permission_text">Camera access is needed to detect Rummikub tiles.</string>
+    <string name="camera_permission_required">Camera permission is required to take a photo.</string>
     <string name="grant_permission">Grant Permission</string>
     <string name="no_detections">No tiles detected</string>
     <string name="error_occurred">An error occurred</string>
