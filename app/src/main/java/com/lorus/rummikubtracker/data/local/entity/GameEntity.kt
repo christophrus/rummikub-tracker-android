@@ -18,6 +18,7 @@ data class GameEntity(
     val extensionReplenishRounds: Int = 0,
     val ttsLanguage: String = "en",
     val currentPlayerIndex: Int = 0,
+    val roundBeginnerIndex: Int = 0,
     val currentRound: Int = 0,
     val extensionsUsed: Int = 0
 )

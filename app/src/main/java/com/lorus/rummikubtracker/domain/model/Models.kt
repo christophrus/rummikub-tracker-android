@@ -30,6 +30,7 @@ data class Game(
     val extensionReplenishRounds: Int = 0,
     val ttsLanguage: String = "en",
     val currentPlayerIndex: Int = 0,
+    val roundBeginnerIndex: Int = 0,
     val currentRound: Int = 0,
     val players: List<Player> = emptyList(),
     val rounds: List<Round> = emptyList()

@@ -17,7 +17,8 @@ class GameManager @Inject constructor(
     suspend fun saveRound(game: Game, round: Round) {
         gameRepository.saveRound(round)
         val nextRound = game.currentRound + 1
-        val nextPlayerIndex = (game.currentPlayerIndex + 1) % game.players.size
+        // Rotate beginner by exactly 1 from the previous round's beginner
+        val nextBeginnerIndex = (game.roundBeginnerIndex + 1) % game.players.size
 
         // Handle extension replenishment — increase maxExtensions for all players
         val newMaxExtensions = if (game.extensionReplenishRounds > 0 && nextRound % game.extensionReplenishRounds == 0) {
@@ -30,7 +31,8 @@ class GameManager @Inject constructor(
         gameRepository.updateGame(
             game.copy(
                 currentRound = nextRound,
-                currentPlayerIndex = nextPlayerIndex,
+                currentPlayerIndex = nextBeginnerIndex,
+                roundBeginnerIndex = nextBeginnerIndex,
                 maxExtensions = newMaxExtensions
             )
         )

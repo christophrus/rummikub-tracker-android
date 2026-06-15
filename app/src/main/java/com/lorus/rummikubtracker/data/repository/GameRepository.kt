@@ -47,6 +47,7 @@ class GameRepository @Inject constructor(
             extensionReplenishRounds = game.extensionReplenishRounds,
             ttsLanguage = game.ttsLanguage,
             currentPlayerIndex = game.currentPlayerIndex,
+            roundBeginnerIndex = game.roundBeginnerIndex,
             currentRound = game.currentRound
         )
         val gameId = gameDao.insertGame(entity)
@@ -79,6 +80,7 @@ class GameRepository @Inject constructor(
             extensionReplenishRounds = game.extensionReplenishRounds,
             ttsLanguage = game.ttsLanguage,
             currentPlayerIndex = game.currentPlayerIndex,
+            roundBeginnerIndex = game.roundBeginnerIndex,
             currentRound = game.currentRound
         )
         gameDao.updateGame(entity)
@@ -160,6 +162,7 @@ class GameRepository @Inject constructor(
             extensionReplenishRounds = entity.extensionReplenishRounds,
             ttsLanguage = entity.ttsLanguage,
             currentPlayerIndex = entity.currentPlayerIndex,
+            roundBeginnerIndex = entity.roundBeginnerIndex,
             currentRound = entity.currentRound,
             players = gamePlayers.map {
                 Player(name = it.playerName, imagePath = it.imagePath, order = it.playerOrder, maxExtensions = it.maxExtensions, extensionsUsed = it.extensionsUsed)

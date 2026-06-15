@@ -15,14 +15,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.data.local.dao.GamePlayerDao
+import com.lorus.rummikubtracker.data.repository.GameRepository
 import com.lorus.rummikubtracker.domain.model.Player
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlayerSelectionViewModel @Inject constructor(
-    private val gamePlayerDao: GamePlayerDao
+    private val gamePlayerDao: GamePlayerDao,
+    private val gameRepository: GameRepository
 ) : androidx.lifecycle.ViewModel() {
     var players by mutableStateOf<List<Player>>(emptyList())
     var selectedPlayer by mutableStateOf<String?>(null)
@@ -33,6 +36,21 @@ class PlayerSelectionViewModel @Inject constructor(
         scope.launch {
             gamePlayerDao.getPlayersForGameOnce(gameId).let { entities ->
                 players = entities.map { Player(name = it.playerName, order = it.playerOrder) }
+            }
+        }
+    }
+
+    fun setStartingPlayer(gameId: Long, playerName: String) {
+        scope.launch {
+            val game = gameRepository.getGameById(gameId).first() ?: return@launch
+            val playerIndex = game.players.indexOfFirst { it.name == playerName }
+            if (playerIndex >= 0) {
+                gameRepository.updateGame(
+                    game.copy(
+                        currentPlayerIndex = playerIndex,
+                        roundBeginnerIndex = playerIndex
+                    )
+                )
             }
         }
     }
@@ -86,6 +104,7 @@ fun PlayerSelectionScreen(
                     Card(
                         onClick = {
                             viewModel.selectedPlayer = player.name
+                            viewModel.setStartingPlayer(gameId, player.name)
                             onPlayerSelected()
                         },
                         modifier = Modifier.fillMaxWidth(),
