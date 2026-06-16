@@ -261,9 +261,10 @@ fun ScoreboardScreen(
                             Spacer(Modifier.width(4.dp))
 
                             // Player scores
+                            val lowestRoundScore = round.scores.values.filter { it >= 0 }.minOrNull() ?: 0
                             g.players.forEachIndexed { pIdx, player ->
                                 val score = round.scores[player.name] ?: 0
-                                val isWinner = round.winnerPlayerName == player.name
+                                val isLowest = score == lowestRoundScore
                                 val cumTotal = cumulativeByPlayer[player.name]?.getOrNull(roundIdx)
 
                                 Box(
@@ -273,11 +274,11 @@ fun ScoreboardScreen(
                                     Text(
                                         text = "$score",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
+                                        fontWeight = if (isLowest) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isLowest) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
                                         textAlign = TextAlign.Center
                                     )
-                                    if (isWinner) {
+                                    if (isLowest) {
                                         Text(
                                             text = "🏆",
                                             style = MaterialTheme.typography.bodySmall,
