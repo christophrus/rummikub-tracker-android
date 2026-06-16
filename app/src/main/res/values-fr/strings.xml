@@ -46,7 +46,8 @@
     <string name="confirm_end_game">Voulez-vous vraiment terminer la partie?</string>
     <string name="confirm_cancel_game">Voulez-vous vraiment annuler la partie? Toute progression sera perdue.</string>
     <string name="all_scores_required">Tous les scores doivent être saisis</string>
-    <string name="one_zero_required">Exactement un joueur doit avoir 0 point</string>
+    <string name="one_zero_required">Le gagnant doit avoir le score le plus bas</string>
+    <string name="winner_lowest_score_required">Le gagnant doit avoir le score le plus bas</string>
     <string name="manage_players_title">Gérer les joueurs</string>
     <string name="no_saved_players">Aucun joueur enregistré</string>
     <string name="delete_player">Supprimer le joueur</string>

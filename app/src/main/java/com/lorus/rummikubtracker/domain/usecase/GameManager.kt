@@ -68,17 +68,18 @@ class GameManager @Inject constructor(
 }
 
 object ScoreValidator {
-    fun validate(scores: Map<String, Int>, playerNames: List<String>): ValidationResult {
+    fun validate(scores: Map<String, Int>, playerNames: List<String>, winnerName: String): ValidationResult {
         // All players must have a score
         val missingPlayers = playerNames.filter { it !in scores }
         if (missingPlayers.isNotEmpty()) {
-            return ValidationResult(false, "All scores must be entered")
+            return ValidationResult(false, "all_scores_required")
         }
 
-        // Exactly one player must have score 0
-        val zeroScorePlayers = scores.filter { it.value == 0 }
-        if (zeroScorePlayers.size != 1) {
-            return ValidationResult(false, "Exactly one player must have score 0")
+        // Winner must have the lowest score
+        val winnerScore = scores[winnerName] ?: return ValidationResult(false, "all_scores_required")
+        val lowestScore = scores.values.minOrNull() ?: return ValidationResult(false, "all_scores_required")
+        if (winnerScore != lowestScore) {
+            return ValidationResult(false, "winner_lowest_score_required")
         }
 
         return ValidationResult(true, null)

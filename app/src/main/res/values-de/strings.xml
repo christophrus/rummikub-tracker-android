@@ -46,7 +46,8 @@
     <string name="confirm_end_game">Möchtest du das Spiel wirklich beenden?</string>
     <string name="confirm_cancel_game">Möchtest du das Spiel wirklich abbrechen? Alle Fortschritte gehen verloren.</string>
     <string name="all_scores_required">Alle Punkte müssen eingegeben werden</string>
-    <string name="one_zero_required">Genau ein Spieler muss 0 Punkte haben</string>
+    <string name="one_zero_required">Der Gewinner muss die niedrigste Punktzahl haben</string>
+    <string name="winner_lowest_score_required">Der Gewinner muss die niedrigste Punktzahl haben</string>
     <string name="manage_players_title">Spieler verwalten</string>
     <string name="no_saved_players">Noch keine gespeicherten Spieler</string>
     <string name="delete_player">Spieler löschen</string>

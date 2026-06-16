@@ -53,7 +53,8 @@
     <string name="confirm_end_game">Are you sure you want to end the game?</string>
     <string name="confirm_cancel_game">Are you sure you want to cancel the game? All progress will be lost.</string>
     <string name="all_scores_required">All scores must be entered</string>
-    <string name="one_zero_required">Exactly one player must have score 0</string>
+    <string name="one_zero_required">The winner must have the lowest score</string>
+    <string name="winner_lowest_score_required">The winner must have the lowest score</string>
 
     <!-- Manage Players Screen -->
     <string name="manage_players_title">Manage Players</string>

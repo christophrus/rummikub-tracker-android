@@ -259,7 +259,7 @@ class ActiveGameViewModel @Inject constructor(
             return
         }
 
-        val validation = ScoreValidator.validate(scoreMap, game.players.map { it.name })
+        val validation = ScoreValidator.validate(scoreMap, game.players.map { it.name }, uiState.winnerPlayerName ?: "")
         if (!validation.isValid) {
             uiState = uiState.copy(validationError = validation.errorMessage ?: "one_zero_required")
             return
@@ -1148,7 +1148,7 @@ private fun formatDurationShort(ms: Int): String {
 private fun getValidationErrorResId(key: String): Int {
     return when (key) {
         "all_scores_required" -> R.string.all_scores_required
-        "one_zero_required" -> R.string.one_zero_required
+        "winner_lowest_score_required" -> R.string.winner_lowest_score_required
         "scan_failed" -> R.string.scan_failed
         else -> R.string.error_occurred
     }

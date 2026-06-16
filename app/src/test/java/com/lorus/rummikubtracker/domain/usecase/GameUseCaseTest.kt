@@ -89,36 +89,36 @@ class ScoreValidatorTest {
     @Test
     fun `valid scores pass validation`() {
         val scores = mapOf("Alice" to 5, "Bob" to 0, "Charlie" to 10)
-        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"))
+        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"), "Bob")
         assertTrue(result.isValid)
         assertNull(result.errorMessage)
     }
 
     @Test
+    fun `winner can have non-zero score if it's the lowest`() {
+        val scores = mapOf("Alice" to 8, "Bob" to 3, "Charlie" to 10)
+        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"), "Bob")
+        assertTrue(result.isValid)
+    }
+
+    @Test
     fun `missing player score fails`() {
         val scores = mapOf("Alice" to 5, "Bob" to 0)
-        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"))
+        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"), "Bob")
         assertFalse(result.isValid)
     }
 
     @Test
-    fun `no zero score fails`() {
-        val scores = mapOf("Alice" to 5, "Bob" to 3, "Charlie" to 10)
-        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"))
-        assertFalse(result.isValid)
-    }
-
-    @Test
-    fun `multiple zero scores fail`() {
-        val scores = mapOf("Alice" to 0, "Bob" to 0, "Charlie" to 10)
-        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"))
+    fun `winner not having lowest score fails`() {
+        val scores = mapOf("Alice" to 5, "Bob" to 10, "Charlie" to 8)
+        val result = ScoreValidator.validate(scores, listOf("Alice", "Bob", "Charlie"), "Bob")
         assertFalse(result.isValid)
     }
 
     @Test
     fun `empty player list returns invalid`() {
         val scores = emptyMap<String, Int>()
-        val result = ScoreValidator.validate(scores, listOf("Alice"))
+        val result = ScoreValidator.validate(scores, listOf("Alice"), "Alice")
         assertFalse(result.isValid)
     }
 }
