@@ -675,29 +675,30 @@ fun ActiveGameScreen(
                             initialValue = 0f,
                             targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(3200),
+                                animation = tween(4000),
                                 repeatMode = RepeatMode.Restart
                             ),
                             label = "fingerPhase"
                         )
 
+                        // Timing: up 0..0.25 | hold 0.25..0.55 | down 0.55..0.80 | pause 0.80..1.0
                         val fingerY = when {
-                            fingerPhase < 0.30f -> fingerPhase / 0.30f                      // 0→1 move up
-                            fingerPhase < 0.50f -> 1f                                        // hold at top
-                            fingerPhase < 0.78f -> 1f - (fingerPhase - 0.50f) / 0.28f       // 1→0 down
-                            else -> 0f                                                       // pause
+                            fingerPhase < 0.25f -> fingerPhase / 0.25f                            // 0→1 move up
+                            fingerPhase < 0.55f -> 1f                                             // hold at top
+                            fingerPhase < 0.80f -> 1f - (fingerPhase - 0.55f) / 0.25f            // 1→0 down
+                            else -> 0f                                                            // pause
                         }
 
-                        // Finger offset: starts 50dp below box top, rises to 38dp above (into clock)
-                        val fingerOffsetY = ((1f - fingerY) * 88 - 38).dp
+                        // Finger: starts at 44dp (below text), rises to 38dp above box top (into clock)
+                        val fingerOffsetY = ((1f - fingerY) * 82 - 38).dp
 
-                        // Ripple expands only while finger is at the top
-                        val targetRipple = if (fingerPhase in 0.30f..0.50f) {
-                            (fingerPhase - 0.30f) / 0.20f
+                        // Ripple active during hold phase (0.25..0.55)
+                        val targetRipple = if (fingerPhase in 0.25f..0.55f) {
+                            (fingerPhase - 0.25f) / 0.30f
                         } else 0f
                         val rippleProgress by animateFloatAsState(
                             targetValue = targetRipple,
-                            animationSpec = tween(100),
+                            animationSpec = tween(300),
                             label = "ripple"
                         )
 
@@ -714,22 +715,21 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            // Hint text stays fixed in the box
+                            // Hint text — directly below the clock (top of box)
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.75f),
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.align(Alignment.Center).offset(y = 16.dp)
+                                modifier = Modifier.align(Alignment.TopCenter).offset(y = 2.dp)
                             )
 
-                            // Ripple canvas tracks the finger — centered at the 👆 tip
-                            // Canvas is 96dp; offset = fingerOffsetY - 48dp so center = fingerOffsetY
+                            // Ripple canvas — 128dp, centered at the 👆 tip
                             val showRipple = rippleProgress > 0.01f
                             Canvas(modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(y = fingerOffsetY - 48.dp)
-                                .size(96.dp)
+                                .offset(y = fingerOffsetY - 64.dp)
+                                .size(128.dp)
                                 .graphicsLayer { alpha = if (showRipple) 1f else 0f }
                             ) {
                                 val cx = size.width / 2
@@ -737,20 +737,20 @@ fun ActiveGameScreen(
                                 val maxR = size.minDimension / 2
                                 val r = maxR * rippleProgress
                                 // Inner filled circle
-                                drawCircle(Color.White.copy(alpha = 0.30f), r, Offset(cx, cy))
+                                drawCircle(Color.White.copy(alpha = 0.28f), r, Offset(cx, cy))
                                 // Middle ring
                                 drawCircle(
-                                    Color.White.copy(alpha = 0.18f), r * 1.6f,
+                                    Color.White.copy(alpha = 0.16f), r * 1.8f,
                                     Offset(cx, cy), style = Stroke(2.dp.toPx())
                                 )
-                                // Outer ring — spreads further
+                                // Outer ring — wide spread
                                 drawCircle(
-                                    Color.White.copy(alpha = 0.10f), r * 2.2f,
+                                    Color.White.copy(alpha = 0.09f), r * 2.8f,
                                     Offset(cx, cy), style = Stroke(1.5f.dp.toPx())
                                 )
                             }
 
-                            // Animated finger — moves up and into the clock
+                            // Animated finger — moves up from below text into the clock
                             Text(
                                 text = "👆",
                                 style = MaterialTheme.typography.headlineMedium,
