@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -173,6 +174,10 @@ class ActiveGameViewModel @Inject constructor(
 
     fun dismissClockHint() {
         uiState = uiState.copy(clockHintDismissed = true)
+    }
+
+    fun dismissWinnerDeclaration() {
+        uiState = uiState.copy(showWinnerDeclaration = false, winnerPlayerName = null, scores = emptyMap(), validationError = null)
     }
 
     fun toggleDurationDropdown() {
@@ -555,7 +560,9 @@ fun ActiveGameScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        if (state.showWinnerDeclaration) viewModel.dismissWinnerDeclaration() else onBack()
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -565,6 +572,11 @@ fun ActiveGameScreen(
         val game = state.game ?: return@Scaffold
 
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Intercept system back when winner declaration is showing
+            if (state.showWinnerDeclaration) {
+                BackHandler { viewModel.dismissWinnerDeclaration() }
+            }
+
             if (state.showWinnerDeclaration) {
                 // Winner declaration view
                 WinnerDeclarationView(
