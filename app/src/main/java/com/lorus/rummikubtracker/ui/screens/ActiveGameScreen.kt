@@ -738,7 +738,18 @@ fun ActiveGameScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(8.dp))
+
+                    if (showClockHint) {
+                        Text(
+                            text = stringResource(R.string.touch_for_next_player),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.75f),
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
 
                     // === Extension button with badge ===
                     Box(
