@@ -675,7 +675,7 @@ fun ActiveGameScreen(
                             initialValue = 0f,
                             targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(4000),
+                                animation = tween(8000),
                                 repeatMode = RepeatMode.Restart
                             ),
                             label = "fingerPhase"
@@ -724,18 +724,19 @@ fun ActiveGameScreen(
                                 modifier = Modifier.align(Alignment.TopCenter).offset(y = 12.dp)
                             )
 
-                            // Ripple canvas 144dp — all rings fit within canvas (no clipping)
-                            // Canvas center = finger tip via offset(y = fingerOffsetY - 72.dp)
+                            // Ripple canvas 280dp — doubled spread radius (maxR=140dp)
+                            // Canvas center = fingerOffsetY - 20dp (slightly above finger tip)
+                            // Math: offset + size/2 = center → offset = fingerOffsetY - 20 - 140 = fingerOffsetY - 160
                             val showRipple = rippleProgress > 0.01f
                             Canvas(modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(y = fingerOffsetY - 72.dp)
-                                .size(144.dp)
+                                .offset(y = fingerOffsetY - 160.dp)
+                                .size(280.dp)
                                 .graphicsLayer { alpha = if (showRipple) 1f else 0f }
                             ) {
                                 val cx = size.width / 2
                                 val cy = size.height / 2
-                                val maxR = size.minDimension / 2   // 72dp → all rings ≤ maxR
+                                val maxR = size.minDimension / 2   // 140dp — doubled from 72dp
                                 val fade = 1f - rippleProgress * 0.6f
                                 // Inner filled pulse
                                 drawCircle(
