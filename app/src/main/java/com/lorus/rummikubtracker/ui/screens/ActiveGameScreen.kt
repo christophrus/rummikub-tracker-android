@@ -738,9 +738,7 @@ fun ActiveGameScreen(
                         }
                     }
 
-                    if (!showClockHint) {
-                        Spacer(Modifier.height(16.dp))
-                    }
+                    Spacer(Modifier.height(16.dp))
 
                     // === Extension button with badge ===
                     Box(
