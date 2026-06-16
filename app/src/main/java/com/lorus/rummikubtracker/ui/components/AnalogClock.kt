@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -56,7 +57,10 @@ fun AnalogClock(
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.clipToBounds(),
+            contentAlignment = Alignment.Center
+        ) {
             Canvas(
                 modifier = Modifier.size(size)
             ) {
@@ -152,8 +156,8 @@ fun AnalogClock(
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = size * 0.12f),
-                    contentAlignment = Alignment.BottomCenter
+                        .padding(top = size * 0.60f),
+                    contentAlignment = Alignment.TopCenter
                 ) {
                     Surface(
                         color = Color.Black.copy(alpha = 0.7f),
