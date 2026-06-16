@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -667,20 +668,21 @@ fun ActiveGameScreen(
                     if (showClockHint) {
                         val infiniteTransition = rememberInfiniteTransition(label = "hintPulse")
                         val hintAlpha by infiniteTransition.animateFloat(
-                            initialValue = 0.5f,
-                            targetValue = 0.85f,
+                            initialValue = 0.4f,
+                            targetValue = 0.9f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(1000),
+                                animation = tween(1200),
                                 repeatMode = RepeatMode.Reverse
                             ),
                             label = "hintAlpha"
                         )
 
                         Surface(
-                            color = Color.Black.copy(alpha = hintAlpha),
+                            color = Color.Black.copy(alpha = 0.85f),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
+                                .graphicsLayer { alpha = hintAlpha }
                                 .clickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
