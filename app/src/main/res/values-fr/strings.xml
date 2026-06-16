@@ -35,6 +35,7 @@
     <string name="extensions_remaining">Extensions: %d</string>
     <string name="skip">Passer</string>
     <string name="declare_winner">Déclarer le gagnant</string>
+    <string name="touch_for_next_player">Touchez pour joueur suivant</string>
     <string name="winner">Gagnant!</string>
     <string name="enter_scores">Entrer les scores</string>
     <string name="score">Score</string>

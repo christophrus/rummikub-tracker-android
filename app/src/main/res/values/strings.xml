@@ -42,6 +42,7 @@
     <string name="extensions_remaining">Extensions: %d</string>
     <string name="skip">Skip</string>
     <string name="declare_winner">Declare Winner</string>
+    <string name="touch_for_next_player">Touch for next player</string>
     <string name="winner">Winner!</string>
     <string name="enter_scores">Enter Scores</string>
     <string name="score">Score</string>

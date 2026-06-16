@@ -680,7 +680,7 @@ fun ActiveGameScreen(
                                 Text("👆", style = MaterialTheme.typography.headlineSmall)
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    "Touch for next player",
+                                    stringResource(R.string.touch_for_next_player),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.White,
                                     fontWeight = FontWeight.Medium
