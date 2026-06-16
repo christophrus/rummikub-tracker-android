@@ -277,7 +277,9 @@ class ActiveGameViewModel @Inject constructor(
             showWinnerDeclaration = false,
             winnerPlayerName = null,
             scores = emptyMap(),
-            validationError = null
+            validationError = null,
+            // Hint stays dismissed — only resets for brand-new games
+            clockHintDismissed = true
         )
 
         // Reset timer for new round, but keep paused — user starts manually
