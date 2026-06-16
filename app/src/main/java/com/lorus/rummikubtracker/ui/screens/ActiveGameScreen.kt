@@ -738,7 +738,7 @@ fun ActiveGameScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(if (showClockHint) 8.dp else 16.dp))
 
                     if (showClockHint) {
                         Text(
