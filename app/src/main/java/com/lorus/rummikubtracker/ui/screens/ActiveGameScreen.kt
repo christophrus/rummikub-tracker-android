@@ -409,7 +409,7 @@ fun ActiveGameScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
-    var showClockHint by remember { mutableStateOf(true) }
+    var showClockHint by rememberSaveable(gameId) { mutableStateOf(true) }
 
     // Gallery image picker
     val galleryLauncher = rememberLauncherForActivityResult(
