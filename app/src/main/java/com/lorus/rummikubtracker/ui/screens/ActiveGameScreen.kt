@@ -32,7 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,7 +87,8 @@ data class ActiveGameUiState(
     val showDurationDropdown: Boolean = false,
     val scrollLocked: Boolean = false,
     val scannedPlayerName: String? = null,
-    val showScanSourceDialog: Boolean = false
+    val showScanSourceDialog: Boolean = false,
+    val clockHintDismissed: Boolean = false
 )
 
 @HiltViewModel
@@ -125,6 +125,8 @@ class ActiveGameViewModel @Inject constructor(
                 )
                 audioEngine.setTtsLanguage(initialGame.ttsLanguage)
                 audioEngine.initialize()
+                // Show clock tap hint for new games
+                uiState = uiState.copy(clockHintDismissed = false)
             } else if (timerEngine.isPaused()) {
                 // Auto-resume timer when returning from main menu
                 timerEngine.resume()
@@ -162,6 +164,10 @@ class ActiveGameViewModel @Inject constructor(
 
     fun toggleScrollLock() {
         uiState = uiState.copy(scrollLocked = !uiState.scrollLocked)
+    }
+
+    fun dismissClockHint() {
+        uiState = uiState.copy(clockHintDismissed = true)
     }
 
     fun toggleDurationDropdown() {
@@ -410,7 +416,7 @@ fun ActiveGameScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
-    var showClockHint by rememberSaveable(gameId) { mutableStateOf(true) }
+    val showClockHint = !state.clockHintDismissed
 
     // Gallery image picker
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -663,7 +669,7 @@ fun ActiveGameScreen(
                             isPaused = timerState == TimerState.PAUSED,
                             size = clockSize,
                             onClick = {
-                                showClockHint = false
+                                viewModel.dismissClockHint()
                                 viewModel.skipPlayer()
                             },
                             modifier = Modifier.align(Alignment.Center)
@@ -705,7 +711,7 @@ fun ActiveGameScreen(
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() }
                                     ) {
-                                        showClockHint = false
+                                        viewModel.dismissClockHint()
                                         viewModel.skipPlayer()
                                     }
                             ) {
