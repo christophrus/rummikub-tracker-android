@@ -682,11 +682,14 @@ fun ActiveGameScreen(
                         )
 
                         val fingerY = when {
-                            fingerPhase < 0.30f -> fingerPhase / 0.30f           // 0→1 move up
-                            fingerPhase < 0.50f -> 1f                            // hold at top
-                            fingerPhase < 0.78f -> 1f - (fingerPhase - 0.50f) / 0.28f  // 1→0 down
-                            else -> 0f                                           // pause
+                            fingerPhase < 0.30f -> fingerPhase / 0.30f                      // 0→1 move up
+                            fingerPhase < 0.50f -> 1f                                        // hold at top
+                            fingerPhase < 0.78f -> 1f - (fingerPhase - 0.50f) / 0.28f       // 1→0 down
+                            else -> 0f                                                       // pause
                         }
+
+                        // Finger offset: starts 50dp below box top, rises to 38dp above (into clock)
+                        val fingerOffsetY = ((1f - fingerY) * 88 - 38).dp
 
                         // Ripple expands only while finger is at the top
                         val targetRipple = if (fingerPhase in 0.30f..0.50f) {
@@ -711,26 +714,7 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            // Ripple at target position
-                            val showRipple = rippleProgress > 0.01f
-                            Canvas(modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 8.dp)
-                                .size(60.dp)
-                                .graphicsLayer { alpha = if (showRipple) 1f else 0f }
-                            ) {
-                                val cx = size.width / 2
-                                val cy = size.height / 2
-                                val maxR = size.minDimension / 2
-                                val r = maxR * rippleProgress
-                                drawCircle(Color.White.copy(alpha = 0.35f), r, Offset(cx, cy))
-                                drawCircle(
-                                    Color.White.copy(alpha = 0.2f), r * 1.5f,
-                                    Offset(cx, cy), style = Stroke(2.dp.toPx())
-                                )
-                            }
-
-                            // Hint text positioned higher
+                            // Hint text stays fixed in the box
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -738,11 +722,39 @@ fun ActiveGameScreen(
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.align(Alignment.Center).offset(y = 16.dp)
                             )
-                            // Animated finger moving up into the clock
+
+                            // Ripple canvas tracks the finger — centered at the 👆 tip
+                            // Canvas is 96dp; offset = fingerOffsetY - 48dp so center = fingerOffsetY
+                            val showRipple = rippleProgress > 0.01f
+                            Canvas(modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .offset(y = fingerOffsetY - 48.dp)
+                                .size(96.dp)
+                                .graphicsLayer { alpha = if (showRipple) 1f else 0f }
+                            ) {
+                                val cx = size.width / 2
+                                val cy = size.height / 2
+                                val maxR = size.minDimension / 2
+                                val r = maxR * rippleProgress
+                                // Inner filled circle
+                                drawCircle(Color.White.copy(alpha = 0.30f), r, Offset(cx, cy))
+                                // Middle ring
+                                drawCircle(
+                                    Color.White.copy(alpha = 0.18f), r * 1.6f,
+                                    Offset(cx, cy), style = Stroke(2.dp.toPx())
+                                )
+                                // Outer ring — spreads further
+                                drawCircle(
+                                    Color.White.copy(alpha = 0.10f), r * 2.2f,
+                                    Offset(cx, cy), style = Stroke(1.5f.dp.toPx())
+                                )
+                            }
+
+                            // Animated finger — moves up and into the clock
                             Text(
                                 text = "👆",
                                 style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.align(Alignment.TopCenter).offset(y = ((1f - fingerY) * 72).dp)
+                                modifier = Modifier.align(Alignment.TopCenter).offset(y = fingerOffsetY)
                             )
                         }
                         Spacer(Modifier.height(4.dp))
