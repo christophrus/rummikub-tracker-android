@@ -9,9 +9,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -689,9 +689,14 @@ fun ActiveGameScreen(
                         }
 
                         // Ripple expands only while finger is at the top
-                        val rippleProgress = if (fingerPhase in 0.30f..0.50f) {
+                        val targetRipple = if (fingerPhase in 0.30f..0.50f) {
                             (fingerPhase - 0.30f) / 0.20f
                         } else 0f
+                        val rippleProgress by animateFloatAsState(
+                            targetValue = targetRipple,
+                            animationSpec = tween(100),
+                            label = "ripple"
+                        )
 
                         Box(
                             modifier = Modifier
