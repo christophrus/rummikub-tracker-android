@@ -3,6 +3,8 @@ package com.lorus.rummikubtracker.ui.navigation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,6 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,6 +43,7 @@ import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.counter.ui.screens.*
 import com.lorus.rummikubtracker.counter.viewmodel.AnalysisViewModel
 import com.lorus.rummikubtracker.counter.viewmodel.HistoryViewModel
+import java.io.File
 
 private object CounterRoutes {
     const val MAIN_MENU = "counter_main_menu"
@@ -56,9 +63,27 @@ fun CounterNavHost(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
+    // Create a temp file URI for full-resolution camera capture
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap -> bitmap?.let { viewModel.analyze(it) } }
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            photoUri?.let { uri ->
+                try {
+                    val bitmap = BitmapFactory.decodeStream(
+                        context.contentResolver.openInputStream(uri)
+                    )
+                    if (bitmap != null) {
+                        viewModel.analyze(bitmap)
+                    }
+                } catch (_: Exception) { }
+                // Clean up temp file
+                try { File(uri.path!!).delete() } catch (_: Exception) { }
+            }
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -74,16 +99,22 @@ fun CounterNavHost(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            cameraLauncher.launch(null)
+            val file = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+            file.parentFile?.mkdirs()
+            photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            photoUri?.let { cameraLauncher.launch(it) }
         } else {
-            Toast.makeText(context, "Camera permission is required to take photos", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, R.string.camera_permission_required, Toast.LENGTH_LONG).show()
         }
     }
 
     fun launchCamera() {
         when {
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
-                cameraLauncher.launch(null)
+                val file = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+                file.parentFile?.mkdirs()
+                photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                photoUri?.let { cameraLauncher.launch(it) }
             }
             else -> {
                 permissionLauncher.launch(Manifest.permission.CAMERA)
