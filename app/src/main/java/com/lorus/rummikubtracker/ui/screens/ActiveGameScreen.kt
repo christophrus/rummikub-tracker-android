@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -693,14 +692,10 @@ fun ActiveGameScreen(
                         val fingerOffsetY = ((1f - fingerY) * 66 - 38).dp
 
                         // Ripple grows during hold phase (0.22..0.62 = 1600ms)
-                        val targetRipple = if (fingerPhase in 0.22f..0.62f) {
+                        // fingerPhase is already a smooth animation — derive rippleProgress directly
+                        val rippleProgress = if (fingerPhase in 0.22f..0.62f) {
                             (fingerPhase - 0.22f) / 0.40f
                         } else 0f
-                        val rippleProgress by animateFloatAsState(
-                            targetValue = targetRipple,
-                            animationSpec = tween(500),
-                            label = "ripple"
-                        )
 
                         Box(
                             modifier = Modifier
