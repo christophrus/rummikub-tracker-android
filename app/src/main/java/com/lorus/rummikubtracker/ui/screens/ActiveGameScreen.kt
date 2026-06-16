@@ -742,7 +742,7 @@ fun ActiveGameScreen(
                             Text(
                                 text = "👆",
                                 style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.align(Alignment.TopCenter).offset(y = (fingerY * 72).dp)
+                                modifier = Modifier.align(Alignment.TopCenter).offset(y = ((1f - fingerY) * 72).dp)
                             )
                         }
                         Spacer(Modifier.height(4.dp))
