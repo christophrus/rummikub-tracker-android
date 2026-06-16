@@ -463,10 +463,12 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
 
         val tableTop = pad.toFloat() + titleHeight
 
-        // Winner line — just above the table
-        val overallWinner = game.computeWinner()
-        if (overallWinner != null) {
-            val winnerText = "${context.getString(R.string.winner_label, overallWinner)} 🏆"
+        // Winner line — just above the table (all players tied for lowest total)
+        val overallTotals = game.players.associate { it.name to game.getPlayerTotal(it.name) }
+        val minOverall = overallTotals.values.minOrNull() ?: 0
+        val overallWinners = overallTotals.filter { it.value == minOverall }.keys
+        if (overallWinners.isNotEmpty() && game.players.size > 1) {
+            val winnerText = "${context.getString(R.string.winner_label, "").substringBefore(":")}: ${overallWinners.joinToString(", ")} 🏆"
             val winnerPaint = android.graphics.Paint().also {
                 it.color = android.graphics.Color.parseColor("#FFD700")
                 it.textSize = textSize
@@ -586,10 +588,11 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
             canvas.drawText(roundLabel, startX + roundLabelWidth / 2 - cellPaint.measureText(roundLabel) / 2, rowY + rowHeight * 0.6f, cellPaint)
 
             var px = startX + roundLabelWidth
+            val lowestScore = round.scores.values.filter { it >= 0 }.minOrNull() ?: 0
             game.players.forEach { player ->
                 val score = round.scores[player.name] ?: 0
                 cumulative[player.name] = (cumulative[player.name] ?: 0) + score
-                val isWinner = round.winnerPlayerName == player.name
+                val isWinner = score == lowestScore
 
                 if (isWinner) {
                     // Gold background for winner cell
@@ -601,7 +604,7 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
                 val scoreY = rowY + rowHeight * 0.6f
 
                 if (isWinner) {
-                    // "0" in gold bold
+                    // Score in gold bold
                     canvas.drawText(scoreText, scoreX, scoreY, winnerPaint)
                     // Draw small gold star next to score
                     val starCx = scoreX + winnerPaint.measureText(scoreText) + 6 * density
@@ -639,13 +642,13 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         val totalLabel = "∑"
         canvas.drawText(totalLabel, startX + roundLabelWidth / 2 - totalPaint.measureText(totalLabel) / 2, totalY + rowHeight * 0.6f, totalPaint)
 
-        // Find winner (lowest total score)
-        val winnerName = game.players.minByOrNull { cumulative[it.name] ?: Int.MAX_VALUE }?.name
+        // Find lowest total score
+        val lowestTotal = game.players.minOfOrNull { cumulative[it.name] ?: Int.MAX_VALUE } ?: 0
 
         var tx = startX + roundLabelWidth
         game.players.forEach { player ->
             val total = cumulative[player.name] ?: 0
-            val isWinner = player.name == winnerName
+            val isWinner = total == lowestTotal
             val paint = if (isWinner) totalPaint else cellPaint
             canvas.drawText("$total", tx + colWidth / 2 - paint.measureText("$total") / 2, totalY + rowHeight * 0.6f, paint)
             if (isWinner) {
