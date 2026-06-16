@@ -3,7 +3,9 @@ package com.lorus.rummikubtracker.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -145,19 +147,35 @@ fun AnalogClock(
                 }
             }
 
-            // Touch hint overlay
+            // Touch hint overlay — shown once to indicate the clock is tappable
             if (showTouchHint) {
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = size * 0.68f),
-                    contentAlignment = Alignment.TopCenter
+                        .padding(bottom = size * 0.12f),
+                    contentAlignment = Alignment.BottomCenter
                 ) {
-                    Text(
-                        text = "👆",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "👆",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "Touch for next player",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
             }
         }
