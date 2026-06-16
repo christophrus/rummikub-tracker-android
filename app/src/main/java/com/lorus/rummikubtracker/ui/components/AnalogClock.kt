@@ -3,14 +3,11 @@ package com.lorus.rummikubtracker.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -33,8 +30,7 @@ fun AnalogClock(
     isPaused: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 200.dp,
-    onClick: (() -> Unit)? = null,
-    showTouchHint: Boolean = false
+    onClick: (() -> Unit)? = null
 ) {
     val seconds = remainingMs / 1000f
     val totalSeconds = totalMs / 1000f
@@ -58,7 +54,6 @@ fun AnalogClock(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.clipToBounds(),
             contentAlignment = Alignment.Center
         ) {
             Canvas(
@@ -148,38 +143,6 @@ fun AnalogClock(
                         modifier = Modifier
                             .padding(top = size * 0.32f + (size / 6.5f) * 1.2f)
                     )
-                }
-            }
-
-            // Touch hint overlay — shown once to indicate the clock is tappable
-            if (showTouchHint) {
-                androidx.compose.foundation.layout.Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = size * 0.60f),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    Surface(
-                        color = Color.Black.copy(alpha = 0.7f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "👆",
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Touch for next player",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
                 }
             }
         }

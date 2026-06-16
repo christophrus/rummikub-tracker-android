@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -653,9 +654,40 @@ fun ActiveGameScreen(
                                 showClockHint = false
                                 viewModel.skipPlayer()
                             },
-                            showTouchHint = showClockHint,
                             modifier = Modifier.align(Alignment.Center)
                         )
+                    }
+
+                    // Touch hint for the clock
+                    if (showClockHint) {
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.7f),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    showClockHint = false
+                                    viewModel.skipPlayer()
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("👆", style = MaterialTheme.typography.headlineSmall)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "Touch for next player",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
                     }
 
                     Spacer(Modifier.height(16.dp))
