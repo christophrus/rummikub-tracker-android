@@ -769,6 +769,8 @@ fun ActiveGameScreen(
                                 modifier = Modifier.align(Alignment.TopCenter).offset(y = fingerOffsetY)
                             )
                         }
+                    } else {
+                        Spacer(Modifier.height(16.dp))
                     }
 
                     // === Extension button with badge ===
