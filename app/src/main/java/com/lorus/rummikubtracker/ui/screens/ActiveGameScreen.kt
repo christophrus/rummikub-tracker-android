@@ -399,6 +399,7 @@ fun ActiveGameScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
+    var showClockHint by remember { mutableStateOf(true) }
 
     // Gallery image picker
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -648,7 +649,11 @@ fun ActiveGameScreen(
                             totalMs = effectiveTotalMs,
                             isPaused = timerState == TimerState.PAUSED,
                             size = clockSize,
-                            onClick = { viewModel.skipPlayer() },
+                            onClick = {
+                                showClockHint = false
+                                viewModel.skipPlayer()
+                            },
+                            showTouchHint = showClockHint,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }

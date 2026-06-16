@@ -30,7 +30,8 @@ fun AnalogClock(
     isPaused: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 200.dp,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    showTouchHint: Boolean = false
 ) {
     val seconds = remainingMs / 1000f
     val totalSeconds = totalMs / 1000f
@@ -140,6 +141,22 @@ fun AnalogClock(
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(top = size * 0.32f + (size / 6.5f) * 1.2f)
+                    )
+                }
+            }
+
+            // Touch hint overlay
+            if (showTouchHint) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = size * 0.68f),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Text(
+                        text = "👆",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color.White.copy(alpha = 0.7f)
                     )
                 }
             }
