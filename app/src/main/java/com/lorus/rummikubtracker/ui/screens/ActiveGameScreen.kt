@@ -693,8 +693,8 @@ fun ActiveGameScreen(
                                 (fingerPhase - 0.22f) / 0.40f
                             } else 0f
 
-                            // Finger travels from 88% → 44% of clockSize from the top (in Dp)
-                            val fingerPosY = clockSize * (0.88f - 0.44f * fingerY)
+                            // Finger travels from 88% → 66% of clockSize from the top (in Dp) — half the previous range
+                            val fingerPosY = clockSize * (0.88f - 0.22f * fingerY)
 
                             // Ripple canvas covers the full clock face — no offsets, no clipping
                             Canvas(
@@ -710,7 +710,7 @@ fun ActiveGameScreen(
                             ) {
                                 if (rippleProgress > 0f) {
                                     val tipX = size.width / 2f
-                                    val tipY = clockSize.toPx() * (0.88f - 0.44f * fingerY)
+                                    val tipY = clockSize.toPx() * (0.88f - 0.22f * fingerY)
                                     val maxR = 90.dp.toPx()
                                     val r    = maxR * rippleProgress
                                     val fade = 1f - rippleProgress * 0.55f
@@ -734,16 +734,7 @@ fun ActiveGameScreen(
                                     .offset(y = fingerPosY)
                             )
 
-                            // Label pinned to bottom of clock area
-                            Text(
-                                text = stringResource(R.string.touch_for_next_player),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.75f),
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 10.dp)
-                            )
+
                         }
                     }
 
