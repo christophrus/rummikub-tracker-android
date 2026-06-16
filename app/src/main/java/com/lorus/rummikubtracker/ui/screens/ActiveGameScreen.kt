@@ -9,6 +9,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -660,8 +665,19 @@ fun ActiveGameScreen(
 
                     // Touch hint for the clock
                     if (showClockHint) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "hintPulse")
+                        val hintAlpha by infiniteTransition.animateFloat(
+                            initialValue = 0.5f,
+                            targetValue = 0.85f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(1000),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "hintAlpha"
+                        )
+
                         Surface(
-                            color = Color.Black.copy(alpha = 0.7f),
+                            color = Color.Black.copy(alpha = hintAlpha),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
