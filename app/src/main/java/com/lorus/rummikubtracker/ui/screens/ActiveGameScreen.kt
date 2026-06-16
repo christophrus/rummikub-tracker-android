@@ -675,7 +675,7 @@ fun ActiveGameScreen(
                             initialValue = 0f,
                             targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(8000),
+                                animation = tween(4000),
                                 repeatMode = RepeatMode.Restart
                             ),
                             label = "fingerPhase"
@@ -698,7 +698,7 @@ fun ActiveGameScreen(
                         } else 0f
                         val rippleProgress by animateFloatAsState(
                             targetValue = targetRipple,
-                            animationSpec = tween(200),
+                            animationSpec = tween(500),
                             label = "ripple"
                         )
 
