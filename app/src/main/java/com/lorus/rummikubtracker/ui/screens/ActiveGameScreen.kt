@@ -649,11 +649,13 @@ fun ActiveGameScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // === Large centered timer — as wide as screen ===
-                    BoxWithConstraints(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    // === Large centered timer + touch hint overlay ===
+                    // Both clock and hint share one BoxWithConstraints so the ripple
+                    // canvas is drawn inside the clock area — no parent-clipping issues.
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                         val clockSize = maxWidth - 32.dp
+
+                        // Clock
                         AnalogClock(
                             remainingMs = remainingMs,
                             totalMs = effectiveTotalMs,
@@ -665,107 +667,87 @@ fun ActiveGameScreen(
                             },
                             modifier = Modifier.align(Alignment.Center)
                         )
-                    }
 
-                    // Touch hint — animated finger + ripple tap effect
-                    if (showClockHint) {
-                        val transition = rememberInfiniteTransition(label = "hintTap")
-                        val fingerPhase by transition.animateFloat(
-                            initialValue = 0f,
-                            targetValue = 1f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(4000),
-                                repeatMode = RepeatMode.Restart
-                            ),
-                            label = "fingerPhase"
-                        )
+                        // Touch hint — overlaid on the clock so ripple draws inside it
+                        if (showClockHint) {
+                            val transition = rememberInfiniteTransition(label = "hintTap")
+                            val fingerPhase by transition.animateFloat(
+                                initialValue = 0f,
+                                targetValue = 1f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(4000),
+                                    repeatMode = RepeatMode.Restart
+                                ),
+                                label = "fingerPhase"
+                            )
 
-                        // Timing: up 0..0.22 | hold+ripple 0.22..0.62 | down 0.62..0.85 | pause 0.85..1.0
-                        val fingerY = when {
-                            fingerPhase < 0.22f -> fingerPhase / 0.22f                            // 0→1 move up
-                            fingerPhase < 0.62f -> 1f                                             // hold at top
-                            fingerPhase < 0.85f -> 1f - (fingerPhase - 0.62f) / 0.23f            // 1→0 down
-                            else -> 0f                                                            // pause
-                        }
+                            // Timing: up 0..0.22 | hold 0.22..0.62 | down 0.62..0.85 | pause 0.85..1.0
+                            val fingerY = when {
+                                fingerPhase < 0.22f -> fingerPhase / 0.22f
+                                fingerPhase < 0.62f -> 1f
+                                fingerPhase < 0.85f -> 1f - (fingerPhase - 0.62f) / 0.23f
+                                else -> 0f
+                            }
 
-                        // Finger: starts at ~28dp (just below text), rises 38dp above box top (into clock)
-                        val fingerOffsetY = ((1f - fingerY) * 66 - 38).dp
+                            val rippleProgress = if (fingerPhase in 0.22f..0.62f) {
+                                (fingerPhase - 0.22f) / 0.40f
+                            } else 0f
 
-                        // Ripple grows during hold phase (0.22..0.62 = 1600ms)
-                        // fingerPhase is already a smooth animation — derive rippleProgress directly
-                        val rippleProgress = if (fingerPhase in 0.22f..0.62f) {
-                            (fingerPhase - 0.22f) / 0.40f
-                        } else 0f
+                            // Finger travels from 88% → 44% of clockSize from the top (in Dp)
+                            val fingerPosY = clockSize * (0.88f - 0.44f * fingerY)
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .offset(y = (-8).dp)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    showClockHint = false
-                                    viewModel.skipPlayer()
+                            // Ripple canvas covers the full clock face — no offsets, no clipping
+                            Canvas(
+                                modifier = Modifier
+                                    .size(maxWidth, clockSize)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
+                                        showClockHint = false
+                                        viewModel.skipPlayer()
+                                    }
+                            ) {
+                                if (rippleProgress > 0f) {
+                                    val tipX = size.width / 2f
+                                    val tipY = clockSize.toPx() * (0.88f - 0.44f * fingerY)
+                                    val maxR = 90.dp.toPx()
+                                    val r    = maxR * rippleProgress
+                                    val fade = 1f - rippleProgress * 0.55f
+                                    // Inner filled pulse
+                                    drawCircle(Color.White.copy(alpha = 0.30f), r * 0.28f, Offset(tipX, tipY))
+                                    // Ring 1
+                                    drawCircle(Color.White.copy(alpha = 0.20f * fade), r * 0.55f, Offset(tipX, tipY), style = Stroke(2.dp.toPx()))
+                                    // Ring 2
+                                    drawCircle(Color.White.copy(alpha = 0.12f * fade), r * 0.78f, Offset(tipX, tipY), style = Stroke(1.5f.dp.toPx()))
+                                    // Outer ring
+                                    drawCircle(Color.White.copy(alpha = 0.07f * fade), r,        Offset(tipX, tipY), style = Stroke(1.dp.toPx()))
                                 }
-                        ) {
-                            // Hint text — slightly below the clock edge
+                            }
+
+                            // Finger emoji — same position mapping as the Canvas above
+                            Text(
+                                text = "👆",
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .offset(y = fingerPosY)
+                            )
+
+                            // Label pinned to bottom of clock area
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.75f),
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.align(Alignment.TopCenter).offset(y = 12.dp)
-                            )
-
-                            // Ripple canvas 280dp — doubled spread radius (maxR=140dp)
-                            // Canvas center = fingerOffsetY - 20dp (slightly above finger tip)
-                            // Math: offset + size/2 = center → offset = fingerOffsetY - 20 - 140 = fingerOffsetY - 160
-                            val showRipple = rippleProgress > 0.01f
-                            Canvas(modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .offset(y = fingerOffsetY - 160.dp)
-                                .size(280.dp)
-                                .graphicsLayer { alpha = if (showRipple) 1f else 0f }
-                            ) {
-                                val cx = size.width / 2
-                                val cy = size.height / 2
-                                val maxR = size.minDimension / 2   // 140dp — doubled from 72dp
-                                val fade = 1f - rippleProgress * 0.6f
-                                // Inner filled pulse
-                                drawCircle(
-                                    Color.White.copy(alpha = 0.32f),
-                                    maxR * 0.25f * rippleProgress, Offset(cx, cy)
-                                )
-                                // Ring 1
-                                drawCircle(
-                                    Color.White.copy(alpha = 0.22f * fade),
-                                    maxR * 0.52f * rippleProgress,
-                                    Offset(cx, cy), style = Stroke(2.dp.toPx())
-                                )
-                                // Ring 2
-                                drawCircle(
-                                    Color.White.copy(alpha = 0.14f * fade),
-                                    maxR * 0.78f * rippleProgress,
-                                    Offset(cx, cy), style = Stroke(1.5f.dp.toPx())
-                                )
-                                // Outer ring — reaches canvas edge at full progress
-                                drawCircle(
-                                    Color.White.copy(alpha = 0.08f * fade),
-                                    maxR * rippleProgress,
-                                    Offset(cx, cy), style = Stroke(1.dp.toPx())
-                                )
-                            }
-
-                            // Animated finger — moves up from below text into the clock
-                            Text(
-                                text = "👆",
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.align(Alignment.TopCenter).offset(y = fingerOffsetY)
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 10.dp)
                             )
                         }
-                    } else {
+                    }
+
+                    if (!showClockHint) {
                         Spacer(Modifier.height(16.dp))
                     }
 
