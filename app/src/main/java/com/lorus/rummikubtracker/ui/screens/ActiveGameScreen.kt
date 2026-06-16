@@ -680,16 +680,6 @@ fun ActiveGameScreen(
                             ),
                             label = "fingerPhase"
                         )
-                        // Ripple only when finger is at clock position
-                        val rippleProgress by transition.animateFloat(
-                            initialValue = 0f,
-                            targetValue = 1f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(800, easing = FastOutSlowInEasing),
-                                repeatMode = RepeatMode.Restart
-                            ),
-                            label = "rippleProgress"
-                        )
 
                         val fingerY = when {
                             fingerPhase < 0.30f -> fingerPhase / 0.30f           // 0→1 move up
@@ -697,6 +687,11 @@ fun ActiveGameScreen(
                             fingerPhase < 0.78f -> 1f - (fingerPhase - 0.50f) / 0.28f  // 1→0 down
                             else -> 0f                                           // pause
                         }
+
+                        // Ripple expands only while finger is at the top
+                        val rippleProgress = if (fingerPhase in 0.30f..0.50f) {
+                            (fingerPhase - 0.30f) / 0.20f
+                        } else 0f
 
                         Box(
                             modifier = Modifier
@@ -711,8 +706,8 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            // Ripple at target position (top of clock area)
-                            val showRipple = fingerPhase in 0.33f..0.48f
+                            // Ripple at target position
+                            val showRipple = rippleProgress > 0.01f
                             Canvas(modifier = Modifier
                                 .align(Alignment.TopCenter)
                                 .padding(top = 8.dp)
@@ -730,13 +725,13 @@ fun ActiveGameScreen(
                                 )
                             }
 
-                            // Static text
+                            // Hint text positioned higher
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.75f),
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp)
+                                modifier = Modifier.align(Alignment.Center).offset(y = 16.dp)
                             )
                             // Animated finger moving up into the clock
                             Text(
