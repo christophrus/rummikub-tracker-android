@@ -681,24 +681,24 @@ fun ActiveGameScreen(
                             label = "fingerPhase"
                         )
 
-                        // Timing: up 0..0.25 | hold 0.25..0.55 | down 0.55..0.80 | pause 0.80..1.0
+                        // Timing: up 0..0.22 | hold+ripple 0.22..0.62 | down 0.62..0.85 | pause 0.85..1.0
                         val fingerY = when {
-                            fingerPhase < 0.25f -> fingerPhase / 0.25f                            // 0→1 move up
-                            fingerPhase < 0.55f -> 1f                                             // hold at top
-                            fingerPhase < 0.80f -> 1f - (fingerPhase - 0.55f) / 0.25f            // 1→0 down
+                            fingerPhase < 0.22f -> fingerPhase / 0.22f                            // 0→1 move up
+                            fingerPhase < 0.62f -> 1f                                             // hold at top
+                            fingerPhase < 0.85f -> 1f - (fingerPhase - 0.62f) / 0.23f            // 1→0 down
                             else -> 0f                                                            // pause
                         }
 
-                        // Finger: starts at 44dp (below text), rises to 38dp above box top (into clock)
-                        val fingerOffsetY = ((1f - fingerY) * 82 - 38).dp
+                        // Finger: starts at ~34dp (just below text), rises 38dp above box top (into clock)
+                        val fingerOffsetY = ((1f - fingerY) * 72 - 38).dp
 
-                        // Ripple active during hold phase (0.25..0.55)
-                        val targetRipple = if (fingerPhase in 0.25f..0.55f) {
-                            (fingerPhase - 0.25f) / 0.30f
+                        // Ripple grows during hold phase (0.22..0.62 = 1600ms)
+                        val targetRipple = if (fingerPhase in 0.22f..0.62f) {
+                            (fingerPhase - 0.22f) / 0.40f
                         } else 0f
                         val rippleProgress by animateFloatAsState(
                             targetValue = targetRipple,
-                            animationSpec = tween(300),
+                            animationSpec = tween(200),
                             label = "ripple"
                         )
 
@@ -715,38 +715,50 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            // Hint text — directly below the clock (top of box)
+                            // Hint text — slightly below the clock edge
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.75f),
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.align(Alignment.TopCenter).offset(y = 2.dp)
+                                modifier = Modifier.align(Alignment.TopCenter).offset(y = 12.dp)
                             )
 
-                            // Ripple canvas — 128dp, centered at the 👆 tip
+                            // Ripple canvas 144dp — all rings fit within canvas (no clipping)
+                            // Canvas center = finger tip via offset(y = fingerOffsetY - 72.dp)
                             val showRipple = rippleProgress > 0.01f
                             Canvas(modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .offset(y = fingerOffsetY - 64.dp)
-                                .size(128.dp)
+                                .offset(y = fingerOffsetY - 72.dp)
+                                .size(144.dp)
                                 .graphicsLayer { alpha = if (showRipple) 1f else 0f }
                             ) {
                                 val cx = size.width / 2
                                 val cy = size.height / 2
-                                val maxR = size.minDimension / 2
-                                val r = maxR * rippleProgress
-                                // Inner filled circle
-                                drawCircle(Color.White.copy(alpha = 0.28f), r, Offset(cx, cy))
-                                // Middle ring
+                                val maxR = size.minDimension / 2   // 72dp → all rings ≤ maxR
+                                val fade = 1f - rippleProgress * 0.6f
+                                // Inner filled pulse
                                 drawCircle(
-                                    Color.White.copy(alpha = 0.16f), r * 1.8f,
+                                    Color.White.copy(alpha = 0.32f),
+                                    maxR * 0.25f * rippleProgress, Offset(cx, cy)
+                                )
+                                // Ring 1
+                                drawCircle(
+                                    Color.White.copy(alpha = 0.22f * fade),
+                                    maxR * 0.52f * rippleProgress,
                                     Offset(cx, cy), style = Stroke(2.dp.toPx())
                                 )
-                                // Outer ring — wide spread
+                                // Ring 2
                                 drawCircle(
-                                    Color.White.copy(alpha = 0.09f), r * 2.8f,
+                                    Color.White.copy(alpha = 0.14f * fade),
+                                    maxR * 0.78f * rippleProgress,
                                     Offset(cx, cy), style = Stroke(1.5f.dp.toPx())
+                                )
+                                // Outer ring — reaches canvas edge at full progress
+                                drawCircle(
+                                    Color.White.copy(alpha = 0.08f * fade),
+                                    maxR * rippleProgress,
+                                    Offset(cx, cy), style = Stroke(1.dp.toPx())
                                 )
                             }
 
