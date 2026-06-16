@@ -664,25 +664,34 @@ fun ActiveGameScreen(
                         )
                     }
 
-                    // Touch hint for the clock
+                    // Touch hint for the clock with animated finger tap
                     if (showClockHint) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "hintPulse")
-                        val hintAlpha by infiniteTransition.animateFloat(
-                            initialValue = 0.4f,
-                            targetValue = 0.9f,
+                        val infiniteTransition = rememberInfiniteTransition(label = "hintTap")
+                        // Finger bounces up toward the clock
+                        val fingerOffset by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(1200),
+                                animation = tween(2000),
                                 repeatMode = RepeatMode.Reverse
                             ),
-                            label = "hintAlpha"
+                            label = "fingerY"
+                        )
+                        // Tap scale effect
+                        val fingerScale by infiniteTransition.animateFloat(
+                            initialValue = 1f,
+                            targetValue = 0.6f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(150),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "fingerScale"
                         )
 
-                        Surface(
-                            color = Color.Black.copy(alpha = 0.85f),
-                            shape = RoundedCornerShape(12.dp),
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .graphicsLayer { alpha = hintAlpha }
+                                .fillMaxWidth()
+                                .height(80.dp)
                                 .clickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
@@ -691,21 +700,30 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("👆", style = MaterialTheme.typography.headlineSmall)
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.touch_for_next_player),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
+                            // Static text at bottom
+                            Text(
+                                text = stringResource(R.string.touch_for_next_player),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 4.dp)
+                            )
+                            // Animated finger moving up and tapping
+                            Text(
+                                text = "👆",
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .offset(y = (fingerOffset * 30).dp)
+                                    .graphicsLayer {
+                                        scaleX = fingerScale
+                                        scaleY = fingerScale
+                                    }
+                            )
                         }
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(4.dp))
                     }
 
                     Spacer(Modifier.height(16.dp))
