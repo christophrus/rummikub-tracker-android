@@ -9,11 +9,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,8 +37,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -664,29 +668,36 @@ fun ActiveGameScreen(
                         )
                     }
 
-                    // Touch hint for the clock with animated finger tap
+                    // Touch hint — animated finger + ripple tap effect
                     if (showClockHint) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "hintTap")
-                        // Finger bounces up toward the clock
-                        val fingerOffset by infiniteTransition.animateFloat(
+                        val transition = rememberInfiniteTransition(label = "hintTap")
+                        // Finger moves up (1s), pause (0.6s), move down (0.8s), pause (0.6s) = 3s cycle
+                        val fingerPhase by transition.animateFloat(
                             initialValue = 0f,
                             targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(2000),
-                                repeatMode = RepeatMode.Reverse
+                                animation = tween(3000),
+                                repeatMode = RepeatMode.Restart
                             ),
-                            label = "fingerY"
+                            label = "fingerPhase"
                         )
-                        // Tap scale effect
-                        val fingerScale by infiniteTransition.animateFloat(
-                            initialValue = 1f,
-                            targetValue = 0.6f,
+                        // Ripple bursts when finger is near the top
+                        val rippleProgress by transition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 1f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(150),
-                                repeatMode = RepeatMode.Reverse
+                                animation = tween(1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                                repeatMode = RepeatMode.Restart
                             ),
-                            label = "fingerScale"
+                            label = "rippleProgress"
                         )
+
+                        val fingerY = when {
+                            fingerPhase < 0.33f -> fingerPhase / 0.33f    // 0→1 move up
+                            fingerPhase < 0.53f -> 1f                     // hold at top
+                            fingerPhase < 0.80f -> 1f - (fingerPhase - 0.53f) / 0.27f  // 1→0 move down
+                            else -> 0f                                    // pause at bottom
+                        }
 
                         Box(
                             modifier = Modifier
@@ -700,27 +711,36 @@ fun ActiveGameScreen(
                                     viewModel.skipPlayer()
                                 }
                         ) {
-                            // Static text at bottom
+                            // Ripple effect at the top
+                            Canvas(modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .size(56.dp)
+                                .graphicsLayer { alpha = if (fingerPhase in 0.33f..0.53f) 1f else 0f }
+                            ) {
+                                val cx = size.width / 2
+                                val cy = size.height / 2
+                                val maxR = size.minDimension / 2
+                                val r = maxR * rippleProgress
+                                drawCircle(Color.White.copy(alpha = 0.3f), r, Offset(cx, cy))
+                                drawCircle(
+                                    Color.White.copy(alpha = 0.15f), r * 1.4f,
+                                    Offset(cx, cy), style = Stroke(2.dp.toPx())
+                                )
+                            }
+
+                            // Static text
                             Text(
                                 text = stringResource(R.string.touch_for_next_player),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.8f),
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 4.dp)
+                                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp)
                             )
-                            // Animated finger moving up and tapping
+                            // Animated finger
                             Text(
                                 text = "👆",
                                 style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .offset(y = (fingerOffset * 30).dp)
-                                    .graphicsLayer {
-                                        scaleX = fingerScale
-                                        scaleY = fingerScale
-                                    }
+                                modifier = Modifier.align(Alignment.TopCenter).offset(y = (fingerY * 30).dp)
                             )
                         }
                         Spacer(Modifier.height(4.dp))
