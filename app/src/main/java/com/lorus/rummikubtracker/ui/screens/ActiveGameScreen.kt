@@ -689,8 +689,8 @@ fun ActiveGameScreen(
                             else -> 0f                                                            // pause
                         }
 
-                        // Finger: starts at ~34dp (just below text), rises 38dp above box top (into clock)
-                        val fingerOffsetY = ((1f - fingerY) * 72 - 38).dp
+                        // Finger: starts at ~28dp (just below text), rises 38dp above box top (into clock)
+                        val fingerOffsetY = ((1f - fingerY) * 66 - 38).dp
 
                         // Ripple grows during hold phase (0.22..0.62 = 1600ms)
                         val targetRipple = if (fingerPhase in 0.22f..0.62f) {
@@ -705,8 +705,8 @@ fun ActiveGameScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(100.dp)
-                                .offset(y = (-12).dp)
+                                .height(56.dp)
+                                .offset(y = (-8).dp)
                                 .clickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
