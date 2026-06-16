@@ -130,6 +130,11 @@ class ActiveGameViewModel @Inject constructor(
             } else if (timerEngine.isPaused()) {
                 // Auto-resume timer when returning from main menu
                 timerEngine.resume()
+                // Don't re-show the clock hint for resumed games
+                uiState = uiState.copy(clockHintDismissed = true)
+            } else {
+                // Returning to an already-running game — no hint needed
+                uiState = uiState.copy(clockHintDismissed = true)
             }
 
             // Collect subsequent changes for UI only — don't reconfigure timer
