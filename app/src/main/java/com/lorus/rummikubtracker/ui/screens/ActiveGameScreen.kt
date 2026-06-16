@@ -2,6 +2,8 @@ package com.lorus.rummikubtracker.ui.screens
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.counter.data.local.AppDatabase
 import com.lorus.rummikubtracker.counter.data.repository.HistoryRepository
@@ -61,6 +64,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 data class ActiveGameUiState(
@@ -406,11 +410,33 @@ fun ActiveGameScreen(
         }
     }
 
-    // Camera photo capture
+    // Camera photo capture — use TakePicture for full resolution
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        bitmap?.let { viewModel.onImageCaptured(it) }
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            photoUri?.let { uri ->
+                try {
+                    val bitmap = BitmapFactory.decodeStream(
+                        context.contentResolver.openInputStream(uri)
+                    )
+                    if (bitmap != null) {
+                        viewModel.onImageCaptured(bitmap)
+                    }
+                } catch (_: Exception) { }
+                try { File(uri.path!!).delete() } catch (_: Exception) { }
+            }
+        }
+    }
+
+    // Helper to create a temp URI and launch the camera
+    fun launchCameraWithUri() {
+        val file = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+        file.parentFile?.mkdirs()
+        photoUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        photoUri?.let { cameraLauncher.launch(it) }
     }
 
     // Camera permission launcher
@@ -418,7 +444,7 @@ fun ActiveGameScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            cameraLauncher.launch(null)
+            launchCameraWithUri()
         } else {
             Toast.makeText(context, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
         }
@@ -439,7 +465,7 @@ fun ActiveGameScreen(
                                     context, Manifest.permission.CAMERA
                                 ) == android.content.pm.PackageManager.PERMISSION_GRANTED
                             if (hasPermission) {
-                                cameraLauncher.launch(null)
+                                launchCameraWithUri()
                             } else {
                                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                             }
