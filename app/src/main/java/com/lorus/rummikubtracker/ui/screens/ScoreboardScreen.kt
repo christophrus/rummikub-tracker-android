@@ -308,6 +308,8 @@ fun ScoreboardScreen(
                     )
 
                     // --- Final totals row ---
+                    val totals = g.players.map { cumulativeByPlayer[it.name]?.lastOrNull() ?: 0 }
+                    val lowestTotal = totals.minOrNull() ?: 0
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -329,14 +331,27 @@ fun ScoreboardScreen(
                         Spacer(Modifier.width(4.dp))
                         g.players.forEachIndexed { idx, player ->
                             val total = cumulativeByPlayer[player.name]?.lastOrNull() ?: 0
-                            Text(
-                                text = "$total",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFB300),
+                            val isWinner = total == lowestTotal
+                            Box(
                                 modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center
-                            )
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "$total",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Center
+                                )
+                                if (isWinner) {
+                                    Text(
+                                        text = "🏆",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.offset(x = 16.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
                             if (idx < g.players.size - 1) {
                                 Spacer(Modifier.width(4.dp))
                             }
