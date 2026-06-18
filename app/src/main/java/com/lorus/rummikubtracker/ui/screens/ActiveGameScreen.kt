@@ -126,8 +126,12 @@ class ActiveGameViewModel @Inject constructor(
                 )
                 audioEngine.setTtsLanguage(initialGame.ttsLanguage)
                 audioEngine.initialize()
-                // Show clock tap hint for new games
-                uiState = uiState.copy(clockHintDismissed = false)
+                // Show clock tap hint for brand-new games only (no rounds played yet)
+                if (initialGame.rounds.isEmpty()) {
+                    uiState = uiState.copy(clockHintDismissed = false)
+                } else {
+                    uiState = uiState.copy(clockHintDismissed = true)
+                }
             } else if (timerEngine.isPaused()) {
                 // Auto-resume timer when returning from main menu
                 timerEngine.resume()
