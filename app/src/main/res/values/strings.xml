@@ -199,4 +199,14 @@
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
+
+    <!-- Orientation Confirmation Dialog -->
+    <string name="orientation_check_title">Check Orientation</string>
+    <string name="orientation_uncertain_message">Automatic detection is uncertain (%1$.0f%%).\nPlease verify the orientation:</string>
+    <string name="orientation_correction_label">Correction: %1$d°</string>
+    <string name="orientation_preview_description">Image preview with correction</string>
+    <string name="orientation_rotate_left">Rotate left</string>
+    <string name="orientation_rotate_right">Rotate right</string>
+    <string name="orientation_confirm">Confirm</string>
+    <string name="orientation_cancel">Cancel</string>
 </resources>

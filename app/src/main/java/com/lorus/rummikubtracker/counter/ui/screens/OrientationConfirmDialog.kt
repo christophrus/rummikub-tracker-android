@@ -17,12 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.lorus.rummikubtracker.R
 
 /**
  * Dialog shown when the orientation CNN confidence is below 90%.
@@ -63,7 +65,7 @@ fun OrientationConfirmDialog(
             ) {
                 // Title
                 Text(
-                    text = "Ausrichtung prüfen",
+                    text = stringResource(R.string.orientation_check_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -73,7 +75,7 @@ fun OrientationConfirmDialog(
 
                 // Subtitle with confidence info
                 Text(
-                    text = "Die automatische Erkennung ist unsicher (${"%.0f".format(maxConfidence * 100)}%).\nBitte prüfe die Ausrichtung:",
+                    text = stringResource(R.string.orientation_uncertain_message, maxConfidence * 100),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -87,7 +89,7 @@ fun OrientationConfirmDialog(
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = "Korrektur: ${correctionDegrees}°",
+                        text = stringResource(R.string.orientation_correction_label, correctionDegrees),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -108,7 +110,7 @@ fun OrientationConfirmDialog(
                 ) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Bildvorschau mit Korrektur",
+                        contentDescription = stringResource(R.string.orientation_preview_description),
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -125,7 +127,7 @@ fun OrientationConfirmDialog(
                     FilledTonalButton(onClick = onRotateLeft) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.RotateLeft,
-                            contentDescription = "Nach links drehen"
+                            contentDescription = stringResource(R.string.orientation_rotate_left)
                         )
                     }
 
@@ -133,17 +135,17 @@ fun OrientationConfirmDialog(
                     Button(onClick = onConfirm) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Bestätigen"
+                            contentDescription = stringResource(R.string.orientation_confirm)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Bestätigen")
+                        Text(stringResource(R.string.orientation_confirm))
                     }
 
                     // Rotate Right
                     FilledTonalButton(onClick = onRotateRight) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.RotateRight,
-                            contentDescription = "Nach rechts drehen"
+                            contentDescription = stringResource(R.string.orientation_rotate_right)
                         )
                     }
                 }
@@ -154,11 +156,11 @@ fun OrientationConfirmDialog(
                 TextButton(onClick = onCancel) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Abbrechen",
+                        contentDescription = stringResource(R.string.orientation_cancel),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Abbrechen")
+                    Text(stringResource(R.string.orientation_cancel))
                 }
             }
         }

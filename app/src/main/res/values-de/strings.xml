@@ -175,4 +175,14 @@
     <string name="duration_hours">%1$d Std. %2$d Min.</string>
     <string name="scan_failed_reason">Scan fehlgeschlagen: %s</string>
     <string name="unknown_error">Unbekannter Fehler</string>
+
+    <!-- Orientation Confirmation Dialog -->
+    <string name="orientation_check_title">Ausrichtung prüfen</string>
+    <string name="orientation_uncertain_message">Die automatische Erkennung ist unsicher (%1$.0f%%).\nBitte prüfe die Ausrichtung:</string>
+    <string name="orientation_correction_label">Korrektur: %1$d°</string>
+    <string name="orientation_preview_description">Bildvorschau mit Korrektur</string>
+    <string name="orientation_rotate_left">Nach links drehen</string>
+    <string name="orientation_rotate_right">Nach rechts drehen</string>
+    <string name="orientation_confirm">Bestätigen</string>
+    <string name="orientation_cancel">Abbrechen</string>
 </resources>
