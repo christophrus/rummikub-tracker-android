@@ -38,11 +38,13 @@ fun PlayerAvatar(
     val hasImage = file?.exists() == true
 
     if (hasImage && file != null) {
+        val lastMod = file.lastModified()
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(file)
                 .memoryCachePolicy(CachePolicy.DISABLED)
                 .diskCachePolicy(CachePolicy.DISABLED)
+                .setParameter("lastModified", lastMod.toString())
                 .build(),
             contentDescription = name,
             modifier = modifier

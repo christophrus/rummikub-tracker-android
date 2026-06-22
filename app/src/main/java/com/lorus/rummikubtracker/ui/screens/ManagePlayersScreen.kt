@@ -36,6 +36,7 @@ class ManagePlayersViewModel @Inject constructor(
     private val playerManager: PlayerManager
 ) : androidx.lifecycle.ViewModel() {
     var players by mutableStateOf<List<Player>>(emptyList())
+    var playerListVersion by mutableStateOf(0)
     var playerToDelete by mutableStateOf<String?>(null)
     var editingPlayer by mutableStateOf<Player?>(null)
     var newPlayerName by mutableStateOf("")
@@ -140,6 +141,7 @@ class ManagePlayersViewModel @Inject constructor(
                 playerManager.deletePlayer(oldName)
             }
             playerManager.savePlayer(name, imagePath)
+            playerListVersion++
             showAddDialog = false
             editingPlayer = null
             newPlayerName = ""
@@ -218,7 +220,7 @@ fun ManagePlayersScreen(
                     state = lazyListState,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                items(viewModel.players) { player ->
+                items(viewModel.players, key = { "${it.name}_${viewModel.playerListVersion}" }) { player ->
                     ListItem(
                         headlineContent = { Text(player.name) },
                         leadingContent = {
