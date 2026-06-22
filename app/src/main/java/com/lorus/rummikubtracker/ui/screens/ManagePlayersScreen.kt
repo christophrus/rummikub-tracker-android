@@ -42,6 +42,7 @@ class ManagePlayersViewModel @Inject constructor(
     var showAddDialog by mutableStateOf(false)
     var pendingImageUri by mutableStateOf<Uri?>(null)
     var pendingImagePath by mutableStateOf<String?>(null)
+    var removePhoto by mutableStateOf(false)
 
     private val scope = kotlinx.coroutines.MainScope()
 
@@ -65,6 +66,7 @@ class ManagePlayersViewModel @Inject constructor(
         editingPlayer = null
         pendingImageUri = null
         pendingImagePath = null
+        removePhoto = false
         showAddDialog = true
     }
 
@@ -73,15 +75,23 @@ class ManagePlayersViewModel @Inject constructor(
         newPlayerName = player.name
         pendingImageUri = null
         pendingImagePath = player.imagePath
+        removePhoto = false
         showAddDialog = true
     }
 
     fun onImageSelected(uri: Uri) {
-        // Copy to temp file for preview
         pendingImageUri = uri
+        removePhoto = false
+    }
+
+    fun onRemovePhoto() {
+        pendingImageUri = null
+        pendingImagePath = null
+        removePhoto = true
     }
 
     fun getPreviewPath(context: android.content.Context): String? {
+        if (removePhoto) return null
         return pendingImagePath ?: pendingImageUri?.let { uri ->
             try {
                 val tempFile = java.io.File(context.cacheDir, "preview_avatar")
@@ -100,19 +110,27 @@ class ManagePlayersViewModel @Inject constructor(
         if (name.isEmpty()) return
 
         scope.launch {
-            // Compress and save image if a new one was picked
             var imagePath = editingPlayer?.imagePath
-            val uri = pendingImageUri
-            if (uri != null) {
-                // Copy to temp file first for compressAndSaveImage
-                val tempFile = java.io.File(context.cacheDir, "temp_avatar_${System.currentTimeMillis()}")
-                context.contentResolver.openInputStream(uri)?.use { input ->
-                    java.io.FileOutputStream(tempFile).use { output ->
-                        input.copyTo(output)
+
+            // Handle photo removal
+            if (removePhoto) {
+                // Delete old avatar file if exists
+                editingPlayer?.imagePath?.let { java.io.File(it).delete() }
+                imagePath = null
+            } else {
+                // Compress and save image if a new one was picked
+                val uri = pendingImageUri
+                if (uri != null) {
+                    // Copy to temp file first for compressAndSaveImage
+                    val tempFile = java.io.File(context.cacheDir, "temp_avatar_${System.currentTimeMillis()}")
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        java.io.FileOutputStream(tempFile).use { output ->
+                            input.copyTo(output)
+                        }
                     }
+                    imagePath = playerManager.compressAndSaveImage(name, tempFile.absolutePath)
+                    tempFile.delete()
                 }
-                imagePath = playerManager.compressAndSaveImage(name, tempFile.absolutePath)
-                tempFile.delete()
             }
 
             // If editing and name changed, delete old name first
@@ -135,6 +153,7 @@ class ManagePlayersViewModel @Inject constructor(
         newPlayerName = ""
         pendingImageUri = null
         pendingImagePath = null
+        removePhoto = false
     }
 }
 
@@ -256,10 +275,28 @@ fun ManagePlayersScreen(
                         size = 72
                     )
                     Spacer(Modifier.height(8.dp))
-                    TextButton(onClick = { imagePicker.launch("image/*") }) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.select_photo))
+                    Row {
+                        TextButton(onClick = { imagePicker.launch("image/*") }) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.select_photo))
+                        }
+                        // Show delete button when a photo exists
+                        if (viewModel.getPreviewPath(context) != null) {
+                            TextButton(onClick = { viewModel.onRemovePhoto() }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    stringResource(R.string.remove_photo),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
                     }
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(

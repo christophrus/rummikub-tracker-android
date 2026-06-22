@@ -170,6 +170,7 @@
     <string name="share_scoreboard">Spielstand teilen</string>
     <string name="screenshot_failed">Screenshot fehlgeschlagen</string>
     <string name="select_photo">Foto auswählen</string>
+    <string name="remove_photo">Foto entfernen</string>
     <string name="default_game_name">Spiel #%d</string>
     <string name="duration_minutes">%d Min.</string>
     <string name="duration_hours">%1$d Std. %2$d Min.</string>

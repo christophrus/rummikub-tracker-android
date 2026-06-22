@@ -170,6 +170,7 @@
     <string name="share_scoreboard">Partager le score</string>
     <string name="screenshot_failed">Échec de la capture</string>
     <string name="select_photo">Sélectionner une photo</string>
+    <string name="remove_photo">Supprimer la photo</string>
     <string name="default_game_name">Partie #%d</string>
     <string name="duration_minutes">%d min</string>
     <string name="duration_hours">%1$dh %2$d min</string>

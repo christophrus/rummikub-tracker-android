@@ -114,6 +114,7 @@
     <string name="share_scoreboard">Share Scoreboard</string>
     <string name="screenshot_failed">Screenshot failed</string>
     <string name="select_photo">Select Photo</string>
+    <string name="remove_photo">Remove Photo</string>
     <string name="default_game_name">Game #%d</string>
     <string name="duration_minutes">%dm</string>
     <string name="duration_hours">%1$dh %2$dm</string>
