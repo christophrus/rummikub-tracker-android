@@ -38,6 +38,10 @@ data class AnalysisUiState(
 
 class AnalysisViewModel(application: Application) : AndroidViewModel(application) {
 
+    companion object {
+        private const val TAG = "AnalysisViewModel"
+    }
+
     private val _uiState = MutableStateFlow(AnalysisUiState())
     val uiState: StateFlow<AnalysisUiState> = _uiState.asStateFlow()
 
@@ -70,9 +74,12 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                 val startTime = System.currentTimeMillis()
 
                 safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap, maxDimension = 1280)
+                Log.d(TAG, "Downscaled: ${safeBitmap!!.width}x${safeBitmap!!.height} (original: ${bitmap.width}x${bitmap.height})")
+
                 val orientationInput = OrientationPreprocessor.preprocess(safeBitmap!!)
                 val orientationResult = orientationDetector.detect(orientationInput)
                 val correctionDegrees = orientationDetector.correctionDegrees(orientationResult.degrees)
+                Log.d(TAG, "Orientation: ${orientationResult.degrees}°, correction: ${correctionDegrees}°, maxConf: ${"%.2f".format(orientationResult.confidences.maxOrNull() ?: 0f)}")
 
                 // Check if orientation confidence is too low → ask user
                 val maxConf = orientationResult.confidences.maxOrNull() ?: 0f
@@ -100,12 +107,18 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                 } else safeBitmap
 
                 // Step 2: YOLO tile detection
+                Log.d(TAG, "Starting YOLO preprocess: bitmap=${orientedBitmap!!.width}x${orientedBitmap!!.height}")
                 val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap!!)
+                Log.d(TAG, "YOLO preprocess done: inputArray.size=${inputArray.size}, scale=${letterboxInfo.scale}, pad=(${letterboxInfo.padX},${letterboxInfo.padY})")
+
                 val rawOutput = detector.detect(inputArray)
+                Log.d(TAG, "YOLO detect done: rawOutput.size=${rawOutput.size}")
+
                 val tiles = NmsProcessor.postProcess(
                     rawOutput, letterboxInfo, orientedBitmap!!.width, orientedBitmap!!.height,
                     confThreshold = confThreshold
                 )
+                Log.d(TAG, "NMS done: ${tiles.size} tiles found")
                 val elapsed = System.currentTimeMillis() - startTime
 
                 val totalScore = tiles.sumOf {
@@ -120,6 +133,7 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
                     imageWidth = orientedBitmap!!.width,
                     imageHeight = orientedBitmap.height
                 )
+                Log.d(TAG, "Analysis complete: ${tiles.size} tiles, score=$totalScore, time=${elapsed}ms")
 
                 // Save to history with original image
                 historyRepository.saveResult(result, tiles, orientedBitmap)

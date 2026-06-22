@@ -44,7 +44,7 @@ object ImagePreprocessor {
         val canvas = Canvas(letterboxed)
         canvas.drawColor(Color.rgb(114, 114, 114))
         canvas.drawBitmap(scaledBitmap, padX, padY, null)
-        scaledBitmap.recycle()
+        if (scaledBitmap != bitmap) scaledBitmap.recycle()
 
         // Convert to CHW float array normalized to [0, 1]
         val floatArray = FloatArray(3 * INPUT_SIZE * INPUT_SIZE)
