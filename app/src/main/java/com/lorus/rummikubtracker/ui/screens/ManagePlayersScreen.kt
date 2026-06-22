@@ -81,6 +81,7 @@ class ManagePlayersViewModel @Inject constructor(
 
     fun onImageSelected(uri: Uri) {
         pendingImageUri = uri
+        pendingImagePath = null
         removePhoto = false
     }
 
@@ -275,27 +276,25 @@ fun ManagePlayersScreen(
                         size = 72
                     )
                     Spacer(Modifier.height(8.dp))
-                    Row {
-                        TextButton(onClick = { imagePicker.launch("image/*") }) {
-                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                    TextButton(onClick = { imagePicker.launch("image/*") }) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.select_photo))
+                    }
+                    // Show delete button when a photo exists, below the select button
+                    if (viewModel.getPreviewPath(context) != null) {
+                        TextButton(onClick = { viewModel.onRemovePhoto() }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                             Spacer(Modifier.width(6.dp))
-                            Text(stringResource(R.string.select_photo))
-                        }
-                        // Show delete button when a photo exists
-                        if (viewModel.getPreviewPath(context) != null) {
-                            TextButton(onClick = { viewModel.onRemovePhoto() }) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    stringResource(R.string.remove_photo),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
+                            Text(
+                                stringResource(R.string.remove_photo),
+                                color = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                     Spacer(Modifier.height(12.dp))
