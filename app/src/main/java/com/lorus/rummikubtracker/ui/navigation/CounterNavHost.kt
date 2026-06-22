@@ -166,7 +166,8 @@ fun CounterNavHost(
                     onBack = {
                         viewModel.reset()
                         navController.popBackStack()
-                    }
+                    },
+                    showFab = false
                 )
             }
         }
