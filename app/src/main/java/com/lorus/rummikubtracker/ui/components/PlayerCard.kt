@@ -17,8 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.lorus.rummikubtracker.R
 import com.lorus.rummikubtracker.ui.theme.Indigo40
 import com.lorus.rummikubtracker.ui.theme.Purple40
@@ -36,7 +39,11 @@ fun PlayerAvatar(
 
     if (hasImage && file != null) {
         AsyncImage(
-            model = file,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(file)
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .diskCachePolicy(CachePolicy.DISABLED)
+                .build(),
             contentDescription = name,
             modifier = modifier
                 .size(size.dp)
