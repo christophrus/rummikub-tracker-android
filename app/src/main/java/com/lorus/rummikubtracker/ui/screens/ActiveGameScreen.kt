@@ -89,7 +89,12 @@ data class ActiveGameUiState(
     val scrollLocked: Boolean = false,
     val scannedPlayerName: String? = null,
     val showScanSourceDialog: Boolean = false,
-    val clockHintDismissed: Boolean = false
+    val clockHintDismissed: Boolean = false,
+    // Orientation confirmation flow
+    val showOrientationConfirm: Boolean = false,
+    val orientationConfirmBitmap: Bitmap? = null,
+    val orientationCorrectionDegrees: Int = 0,
+    val orientationMaxConfidence: Float = 0f
 )
 
 @HiltViewModel
@@ -328,6 +333,9 @@ class ActiveGameViewModel @Inject constructor(
         HistoryRepository(db.analysisDao(), appContext)
     }
 
+    /** Holds the downscaled (unrotated) bitmap while the orientation confirmation dialog is shown. */
+    private var pendingSafeBitmap: Bitmap? = null
+
     fun startTileScan(playerName: String) {
         uiState = uiState.copy(
             scannedPlayerName = playerName,
@@ -362,8 +370,27 @@ class ActiveGameViewModel @Inject constructor(
                 val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold
                 safeBitmap = ImagePreprocessor.downscaleIfNeeded(bitmap, maxDimension = 1280)
                 val orientationInput = OrientationPreprocessor.preprocess(safeBitmap!!)
-                val detectedDegrees = orientationDetector.detect(orientationInput)
-                val correctionDegrees = orientationDetector.correctionDegrees(detectedDegrees)
+                val orientationResult = orientationDetector.detect(orientationInput)
+                val correctionDegrees = orientationDetector.correctionDegrees(orientationResult.degrees)
+
+                // Check if orientation confidence is too low → ask user
+                val maxConf = orientationResult.confidences.maxOrNull() ?: 0f
+                if (maxConf < 0.9f) {
+                    orientedBitmap = if (correctionDegrees != 0) {
+                        ImagePreprocessor.rotateBitmap(safeBitmap!!, correctionDegrees)
+                    } else safeBitmap
+                    pendingSafeBitmap = safeBitmap
+                    uiState = uiState.copy(
+                        isScanning = uiState.isScanning - playerName,
+                        showOrientationConfirm = true,
+                        orientationConfirmBitmap = orientedBitmap,
+                        orientationCorrectionDegrees = correctionDegrees,
+                        orientationMaxConfidence = maxConf,
+                        scannedPlayerName = playerName // remember for when confirmed
+                    )
+                    return@launch
+                }
+
                 orientedBitmap = if (correctionDegrees != 0) {
                     val rotated = ImagePreprocessor.rotateBitmap(safeBitmap!!, correctionDegrees)
                     if (rotated != safeBitmap) safeBitmap!!.recycle()
@@ -402,6 +429,103 @@ class ActiveGameViewModel @Inject constructor(
                     isScanning = uiState.isScanning - playerName,
                     validationError = e.message?.let { "Scan failed: ${it.take(60)}" } ?: "scan_failed"
                 )
+            }
+        }
+    }
+
+    /** User confirms the orientation — continue to YOLO detection. */
+    fun confirmOrientation() {
+        val state = uiState
+        val bitmap = state.orientationConfirmBitmap ?: return
+        val playerName = state.scannedPlayerName ?: return
+        val safeBitmap = pendingSafeBitmap
+        pendingSafeBitmap = null
+        uiState = uiState.copy(
+            showOrientationConfirm = false,
+            orientationConfirmBitmap = null,
+            scannedPlayerName = null,
+            isScanning = uiState.isScanning + playerName
+        )
+        continueWithYolo(bitmap, state.orientationCorrectionDegrees, safeBitmap, playerName)
+    }
+
+    /** User rotates the orientation preview 90° clockwise. */
+    fun rotateOrientationRight() {
+        val currentBmp = uiState.orientationConfirmBitmap ?: return
+        val newCorrection = (uiState.orientationCorrectionDegrees + 90) % 360
+        val rotated = Bitmap.createBitmap(currentBmp, 0, 0, currentBmp.width, currentBmp.height,
+            android.graphics.Matrix().apply { postRotate(90f) }, true)
+        if (rotated != currentBmp) currentBmp.recycle()
+        uiState = uiState.copy(
+            orientationConfirmBitmap = rotated,
+            orientationCorrectionDegrees = newCorrection
+        )
+    }
+
+    /** User rotates the orientation preview 90° counter-clockwise. */
+    fun rotateOrientationLeft() {
+        val currentBmp = uiState.orientationConfirmBitmap ?: return
+        val newCorrection = (uiState.orientationCorrectionDegrees - 90 + 360) % 360
+        val rotated = Bitmap.createBitmap(currentBmp, 0, 0, currentBmp.width, currentBmp.height,
+            android.graphics.Matrix().apply { postRotate(-90f) }, true)
+        if (rotated != currentBmp) currentBmp.recycle()
+        uiState = uiState.copy(
+            orientationConfirmBitmap = rotated,
+            orientationCorrectionDegrees = newCorrection
+        )
+    }
+
+    /** User cancels orientation confirmation. */
+    fun cancelOrientationConfirmation() {
+        pendingSafeBitmap?.recycle()
+        pendingSafeBitmap = null
+        uiState = uiState.copy(
+            showOrientationConfirm = false,
+            orientationConfirmBitmap = null,
+            scannedPlayerName = null
+        )
+    }
+
+    /** Continues the YOLO pipeline after orientation is confirmed. */
+    private fun continueWithYolo(orientedBitmap: Bitmap, correctionDegrees: Int, safeBitmap: Bitmap?, playerName: String) {
+        kotlinx.coroutines.MainScope().launch(Dispatchers.Default) {
+            try {
+                val startTime = System.currentTimeMillis()
+                val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold
+
+                val (inputArray, letterboxInfo) = ImagePreprocessor.preprocess(orientedBitmap)
+                val rawOutput = yoloDetector.detect(inputArray)
+                val tiles = NmsProcessor.postProcess(
+                    rawOutput, letterboxInfo, orientedBitmap.width, orientedBitmap.height,
+                    confThreshold = confThreshold
+                )
+                val totalScore = tiles.sumOf { if (it.isJoker) 20 else (it.number ?: 0) }
+                val elapsed = System.currentTimeMillis() - startTime
+                val result = com.lorus.rummikubtracker.counter.model.AnalysisResult(
+                    tiles = tiles,
+                    totalScore = totalScore,
+                    tileCount = tiles.size,
+                    processingTimeMs = elapsed,
+                    imageWidth = orientedBitmap.width,
+                    imageHeight = orientedBitmap.height
+                )
+
+                try {
+                    historyRepository.saveResult(result, tiles, orientedBitmap)
+                } catch (_: Exception) { }
+
+                uiState = uiState.copy(
+                    isScanning = uiState.isScanning - playerName,
+                    scores = uiState.scores + (playerName to totalScore.toString()),
+                    validationError = null
+                )
+            } catch (e: Exception) {
+                uiState = uiState.copy(
+                    isScanning = uiState.isScanning - playerName,
+                    validationError = e.message?.let { "Scan failed: ${it.take(60)}" } ?: "scan_failed"
+                )
+            } finally {
+                safeBitmap?.let { if (it != orientedBitmap && !it.isRecycled) it.recycle() }
             }
         }
     }
@@ -532,6 +656,22 @@ fun ActiveGameScreen(
                 }
             }
         )
+    }
+
+    // Orientation confirmation dialog
+    if (state.showOrientationConfirm) {
+        val confirmBitmap = state.orientationConfirmBitmap
+        if (confirmBitmap != null) {
+            com.lorus.rummikubtracker.counter.ui.screens.OrientationConfirmDialog(
+                bitmap = confirmBitmap,
+                correctionDegrees = state.orientationCorrectionDegrees,
+                maxConfidence = state.orientationMaxConfidence,
+                onRotateLeft = { viewModel.rotateOrientationLeft() },
+                onRotateRight = { viewModel.rotateOrientationRight() },
+                onConfirm = { viewModel.confirmOrientation() },
+                onCancel = { viewModel.cancelOrientationConfirmation() }
+            )
+        }
     }
 
     LaunchedEffect(gameId) {

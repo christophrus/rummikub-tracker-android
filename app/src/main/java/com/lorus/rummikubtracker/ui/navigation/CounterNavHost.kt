@@ -239,5 +239,21 @@ fun CounterNavHost(
                 }
             }
         }
+
+        // Orientation confirmation dialog
+        if (uiState.showOrientationConfirm) {
+            val confirmBitmap = uiState.orientationConfirmBitmap
+            if (confirmBitmap != null) {
+                OrientationConfirmDialog(
+                    bitmap = confirmBitmap,
+                    correctionDegrees = uiState.orientationCorrectionDegrees,
+                    maxConfidence = uiState.orientationMaxConfidence,
+                    onRotateLeft = { viewModel.rotateOrientationLeft() },
+                    onRotateRight = { viewModel.rotateOrientationRight() },
+                    onConfirm = { viewModel.confirmOrientation() },
+                    onCancel = { viewModel.cancelOrientationConfirmation() }
+                )
+            }
+        }
     }
 }
