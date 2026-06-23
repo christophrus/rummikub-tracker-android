@@ -23,7 +23,7 @@ class YoloDetector private constructor(context: Context) {
     private val session: OrtSession
 
     init {
-        val modelBytes = context.assets.open("RummiQ_yolo.onnx").readBytes()
+        val modelBytes = context.assets.open("rummikub_yolo.onnx").readBytes()
         val options = OrtSession.SessionOptions()
         session = env.createSession(modelBytes, options)
     }

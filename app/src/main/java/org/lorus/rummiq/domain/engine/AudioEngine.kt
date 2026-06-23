@@ -55,7 +55,7 @@ class AudioEngine @Inject constructor(
     }
 
     fun speak(text: String) {
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "RummiQ_tts_${System.currentTimeMillis()}")
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "rummikub_tts_${System.currentTimeMillis()}")
     }
 
     fun playTick() {

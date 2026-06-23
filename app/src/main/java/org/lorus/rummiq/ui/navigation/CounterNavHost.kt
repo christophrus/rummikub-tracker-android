@@ -88,10 +88,17 @@ fun CounterNavHost(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
+        android.util.Log.d("CounterNavHost", "Gallery result: uri=$uri")
         uri?.let {
-            val bitmap = android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            viewModel.analyze(bitmap)
-        }
+            try {
+                val bitmap = android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                android.util.Log.d("CounterNavHost", "Bitmap decoded: ${bitmap.width}x${bitmap.height}")
+                viewModel.analyze(bitmap)
+            } catch (e: Exception) {
+                android.util.Log.e("CounterNavHost", "Gallery pick failed", e)
+                Toast.makeText(context, "Failed to load image: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } ?: android.util.Log.d("CounterNavHost", "Gallery result: uri is null")
     }
 
     // Camera permission launcher
