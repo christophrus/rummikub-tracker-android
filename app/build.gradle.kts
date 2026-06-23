@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.lorus.rummikubtracker"
+    namespace = "org.lorus.rummiq"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.lorus.rummikubtracker"
+        applicationId = "org.lorus.rummiq"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

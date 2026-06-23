@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rummikub Tracker</string>
-    <string name="home_title">Rummikub Tracker</string>
+    <string name="app_name">RummiQ</string>
+    <string name="home_title">RummiQ</string>
     <string name="game_in_progress">Partie en cours</string>
     <string name="resume_game">Reprendre la partie</string>
     <string name="cancel_game">Annuler la partie</string>
@@ -15,7 +15,7 @@
     <string name="game_history_desc">Voir les parties passées et résultats</string>
     <string name="counter_desc">Détecter les tuiles avec l\'IA et calculer les scores</string>
     <string name="settings_desc">Langue, thème et gestion des données</string>
-    <string name="home_subtitle">Suivez vos parties de Rummikub</string>
+    <string name="home_subtitle">Suivez vos parties de RummiQ</string>
     <string name="new_game_title">Nouvelle partie</string>
     <string name="game_name">Nom de la partie</string>
     <string name="game_name_hint">Entrez le nom (optionnel)</string>

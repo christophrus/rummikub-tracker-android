@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RummikubTracker"
+rootProject.name = "RummiQ"
 include(":app")

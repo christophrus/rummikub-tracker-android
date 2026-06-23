@@ -1,3 +1,3 @@
 # Add project specific ProGuard rules here.
 -keepattributes *Annotation*
--keep class com.lorus.rummikubtracker.data.local.entity.** { *; }
+-keep class org.lorus.rummiq.data.local.entity.** { *; }

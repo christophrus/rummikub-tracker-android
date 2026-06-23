@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rummikub Tracker</string>
-    <string name="home_title">Rummikub Tracker</string>
+    <string name="app_name">RummiQ</string>
+    <string name="home_title">RummiQ</string>
     <string name="game_in_progress">Laufendes Spiel</string>
     <string name="resume_game">Spiel fortsetzen</string>
     <string name="cancel_game">Spiel abbrechen</string>
@@ -10,12 +10,12 @@
     <string name="game_history">Spielverlauf</string>
     <string name="settings">Einstellungen</string>
     <string name="counter">Steine Zähler</string>
-    <string name="new_game_desc">Neue Rummikub-Runde mit Timer starten</string>
+    <string name="new_game_desc">Neue RummiQ-Runde mit Timer starten</string>
     <string name="manage_players_desc">Spieler hinzufügen, bearbeiten oder löschen</string>
     <string name="game_history_desc">Vergangene Spiele und Ergebnisse anzeigen</string>
     <string name="counter_desc">Steine mit KI erkennen und Punkte berechnen</string>
     <string name="settings_desc">Sprache, Design und Datenverwaltung</string>
-    <string name="home_subtitle">Verfolge deine Rummikub-Spiele</string>
+    <string name="home_subtitle">Verfolge deine RummiQ-Spiele</string>
     <string name="new_game_title">Neues Spiel</string>
     <string name="game_name">Spielname</string>
     <string name="game_name_hint">Spielname eingeben (optional)</string>
@@ -123,7 +123,7 @@
     <string name="confidence">Konfidenz: %1$.0f%%</string>
     <string name="processing_time">Verarbeitung: %d ms</string>
     <string name="camera_permission_title">Kamera-Berechtigung erforderlich</string>
-    <string name="camera_permission_text">Kamera-Zugriff wird benötigt, um Rummikub-Steine zu erkennen.</string>
+    <string name="camera_permission_text">Kamera-Zugriff wird benötigt, um RummiQ-Steine zu erkennen.</string>
     <string name="camera_permission_required">Kamera-Berechtigung wird zum Fotografieren benötigt.</string>
     <string name="grant_permission">Berechtigung erteilen</string>
     <string name="no_detections">Keine Steine erkannt</string>
