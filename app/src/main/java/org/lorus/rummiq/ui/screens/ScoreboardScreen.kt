@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.lorus.rummiq.R
 import org.lorus.rummiq.data.repository.GameRepository
+import org.lorus.rummiq.domain.engine.TimerEngine
 import org.lorus.rummiq.domain.model.Game
 import org.lorus.rummiq.domain.usecase.GameManager
 import org.lorus.rummiq.ui.components.ScrollIndicator
@@ -45,7 +46,8 @@ private val PLAYER_COLORS = listOf(
 @HiltViewModel
 class ScoreboardViewModel @Inject constructor(
     private val gameRepository: GameRepository,
-    private val gameManager: GameManager
+    private val gameManager: GameManager,
+    private val timerEngine: TimerEngine
 ) : androidx.lifecycle.ViewModel() {
 
     var game by mutableStateOf<Game?>(null)
@@ -65,6 +67,7 @@ class ScoreboardViewModel @Inject constructor(
         val g = game ?: return
         scope.launch {
             gameManager.endGame(g)
+            timerEngine.stop()
             onDone()
         }
     }
