@@ -15,7 +15,7 @@ object Routes {
     const val PLAYER_SELECTION = "player_selection/{gameId}"
     const val ACTIVE_GAME = "active_game/{gameId}"
     const val MANAGE_PLAYERS = "manage_players"
-    const val GAME_HISTORY = "game_history"
+    const val GAME_HISTORY = "game_history?expandGameId={expandGameId}"
     const val SETTINGS = "settings"
     const val COUNTER = "counter"
     const val SCOREBOARD = "scoreboard/{gameId}"
@@ -23,6 +23,7 @@ object Routes {
     fun playerSelection(gameId: Long) = "player_selection/$gameId"
     fun activeGame(gameId: Long) = "active_game/$gameId"
     fun scoreboard(gameId: Long) = "scoreboard/$gameId"
+    fun gameHistory(expandGameId: Long = -1L) = "game_history?expandGameId=$expandGameId"
 }
 
 @Composable
@@ -38,7 +39,7 @@ fun RummiQNavHost(
                 onNewGame = { navController.navigate(Routes.NEW_GAME) },
                 onResumeGame = { gameId -> navController.navigate(Routes.activeGame(gameId)) },
                 onManagePlayers = { navController.navigate(Routes.MANAGE_PLAYERS) },
-                onGameHistory = { navController.navigate(Routes.GAME_HISTORY) },
+                onGameHistory = { navController.navigate(Routes.gameHistory()) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 onCounter = { navController.navigate(Routes.COUNTER) }
             )
@@ -94,10 +95,15 @@ fun RummiQNavHost(
             )
         }
 
-        composable(Routes.GAME_HISTORY) {
+        composable(
+            route = Routes.GAME_HISTORY,
+            arguments = listOf(navArgument("expandGameId") { type = NavType.LongType; defaultValue = -1L })
+        ) { backStackEntry ->
+            val expandGameId = backStackEntry.arguments?.getLong("expandGameId") ?: -1L
             GameHistoryScreen(
                 onBack = { navController.popBackStack() },
-                onViewGame = { gameId -> navController.navigate(Routes.activeGame(gameId)) }
+                onViewGame = { gameId -> navController.navigate(Routes.activeGame(gameId)) },
+                expandGameId = expandGameId
             )
         }
 
@@ -121,8 +127,8 @@ fun RummiQNavHost(
             ScoreboardScreen(
                 gameId = gameId,
                 onBack = { navController.popBackStack() },
-                onGameEnded = {
-                    navController.navigate(Routes.HOME) {
+                onGameEnded = { endedGameId ->
+                    navController.navigate(Routes.gameHistory(endedGameId)) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
                 }

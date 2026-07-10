@@ -93,11 +93,19 @@ data class EditingScore(
 fun GameHistoryScreen(
     onBack: () -> Unit,
     onViewGame: (Long) -> Unit,
+    expandGameId: Long = -1L,
     viewModel: GameHistoryViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
     val context = LocalContext.current
+
+    // Auto-expand the game when navigated here with a specific game ID
+    LaunchedEffect(expandGameId) {
+        if (expandGameId > 0) {
+            viewModel.expandedGameId = expandGameId
+        }
+    }
 
     Scaffold(
         topBar = {

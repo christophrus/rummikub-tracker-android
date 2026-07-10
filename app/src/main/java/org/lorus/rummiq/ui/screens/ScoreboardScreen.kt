@@ -63,12 +63,13 @@ class ScoreboardViewModel @Inject constructor(
         }
     }
 
-    fun endGame(onDone: () -> Unit) {
+    fun endGame(onDone: (Long) -> Unit) {
         val g = game ?: return
+        val gid = g.id
         scope.launch {
             gameManager.endGame(g)
             timerEngine.stop()
-            onDone()
+            onDone(gid)
         }
     }
 }
@@ -78,7 +79,7 @@ class ScoreboardViewModel @Inject constructor(
 fun ScoreboardScreen(
     gameId: Long,
     onBack: () -> Unit,
-    onGameEnded: () -> Unit = {},
+    onGameEnded: (Long) -> Unit = {},
     viewModel: ScoreboardViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     LaunchedEffect(gameId) {
