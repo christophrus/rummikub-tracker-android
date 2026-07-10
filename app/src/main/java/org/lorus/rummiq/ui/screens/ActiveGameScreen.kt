@@ -955,10 +955,11 @@ fun ActiveGameScreen(
                         Badge(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = 12.dp, y = (-10).dp),
+                                .offset(x = 12.dp, y = (-10).dp)
+                                .size(28.dp),
                             containerColor = Color(0xFFE53935)
                         ) {
-                            Text("$remaining", color = Color.White, style = MaterialTheme.typography.titleSmall)
+                            Text("$remaining", color = Color.White, style = MaterialTheme.typography.titleMedium)
                         }
                     }
 
