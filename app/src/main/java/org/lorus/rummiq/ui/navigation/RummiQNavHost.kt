@@ -129,7 +129,7 @@ fun RummiQNavHost(
                 onBack = { navController.popBackStack() },
                 onGameEnded = { endedGameId ->
                     navController.navigate(Routes.gameHistory(endedGameId)) {
-                        popUpTo(Routes.HOME) { inclusive = true }
+                        popUpTo(Routes.HOME)
                     }
                 }
             )
