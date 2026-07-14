@@ -233,6 +233,7 @@ class ActiveGameViewModel @Inject constructor(
 
     fun skipPlayer() {
         val game = uiState.game ?: return
+        if (game.players.isEmpty()) return
         val nextIndex = (game.currentPlayerIndex + 1) % game.players.size
         val nextPlayer = game.players[nextIndex]
 

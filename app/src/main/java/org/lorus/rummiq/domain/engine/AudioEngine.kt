@@ -24,9 +24,22 @@ class AudioEngine @Inject constructor(
 
     private var currentTtsLanguage: Locale = Locale.ENGLISH
 
+    /** Managed scope for one-shot audio playback; cancelled in [destroy]. */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** Idempotent: repeated calls must not leak a second ToneGenerator/TextToSpeech. */
     fun initialize() {
-        toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
-        initTts()
+        if (toneGenerator == null) {
+            toneGenerator = try {
+                ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
+            } catch (e: RuntimeException) {
+                // ToneGenerator can throw on some devices when the audio resource is unavailable.
+                null
+            }
+        }
+        if (tts == null) {
+            initTts()
+        }
     }
 
     private fun initTts() {
@@ -127,7 +140,7 @@ class AudioEngine @Inject constructor(
     }
 
     fun playVictory() {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             playFanfare()
         }
     }
@@ -196,6 +209,7 @@ class AudioEngine @Inject constructor(
     }
 
     fun destroy() {
+        scope.cancel()
         toneGenerator?.release()
         toneGenerator = null
         tts?.stop()

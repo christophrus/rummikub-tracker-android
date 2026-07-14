@@ -1,5 +1,7 @@
 package org.lorus.rummiq.data.repository
 
+import androidx.room.withTransaction
+import org.lorus.rummiq.data.local.AppDatabase
 import org.lorus.rummiq.data.local.dao.*
 import org.lorus.rummiq.data.local.entity.*
 import org.lorus.rummiq.domain.model.Game
@@ -14,11 +16,15 @@ import javax.inject.Singleton
 
 @Singleton
 class GameRepository @Inject constructor(
+    private val db: AppDatabase,
     private val gameDao: GameDao,
     private val roundDao: RoundDao,
     private val roundScoreDao: RoundScoreDao,
     private val gamePlayerDao: GamePlayerDao
 ) {
+    /** Runs [block] in a single DB transaction. Nesting is supported by Room. */
+    suspend fun <T> runInTransaction(block: suspend () -> T): T = db.withTransaction(block)
+
     fun getActiveGame(): Flow<Game?> = gameDao.getActiveGameFlow().map { entity ->
         entity?.let { gameEntityToGame(it) }
     }
@@ -36,7 +42,7 @@ class GameRepository @Inject constructor(
         entities.map { gameEntityToGame(it) }
     }
 
-    suspend fun createGame(game: Game): Long {
+    suspend fun createGame(game: Game): Long = db.withTransaction {
         val entity = GameEntity(
             name = game.name,
             status = game.status,
@@ -63,7 +69,7 @@ class GameRepository @Inject constructor(
             )
         }
         gamePlayerDao.insertGamePlayers(gamePlayers)
-        return gameId
+        gameId
     }
 
     suspend fun updateGame(game: Game) {
@@ -90,7 +96,7 @@ class GameRepository @Inject constructor(
         gameDao.deleteGameById(gameId)
     }
 
-    suspend fun saveRound(round: Round): Long {
+    suspend fun saveRound(round: Round): Long = db.withTransaction {
         val entity = RoundEntity(
             gameId = round.gameId,
             roundNumber = round.roundNumber,
@@ -103,10 +109,10 @@ class GameRepository @Inject constructor(
             RoundScoreEntity(roundId = roundId, playerName = playerName, score = score)
         }
         roundScoreDao.insertScores(scores)
-        return roundId
+        roundId
     }
 
-    suspend fun updateRound(round: Round) {
+    suspend fun updateRound(round: Round) = db.withTransaction {
         val entity = RoundEntity(
             id = round.id,
             gameId = round.gameId,

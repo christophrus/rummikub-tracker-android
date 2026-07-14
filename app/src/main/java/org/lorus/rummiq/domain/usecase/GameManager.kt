@@ -15,27 +15,32 @@ class GameManager @Inject constructor(
     }
 
     suspend fun saveRound(game: Game, round: Round) {
-        gameRepository.saveRound(round)
-        val nextRound = game.currentRound + 1
-        // Rotate beginner by exactly 1 from the previous round's beginner
-        val nextBeginnerIndex = (game.roundBeginnerIndex + 1) % game.players.size
+        // Persist the round and advance the game counters atomically so a failure can't
+        // leave the round saved but the game state (round/beginner/maxExtensions) unadvanced.
+        gameRepository.runInTransaction {
+            gameRepository.saveRound(round)
+            val nextRound = game.currentRound + 1
+            // Rotate beginner by exactly 1 from the previous round's beginner
+            val nextBeginnerIndex = if (game.players.isEmpty()) 0
+                else (game.roundBeginnerIndex + 1) % game.players.size
 
-        // Handle extension replenishment — increase maxExtensions for all players
-        val newMaxExtensions = if (game.extensionReplenishRounds > 0 && nextRound % game.extensionReplenishRounds == 0) {
-            gameRepository.incrementAllMaxExtensions(game.id)
-            game.maxExtensions + 1
-        } else {
-            game.maxExtensions
-        }
+            // Handle extension replenishment — increase maxExtensions for all players
+            val newMaxExtensions = if (game.extensionReplenishRounds > 0 && nextRound % game.extensionReplenishRounds == 0) {
+                gameRepository.incrementAllMaxExtensions(game.id)
+                game.maxExtensions + 1
+            } else {
+                game.maxExtensions
+            }
 
-        gameRepository.updateGame(
-            game.copy(
-                currentRound = nextRound,
-                currentPlayerIndex = nextBeginnerIndex,
-                roundBeginnerIndex = nextBeginnerIndex,
-                maxExtensions = newMaxExtensions
+            gameRepository.updateGame(
+                game.copy(
+                    currentRound = nextRound,
+                    currentPlayerIndex = nextBeginnerIndex,
+                    roundBeginnerIndex = nextBeginnerIndex,
+                    maxExtensions = newMaxExtensions
+                )
             )
-        )
+        }
     }
 
     suspend fun endGame(game: Game): Game {

@@ -1,5 +1,6 @@
 package org.lorus.rummiq.domain.engine
 
+import android.os.SystemClock
 import org.lorus.rummiq.domain.model.Config
 import org.lorus.rummiq.domain.model.TimerState
 import kotlinx.coroutines.*
@@ -32,6 +33,17 @@ class TimerEngine @Inject constructor() {
     private var timerJob: Job? = null
     private var totalDuration: Long = 0L
 
+    /** Monotonic wall-clock deadline; the countdown derives remaining time from this instead of counting ticks. */
+    @Volatile private var targetEndTime: Long = 0L
+
+    /** Time source in milliseconds; injectable for testing. Defaults to the monotonic elapsed-realtime clock. */
+    internal var timeSource: () -> Long = { SystemClock.elapsedRealtime() }
+
+    /** Single managed scope for the countdown; created lazily so tests can inject the dispatcher first. */
+    private var engineScope: CoroutineScope? = null
+    private fun scope(): CoroutineScope =
+        engineScope ?: CoroutineScope(SupervisorJob() + countdownDispatcher).also { engineScope = it }
+
     var onTick: ((Long) -> Unit)? = null
     var onTimeUp: (() -> Unit)? = null
     var onTickSound: (() -> Unit)? = null
@@ -49,6 +61,7 @@ class TimerEngine @Inject constructor() {
         if (_timerState.value == TimerState.RUNNING) return
         if (_remainingMs.value <= 0) {
             _remainingMs.value = totalDuration
+            _effectiveTotalMs.value = totalDuration
         }
         _timerState.value = TimerState.RUNNING
         startCountdown()
@@ -90,6 +103,8 @@ class TimerEngine @Inject constructor() {
 
         _extensionsUsed.value += 1
         _remainingMs.value += Config.EXTENSION_DURATION_MS
+        // Push the wall-clock deadline too so the running countdown keeps the added time.
+        targetEndTime += Config.EXTENSION_DURATION_MS
         // After extension, the clock should be fully filled
         _effectiveTotalMs.value = _remainingMs.value
         return true
@@ -116,27 +131,41 @@ class TimerEngine @Inject constructor() {
 
     private fun startCountdown() {
         timerJob?.cancel()
-        timerJob = CoroutineScope(countdownDispatcher).launch {
-            while (_remainingMs.value > 0 && _timerState.value == TimerState.RUNNING) {
-                delay(1000)
-                if (_timerState.value != TimerState.RUNNING) break
-                _remainingMs.value -= 1000
-                onTick?.invoke(_remainingMs.value)
+        timerJob = scope().launch {
+            // Anchor the deadline to the monotonic clock so drift and background pauses self-correct.
+            targetEndTime = timeSource() + _remainingMs.value
+            var lastShownSecond = -1L
+            while (isActive && _timerState.value == TimerState.RUNNING) {
+                val remainingRaw = (targetEndTime - timeSource()).coerceAtLeast(0L)
+                // Round up to whole seconds so the mm:ss display never skips a second.
+                val remainingSecond = (remainingRaw + 999L) / 1000L
 
-                if (_remainingMs.value <= Config.TICK_START_SECONDS * 1000 && _remainingMs.value > 0) {
-                    onTickSound?.invoke()
+                if (remainingSecond != lastShownSecond) {
+                    lastShownSecond = remainingSecond
+                    _remainingMs.value = remainingSecond * 1000L
+                    onTick?.invoke(_remainingMs.value)
+
+                    if (remainingRaw > 0L && _remainingMs.value <= Config.TICK_START_SECONDS * 1000L) {
+                        onTickSound?.invoke()
+                    }
                 }
 
-                if (_remainingMs.value <= 0) {
+                if (remainingRaw <= 0L) {
+                    _remainingMs.value = 0L
                     _timerState.value = TimerState.STOPPED
                     onTimeUp?.invoke()
                     break
                 }
+
+                // Sample well below one second so the display updates promptly on each second boundary.
+                delay(200)
             }
         }
     }
 
     fun destroy() {
         timerJob?.cancel()
+        engineScope?.cancel()
+        engineScope = null
     }
 }
