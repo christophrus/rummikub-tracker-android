@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import android.Manifest
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -110,7 +112,7 @@ class ActiveGameViewModel @Inject constructor(
     var uiState by mutableStateOf(ActiveGameUiState())
         private set
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
     private var gameId: Long = 0
 
     fun loadGame(id: Long) {
@@ -362,7 +364,7 @@ class ActiveGameViewModel @Inject constructor(
             scannedPlayerName = null
         )
 
-        kotlinx.coroutines.MainScope().launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             var safeBitmap: Bitmap? = null
             var orientedBitmap: Bitmap? = null
             try {
@@ -488,7 +490,7 @@ class ActiveGameViewModel @Inject constructor(
 
     /** Continues the YOLO pipeline after orientation is confirmed. */
     private fun continueWithYolo(orientedBitmap: Bitmap, correctionDegrees: Int, safeBitmap: Bitmap?, playerName: String) {
-        kotlinx.coroutines.MainScope().launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             try {
                 val startTime = System.currentTimeMillis()
                 val confThreshold = preferencesDataStore.preferences.first().confidenceThreshold

@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -52,7 +54,7 @@ class NewGameViewModel @Inject constructor(
     var newPlayerName by mutableStateOf("")
     var errorMessage by mutableStateOf<String?>(null)
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
 
     init {
         scope.launch {

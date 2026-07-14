@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,7 +36,7 @@ class HomeViewModel @Inject constructor(
         private set
 
     init {
-        kotlinx.coroutines.MainScope().launch {
+        viewModelScope.launch {
             gameRepository.getActiveGame().collect { game ->
                 activeGame = game
             }
@@ -42,7 +44,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun cancelGame() {
-        kotlinx.coroutines.MainScope().launch {
+        viewModelScope.launch {
             activeGame?.let {
                 timerEngine.stop()
                 gameRepository.deleteGame(it.id)

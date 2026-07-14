@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,7 +47,7 @@ class ManagePlayersViewModel @Inject constructor(
     var pendingImagePath by mutableStateOf<String?>(null)
     var removePhoto by mutableStateOf(false)
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
 
     init {
         scope.launch {

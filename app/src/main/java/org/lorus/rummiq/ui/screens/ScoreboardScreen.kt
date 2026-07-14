@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,7 +55,7 @@ class ScoreboardViewModel @Inject constructor(
     var game by mutableStateOf<Game?>(null)
         private set
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
     private var gameId: Long = 0
 
     fun loadGame(id: Long) {

@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -52,7 +54,7 @@ class GameHistoryViewModel @Inject constructor(
     // Edit score dialog state
     var editingScore by mutableStateOf<EditingScore?>(null)
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
 
     init {
         scope.launch {
@@ -83,6 +85,7 @@ class GameHistoryViewModel @Inject constructor(
 
 data class EditingScore(
     val roundId: Long,
+    val roundNumber: Int,
     val playerName: String,
     val currentScore: Int,
     val gameId: Long
@@ -267,6 +270,7 @@ fun GameHistoryScreen(
                                                                 .clickable {
                                                                     viewModel.editingScore = EditingScore(
                                                                         roundId = round.id,
+                                                                        roundNumber = round.roundNumber,
                                                                         playerName = player.name,
                                                                         currentScore = score,
                                                                         gameId = game.id
@@ -363,7 +367,7 @@ fun GameHistoryScreen(
             text = {
                 Column {
                     Text(
-                        text = "${edit.playerName} · ${stringResource(R.string.round_label, edit.roundId)}",
+                        text = "${edit.playerName} · ${stringResource(R.string.round_label, edit.roundNumber + 1)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

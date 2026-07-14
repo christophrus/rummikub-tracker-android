@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -41,7 +43,7 @@ class SettingsViewModel @Inject constructor(
     var showUiLangDropdown by mutableStateOf(false)
     var showTtsDropdown by mutableStateOf(false)
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
 
     init {
         scope.launch {

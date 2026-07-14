@@ -1,5 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
+import androidx.lifecycle.viewModelScope
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -30,7 +32,7 @@ class PlayerSelectionViewModel @Inject constructor(
     var players by mutableStateOf<List<Player>>(emptyList())
     var selectedPlayer by mutableStateOf<String?>(null)
 
-    private val scope = kotlinx.coroutines.MainScope()
+    private val scope get() = viewModelScope
 
     fun loadPlayers(gameId: Long) {
         scope.launch {
