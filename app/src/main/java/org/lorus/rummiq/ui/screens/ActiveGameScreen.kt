@@ -65,6 +65,7 @@ import org.lorus.rummiq.data.local.datastore.PreferencesDataStore
 import org.lorus.rummiq.data.repository.GameRepository
 import org.lorus.rummiq.domain.engine.AudioEngine
 import org.lorus.rummiq.domain.engine.TimerEngine
+import org.lorus.rummiq.domain.engine.TimerEvent
 import org.lorus.rummiq.domain.model.*
 import org.lorus.rummiq.domain.usecase.GameManager
 import org.lorus.rummiq.domain.usecase.ScoreValidator
@@ -115,10 +116,21 @@ class ActiveGameViewModel @Inject constructor(
     private val scope get() = viewModelScope
     private var gameId: Long = 0
 
+    init {
+        // Lifecycle-scoped: collection stops on onCleared(), so a stale ViewModel can't react
+        // to the singleton timer (replaces the previously overwritable onTick/onTimeUp callbacks).
+        viewModelScope.launch {
+            timerEngine.events.collect { event ->
+                when (event) {
+                    TimerEvent.TICK_SOUND -> audioEngine.playTick()
+                    TimerEvent.TIME_UP -> skipPlayer()
+                }
+            }
+        }
+    }
+
     fun loadGame(id: Long) {
         gameId = id
-        timerEngine.onTickSound = { audioEngine.playTick() }
-        timerEngine.onTimeUp = { skipPlayer() }
         scope.launch {
             val initialGame = gameRepository.getGameById(id).first() ?: return@launch
             // Configure only for truly new game or if timer was stopped

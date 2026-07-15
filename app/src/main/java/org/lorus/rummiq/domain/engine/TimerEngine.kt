@@ -4,11 +4,17 @@ import android.os.SystemClock
 import org.lorus.rummiq.domain.model.Config
 import org.lorus.rummiq.domain.model.TimerState
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** One-shot timer events consumed by the UI. Emitted via a SharedFlow so listeners are lifecycle-scoped. */
+enum class TimerEvent { TICK_SOUND, TIME_UP }
 
 @Singleton
 class TimerEngine @Inject constructor() {
@@ -44,9 +50,10 @@ class TimerEngine @Inject constructor() {
     private fun scope(): CoroutineScope =
         engineScope ?: CoroutineScope(SupervisorJob() + countdownDispatcher).also { engineScope = it }
 
-    var onTick: ((Long) -> Unit)? = null
-    var onTimeUp: (() -> Unit)? = null
-    var onTickSound: (() -> Unit)? = null
+    // Buffered so emissions from the countdown coroutine never suspend; replay=0 so a fresh
+    // subscriber (e.g. after config change) doesn't replay a stale TIME_UP.
+    private val _events = MutableSharedFlow<TimerEvent>(extraBufferCapacity = 16)
+    val events: SharedFlow<TimerEvent> = _events.asSharedFlow()
 
     fun configure(durationMs: Long, maxExt: Int = 3, currentExtensionsUsed: Int = 0) {
         totalDuration = durationMs
@@ -143,17 +150,16 @@ class TimerEngine @Inject constructor() {
                 if (remainingSecond != lastShownSecond) {
                     lastShownSecond = remainingSecond
                     _remainingMs.value = remainingSecond * 1000L
-                    onTick?.invoke(_remainingMs.value)
 
                     if (remainingRaw > 0L && _remainingMs.value <= Config.TICK_START_SECONDS * 1000L) {
-                        onTickSound?.invoke()
+                        _events.tryEmit(TimerEvent.TICK_SOUND)
                     }
                 }
 
                 if (remainingRaw <= 0L) {
                     _remainingMs.value = 0L
                     _timerState.value = TimerState.STOPPED
-                    onTimeUp?.invoke()
+                    _events.tryEmit(TimerEvent.TIME_UP)
                     break
                 }
 
