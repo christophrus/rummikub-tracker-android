@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Backup policy for API <= 30 (Auto Backup). Deliberate full backup: game history
+     (Room DBs incl. WAL sidecars), avatar images and preferences are exactly the data
+     a user wants restored on a new device. Cache is excluded by the system by default. -->
+<full-backup-content>
+    <include domain="database" path="." />
+    <include domain="file" path="." />
+    <include domain="sharedpref" path="." />
+</full-backup-content>
