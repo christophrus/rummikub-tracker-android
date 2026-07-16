@@ -9,4 +9,5 @@
 .cxx
 local.properties
 /app/build
-/app/schemas
+# Room-Schemas sind bewusst versioniert: MigrationTestHelper braucht die
+# historischen JSONs, und verlorene Historie laesst sich nicht exportieren.
