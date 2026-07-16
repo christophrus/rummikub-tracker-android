@@ -560,6 +560,17 @@ fun ActiveGameScreen(
     val hapticFeedback = LocalHapticFeedback.current
     val showClockHint = !state.clockHintDismissed
 
+    // Minute ticker for the elapsed-time display. Reading System.currentTimeMillis() directly
+    // in composition is non-deterministic — the shown duration would only update by luck of
+    // unrelated recompositions.
+    var nowMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000)
+            nowMillis = System.currentTimeMillis()
+        }
+    }
+
     // Gallery image picker
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -696,7 +707,7 @@ fun ActiveGameScreen(
                         Text(
                             text = buildString {
                                 append(stringResource(R.string.round_label, (state.game?.currentRound ?: 0) + 1))
-                                val elapsed = ((System.currentTimeMillis() - (state.game?.startTime ?: 0L)) / 1000).toInt()
+                                val elapsed = ((nowMillis - (state.game?.startTime ?: 0L)) / 1000).toInt()
                                 val mins = elapsed / 60
                                 val dur = if (mins < 60) stringResource(R.string.duration_minutes, mins) else stringResource(R.string.duration_hours, mins / 60, mins % 60)
                                 append(" · $dur")
@@ -742,8 +753,6 @@ fun ActiveGameScreen(
                 val currentPlayer = game.players.getOrNull(game.currentPlayerIndex)
                 val currentPlayerName = currentPlayer?.name ?: ""
                 val currentPlayerImage = currentPlayer?.imagePath
-                val elapsedSeconds = ((System.currentTimeMillis() - game.startTime) / 1000).toInt()
-                val elapsedMin = elapsedSeconds / 60
 
                 Column(
                     modifier = Modifier.fillMaxSize()

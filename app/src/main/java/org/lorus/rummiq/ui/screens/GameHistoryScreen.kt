@@ -38,8 +38,10 @@ import org.lorus.rummiq.data.repository.GameRepository
 import org.lorus.rummiq.domain.model.Game
 import org.lorus.rummiq.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -303,7 +305,10 @@ fun GameHistoryScreen(
                                     ) {
                                         // Share button
                                         IconButton(onClick = {
-                                            takeScreenshot(context, game)
+                                            // Bitmap rendering + PNG encode + disk write — off the main thread.
+                                            scope.launch(Dispatchers.Default) {
+                                                takeScreenshot(context, game)
+                                            }
                                         }) {
                                             Icon(
                                                 Icons.Default.Share,
@@ -404,7 +409,7 @@ fun GameHistoryScreen(
     }
 }
 
-private fun takeScreenshot(context: android.content.Context, game: Game) {
+private suspend fun takeScreenshot(context: android.content.Context, game: Game) {
     try {
         val density = context.resources.displayMetrics.density
         val pad = (20 * density).toInt()
@@ -703,7 +708,10 @@ private fun takeScreenshot(context: android.content.Context, game: Game) {
         }
         context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_scoreboard)))
     } catch (e: Exception) {
-        Toast.makeText(context, context.getString(R.string.screenshot_failed), Toast.LENGTH_SHORT).show()
+        // Toast requires a looper thread — hop back to Main.
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, context.getString(R.string.screenshot_failed), Toast.LENGTH_SHORT).show()
+        }
     }
 }
 

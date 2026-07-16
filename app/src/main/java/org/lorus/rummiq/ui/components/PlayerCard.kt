@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import org.lorus.rummiq.ui.theme.Indigo40
 import org.lorus.rummiq.ui.theme.Purple40
@@ -30,17 +30,23 @@ fun PlayerAvatar(
     modifier: Modifier = Modifier,
     size: Int = 48
 ) {
-    val file = imagePath?.let { File(it) }
-    val hasImage = file?.exists() == true
+    // Stat the file once per path instead of on every recomposition (filesystem I/O).
+    val fileInfo = remember(imagePath) {
+        val f = imagePath?.let { File(it) }
+        if (f?.exists() == true) Pair(f, f.lastModified()) else null
+    }
 
-    if (hasImage && file != null) {
-        val lastMod = file.lastModified()
+    if (fileInfo != null) {
+        val (file, lastMod) = fileInfo
+        // Caching stays enabled; the lastModified-based key busts the cache when the avatar
+        // file is overwritten under the same name (previously both caches were fully disabled,
+        // forcing a fresh decode from disk on every display).
+        val cacheKey = "${file.absolutePath}:$lastMod"
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(file)
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
-                .setParameter("lastModified", lastMod.toString())
+                .memoryCacheKey(cacheKey)
+                .diskCacheKey(cacheKey)
                 .build(),
             contentDescription = name,
             modifier = modifier

@@ -262,7 +262,11 @@ fun ManagePlayersScreen(
     // Add/Edit dialog
     if (viewModel.showAddDialog) {
         val isEditing = viewModel.editingPlayer != null
-        val previewPath = viewModel.pendingImagePath
+        // Compute once per image change instead of twice per recomposition — getPreviewPath
+        // copies the picked image to a temp file (disk I/O) and the dialog recomposes per keystroke.
+        val previewPath = remember(viewModel.pendingImageUri, viewModel.pendingImagePath, viewModel.removePhoto) {
+            viewModel.getPreviewPath(context)
+        }
         AlertDialog(
             onDismissRequest = { viewModel.dismissDialog() },
             title = {
@@ -276,7 +280,7 @@ fun ManagePlayersScreen(
                     // Avatar preview
                     PlayerAvatar(
                         name = viewModel.newPlayerName.ifEmpty { "?" },
-                        imagePath = viewModel.getPreviewPath(context),
+                        imagePath = previewPath,
                         size = 72
                     )
                     Spacer(Modifier.height(8.dp))
@@ -286,7 +290,7 @@ fun ManagePlayersScreen(
                         Text(stringResource(R.string.select_photo))
                     }
                     // Show delete button when a photo exists, below the select button
-                    if (viewModel.getPreviewPath(context) != null) {
+                    if (previewPath != null) {
                         TextButton(onClick = { viewModel.onRemovePhoto() }) {
                             Icon(
                                 Icons.Default.Delete,

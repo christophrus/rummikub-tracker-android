@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 data class AnalysisUiState(
     val isLoading: Boolean = false,
@@ -59,13 +58,10 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
     private var pendingSafeBitmap: Bitmap? = null
 
     fun analyze(bitmap: Bitmap) {
-        // Read current confidence threshold from settings
-        val confThreshold = runBlocking {
-            settingsDataStore.confidenceThreshold.first()
-        }
-        Log.d("AnalysisViewModel", "Confidence threshold: ${confThreshold * 100}%")
-
         viewModelScope.launch(Dispatchers.Default) {
+            // Read inside the coroutine — runBlocking here used to stall the main thread.
+            val confThreshold = settingsDataStore.confidenceThreshold.first()
+            Log.d("AnalysisViewModel", "Confidence threshold: ${confThreshold * 100}%")
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             var safeBitmap: Bitmap? = null
@@ -214,8 +210,8 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
 
     /** Continues the YOLO pipeline after orientation is confirmed. */
     private fun continueWithYolo(orientedBitmap: Bitmap, correctionDegrees: Int, safeBitmap: Bitmap?) {
-        val confThreshold = runBlocking { settingsDataStore.confidenceThreshold.first() }
         viewModelScope.launch(Dispatchers.Default) {
+            val confThreshold = settingsDataStore.confidenceThreshold.first()
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val startTime = System.currentTimeMillis()
