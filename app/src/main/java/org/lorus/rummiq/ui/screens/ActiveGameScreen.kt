@@ -914,7 +914,7 @@ fun ActiveGameScreen(
                         Text(
                             text = stringResource(R.string.touch_for_next_player),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.75f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
