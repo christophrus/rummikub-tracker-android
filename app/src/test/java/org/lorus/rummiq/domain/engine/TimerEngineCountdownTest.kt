@@ -35,6 +35,7 @@ class TimerEngineCountdownTest {
         runCurrent()
         assertEquals(50_000L, e.remainingMs.value)
         assertEquals(TimerState.RUNNING, e.timerState.value)
+        e.destroy() // stop the countdown so runTest can reach quiescence
     }
 
     @Test
@@ -53,6 +54,7 @@ class TimerEngineCountdownTest {
         }
         assertEquals(TimerState.STOPPED, e.timerState.value)
         assertEquals(0L, e.remainingMs.value)
+        e.destroy()
     }
 
     @Test
@@ -72,6 +74,7 @@ class TimerEngineCountdownTest {
         // Still running, and the countdown respects the pushed deadline.
         assertEquals(TimerState.RUNNING, e.timerState.value)
         assertEquals(32_000L, e.remainingMs.value)
+        e.destroy()
     }
 
     @Test
@@ -91,6 +94,7 @@ class TimerEngineCountdownTest {
         advanceTimeBy(5_000)
         runCurrent()
         assertEquals(frozen - 5_000, e.remainingMs.value)
+        e.destroy()
     }
 
     @Test
@@ -111,6 +115,9 @@ class TimerEngineCountdownTest {
         runCurrent()
         assertEquals(15_000L, e.remainingMs.value)
         assertEquals(TimerState.RUNNING, e.timerState.value)
+        // Critical: the manual clock never advances further, so without stopping the
+        // engine the countdown loop would never terminate and runTest would hang.
+        e.destroy()
     }
 
     @Test
@@ -127,6 +134,6 @@ class TimerEngineCountdownTest {
         assertEquals(2_000L, e.remainingMs.value)
         assertEquals(2_000L, e.effectiveTotalMs.value)
         assertEquals(TimerState.RUNNING, e.timerState.value)
-        e.stop()
+        e.destroy()
     }
 }
