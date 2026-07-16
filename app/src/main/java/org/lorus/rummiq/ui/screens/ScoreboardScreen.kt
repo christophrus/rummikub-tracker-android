@@ -30,6 +30,7 @@ import org.lorus.rummiq.domain.engine.TimerEngine
 import org.lorus.rummiq.domain.model.Game
 import org.lorus.rummiq.domain.usecase.GameManager
 import org.lorus.rummiq.ui.components.ScrollIndicator
+import org.lorus.rummiq.ui.theme.goldAccentColor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -104,15 +105,9 @@ fun ScoreboardScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1A1A2E),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                }
             )
-        },
-        containerColor = Color(0xFF16213E)
+        }
     ) { padding ->
         val g = game
         if (g == null || g.rounds.isEmpty()) {
@@ -125,7 +120,7 @@ fun ScoreboardScreen(
                 Text(
                     text = stringResource(R.string.no_rounds_played),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             return@Scaffold
@@ -163,7 +158,7 @@ fun ScoreboardScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F3460))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(
                     modifier = Modifier
@@ -175,14 +170,14 @@ fun ScoreboardScreen(
                         text = g.name,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = "${g.rounds.size} ${stringResource(R.string.rounds_label, 0).substringBefore(':')} · ${g.players.size} ${stringResource(R.string.players)}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -194,7 +189,7 @@ fun ScoreboardScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp)
@@ -205,7 +200,10 @@ fun ScoreboardScreen(
                             .fillMaxWidth()
                             .background(
                                 Brush.horizontalGradient(
-                                    listOf(Color(0xFF0F3460), Color(0xFF1A1A2E))
+                                    listOf(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    )
                                 ),
                                 RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                             )
@@ -217,7 +215,7 @@ fun ScoreboardScreen(
                             text = "#",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White.copy(alpha = 0.6f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(44.dp),
                             textAlign = TextAlign.Center
                         )
@@ -239,7 +237,7 @@ fun ScoreboardScreen(
                         }
                     }
 
-                    HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                     // --- Round rows ---
                     g.rounds.forEachIndexed { roundIdx, round ->
@@ -248,7 +246,7 @@ fun ScoreboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (isEven) Color.White.copy(alpha = 0.03f)
+                                    if (isEven) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
                                     else Color.Transparent
                                 )
                                 .padding(horizontal = 8.dp, vertical = 10.dp),
@@ -258,7 +256,7 @@ fun ScoreboardScreen(
                             Text(
                                 text = "${stringResource(R.string.round_abbr)}${roundIdx + 1}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.width(44.dp),
                                 textAlign = TextAlign.Center
@@ -281,7 +279,7 @@ fun ScoreboardScreen(
                                         text = "$score",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = if (isLowest) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isLowest) Color(0xFFFFB300) else Color.White.copy(alpha = 0.8f),
+                                        color = if (isLowest) goldAccentColor() else MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = TextAlign.Center
                                     )
                                     if (isLowest) {
@@ -302,14 +300,14 @@ fun ScoreboardScreen(
 
                         if (roundIdx < g.rounds.size - 1) {
                             HorizontalDivider(
-                                color = Color.White.copy(alpha = 0.05f),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                                 thickness = 0.5.dp
                             )
                         }
                     }
 
                     HorizontalDivider(
-                        color = Color(0xFFFFB300).copy(alpha = 0.4f),
+                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                         thickness = 1.5.dp,
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -321,7 +319,7 @@ fun ScoreboardScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                Color(0xFFFFB300).copy(alpha = 0.08f),
+                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.08f),
                                 RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
                             )
                             .padding(horizontal = 8.dp, vertical = 12.dp),
@@ -331,7 +329,7 @@ fun ScoreboardScreen(
                             text = stringResource(R.string.total).take(4),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFB300),
+                            color = goldAccentColor(),
                             modifier = Modifier.width(44.dp),
                             textAlign = TextAlign.Center
                         )
@@ -347,7 +345,7 @@ fun ScoreboardScreen(
                                     text = "$total",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isWinner) Color(0xFFFFB300) else Color.White.copy(alpha = 0.7f),
+                                    color = if (isWinner) goldAccentColor() else MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
                                 )
                                 if (isWinner) {
@@ -376,16 +374,16 @@ fun ScoreboardScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFC62828)
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Stop, contentDescription = null, tint = Color.White)
+                Icon(Icons.Default.Stop, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.end_game),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
 

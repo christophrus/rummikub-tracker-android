@@ -73,6 +73,8 @@ import org.lorus.rummiq.ui.components.AnalogClock
 import org.lorus.rummiq.ui.components.ConfettiEffect
 import org.lorus.rummiq.ui.components.PlayerAvatar
 import org.lorus.rummiq.ui.components.ScrollIndicator
+import org.lorus.rummiq.ui.theme.goldAccentColor
+import org.lorus.rummiq.ui.theme.successColor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -752,7 +754,10 @@ fun ActiveGameScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         shape = MaterialTheme.shapes.large,
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF5E35C2))
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     ) {
                         Row(
                             modifier = Modifier
@@ -772,13 +777,13 @@ fun ActiveGameScreen(
                                 Text(
                                     text = stringResource(R.string.turn_label),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                 )
                                 Text(
                                     text = currentPlayerName,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                             // Trophy button — declare winner
@@ -786,8 +791,8 @@ fun ActiveGameScreen(
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(MaterialTheme.shapes.medium)
-                                    .background(Color(0xFFFFB300).copy(alpha = 0.2f))
-                                    .border(2.dp, Color(0xFFFFB300), MaterialTheme.shapes.medium)
+                                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
+                                    .border(2.dp, MaterialTheme.colorScheme.tertiary, MaterialTheme.shapes.medium)
                                     .clickable(
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() }
@@ -797,7 +802,7 @@ fun ActiveGameScreen(
                                 Icon(
                                     Icons.Default.EmojiEvents,
                                     contentDescription = stringResource(R.string.declare_winner),
-                                    tint = Color(0xFFFFB300),
+                                    tint = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier.size(34.dp)
                                 )
                             }
@@ -810,7 +815,7 @@ fun ActiveGameScreen(
                                 Icon(
                                     Icons.Default.SkipNext,
                                     contentDescription = stringResource(R.string.skip),
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -840,6 +845,8 @@ fun ActiveGameScreen(
 
                         // Touch hint — overlaid on the clock so ripple draws inside it
                         if (showClockHint) {
+                            // Captured outside the DrawScope; theme-aware so the ripple shows in both themes.
+                            val rippleColor = MaterialTheme.colorScheme.onSurface
                             val transition = rememberInfiniteTransition(label = "hintTap")
                             val fingerPhase by transition.animateFloat(
                                 initialValue = 0f,
@@ -885,13 +892,13 @@ fun ActiveGameScreen(
                                     val r    = maxR * rippleProgress
                                     val fade = 1f - rippleProgress * 0.55f
                                     // Inner filled pulse
-                                    drawCircle(Color.White.copy(alpha = 0.30f), r * 0.28f, Offset(tipX, tipY))
+                                    drawCircle(rippleColor.copy(alpha = 0.30f), r * 0.28f, Offset(tipX, tipY))
                                     // Ring 1
-                                    drawCircle(Color.White.copy(alpha = 0.20f * fade), r * 0.55f, Offset(tipX, tipY), style = Stroke(2.dp.toPx()))
+                                    drawCircle(rippleColor.copy(alpha = 0.20f * fade), r * 0.55f, Offset(tipX, tipY), style = Stroke(2.dp.toPx()))
                                     // Ring 2
-                                    drawCircle(Color.White.copy(alpha = 0.12f * fade), r * 0.78f, Offset(tipX, tipY), style = Stroke(1.5f.dp.toPx()))
+                                    drawCircle(rippleColor.copy(alpha = 0.12f * fade), r * 0.78f, Offset(tipX, tipY), style = Stroke(1.5f.dp.toPx()))
                                     // Outer ring
-                                    drawCircle(Color.White.copy(alpha = 0.07f * fade), r,        Offset(tipX, tipY), style = Stroke(1.dp.toPx()))
+                                    drawCircle(rippleColor.copy(alpha = 0.07f * fade), r,        Offset(tipX, tipY), style = Stroke(1.dp.toPx()))
                                 }
                             }
 
@@ -936,18 +943,16 @@ fun ActiveGameScreen(
                             enabled = game.maxExtensions - extensionsUsed > 0,
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1E399F),
-                                disabledContainerColor = Color(0xFF9E9E9E),
-                                disabledContentColor = Color.White.copy(alpha = 0.5f)
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp), tint = Color(0xFF4195ED))
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(24.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.add_30_seconds),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
+                                style = MaterialTheme.typography.titleMedium
                             )
                         }
                         // Badge
@@ -957,9 +962,10 @@ fun ActiveGameScreen(
                                 .align(Alignment.TopEnd)
                                 .offset(x = 12.dp, y = (-10).dp)
                                 .size(28.dp),
-                            containerColor = Color(0xFFE53935)
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
                         ) {
-                            Text("$remaining", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                            Text("$remaining", style = MaterialTheme.typography.titleMedium)
                         }
                     }
 
@@ -1014,16 +1020,16 @@ fun ActiveGameScreen(
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1E232F)
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Icon(Icons.Default.TableView, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color(0xFF3788C3))
+                            Icon(Icons.Default.TableView, contentDescription = null, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = stringResource(R.string.scoreboard),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color(0xFFC9CCCF)
+                                style = MaterialTheme.typography.titleMedium
                             )
                         }
                     }
@@ -1070,7 +1076,7 @@ private fun WinnerDeclarationView(
             Text(
                 text = stringResource(R.string.winner),
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color(0xFFFFB300),
+                color = goldAccentColor(),
                 fontWeight = FontWeight.Bold
             )
 
@@ -1118,7 +1124,7 @@ private fun WinnerDeclarationView(
                         .padding(vertical = 4.dp)
                         .then(
                             if (isWinner) Modifier.background(
-                                Color(0xFF4CAF50).copy(alpha = 0.15f),
+                                successColor().copy(alpha = 0.15f),
                                 MaterialTheme.shapes.medium
                             )
                             else Modifier
@@ -1131,7 +1137,7 @@ private fun WinnerDeclarationView(
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isWinner) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurface
+                        color = if (isWinner) successColor() else MaterialTheme.colorScheme.onSurface
                     )
 
                     OutlinedTextField(

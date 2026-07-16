@@ -1,6 +1,7 @@
 package org.lorus.rummiq.ui.screens
 
 import androidx.lifecycle.viewModelScope
+import org.lorus.rummiq.ui.theme.successColor
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -264,7 +265,7 @@ fun GameHistoryScreen(
                                                         Text(
                                                             text = "$score",
                                                             style = MaterialTheme.typography.bodySmall,
-                                                            color = if (isBest) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
+                                                            color = if (isBest) successColor() else MaterialTheme.colorScheme.onSurface,
                                                             fontWeight = if (isBest) FontWeight.Bold else FontWeight.Normal,
                                                             modifier = Modifier
                                                                 .clickable {
@@ -286,7 +287,7 @@ fun GameHistoryScreen(
                                                     Text(
                                                         text = "$playerTotal",
                                                         style = MaterialTheme.typography.bodySmall,
-                                                        color = if (isBestTotal) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
+                                                        color = if (isBestTotal) successColor() else MaterialTheme.colorScheme.onSurface,
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                 }
