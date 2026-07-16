@@ -102,7 +102,8 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
 
                 orientedBitmap = if (correctionDegrees != 0) {
                     val rotated = ImagePreprocessor.rotateBitmap(safeBitmap!!, correctionDegrees)
-                    if (rotated != safeBitmap) safeBitmap!!.recycle()
+                    // safeBitmap is a pure intermediate here (never shown), so it is safe to recycle.
+                    if (rotated != safeBitmap && !safeBitmap!!.isRecycled) safeBitmap!!.recycle()
                     rotated
                 } else safeBitmap
 
@@ -175,29 +176,25 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
     }
 
     /** User rotates the orientation preview 90° clockwise. */
-    fun rotateOrientationRight() {
-        val state = _uiState.value
-        val currentBmp = state.orientationConfirmBitmap ?: return
-        val newCorrection = (state.orientationCorrectionDegrees + 90) % 360
-        val rotated = Bitmap.createBitmap(currentBmp, 0, 0, currentBmp.width, currentBmp.height,
-            Matrix().apply { postRotate(90f) }, true)
-        if (rotated != currentBmp) currentBmp.recycle()
-        _uiState.update {
-            it.copy(
-                orientationConfirmBitmap = rotated,
-                orientationCorrectionDegrees = newCorrection
-            )
-        }
-    }
+    fun rotateOrientationRight() = rotatePreview(90f, +90)
 
     /** User rotates the orientation preview 90° counter-clockwise. */
-    fun rotateOrientationLeft() {
+    fun rotateOrientationLeft() = rotatePreview(-90f, -90)
+
+    private fun rotatePreview(matrixDegrees: Float, correctionDelta: Int) {
         val state = _uiState.value
         val currentBmp = state.orientationConfirmBitmap ?: return
-        val newCorrection = (state.orientationCorrectionDegrees - 90 + 360) % 360
-        val rotated = Bitmap.createBitmap(currentBmp, 0, 0, currentBmp.width, currentBmp.height,
-            Matrix().apply { postRotate(-90f) }, true)
-        if (rotated != currentBmp) currentBmp.recycle()
+        if (currentBmp.isRecycled) return
+        val newCorrection = (state.orientationCorrectionDegrees + correctionDelta + 360) % 360
+        val rotated = Bitmap.createBitmap(
+            currentBmp, 0, 0, currentBmp.width, currentBmp.height,
+            Matrix().apply { postRotate(matrixDegrees) }, true
+        )
+        // Swap the visible bitmap first, then intentionally do NOT recycle the old preview:
+        // it may still equal pendingSafeBitmap or be mid-draw in Compose. Recycling it here
+        // (before the state swap) was the source of "trying to use a recycled bitmap" crashes.
+        // GC reclaims the replaced preview; the retained safe/oriented bitmaps are freed in
+        // continueWithYolo / cancelOrientationConfirmation.
         _uiState.update {
             it.copy(
                 orientationConfirmBitmap = rotated,
@@ -208,9 +205,11 @@ class AnalysisViewModel(application: Application) : AndroidViewModel(application
 
     /** User cancels orientation confirmation — go back to main menu. */
     fun cancelOrientationConfirmation() {
-        pendingSafeBitmap?.recycle()
+        val bmp = pendingSafeBitmap
         pendingSafeBitmap = null
+        // Clear the visible reference before recycling so Compose can't draw a recycled bitmap.
         _uiState.update { it.copy(showOrientationConfirm = false, orientationConfirmBitmap = null) }
+        bmp?.let { if (!it.isRecycled) it.recycle() }
     }
 
     /** Continues the YOLO pipeline after orientation is confirmed. */
