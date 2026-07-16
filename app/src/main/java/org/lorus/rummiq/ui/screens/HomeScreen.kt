@@ -23,7 +23,6 @@ import org.lorus.rummiq.domain.engine.TimerEngine
 import org.lorus.rummiq.domain.model.Game
 import org.lorus.rummiq.ui.components.ScrollIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

@@ -88,7 +88,6 @@ data class ActiveGameUiState(
     val scores: Map<String, String> = emptyMap(),
     val validationError: String? = null,
     val isScanning: Set<String> = emptySet(),
-    val showDurationDropdown: Boolean = false,
     val scrollLocked: Boolean = false,
     val scannedPlayerName: String? = null,
     val showScanSourceDialog: Boolean = false,
@@ -201,20 +200,6 @@ class ActiveGameViewModel @Inject constructor(
 
     fun dismissWinnerDeclaration() {
         uiState = uiState.copy(showWinnerDeclaration = false, winnerPlayerName = null, scores = emptyMap(), validationError = null)
-    }
-
-    fun toggleDurationDropdown() {
-        uiState = uiState.copy(showDurationDropdown = !uiState.showDurationDropdown)
-    }
-
-    fun dismissDurationDropdown() {
-        uiState = uiState.copy(showDurationDropdown = false)
-    }
-
-    fun setTimerDuration(ms: Int) {
-        val game = uiState.game ?: return
-        timerEngine.configure(ms.toLong(), game.maxExtensions, currentExtensionsUsed = timerEngine.extensionsUsed.value)
-        uiState = uiState.copy(showDurationDropdown = false)
     }
 
     fun extendTimer() {
@@ -1212,95 +1197,6 @@ private fun WinnerDeclarationView(
             canScrollForward = canScrollForward,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
-    }
-}
-
-@Composable
-private fun ScoreSummaryTable(game: Game) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp)
-            .horizontalScroll(rememberScrollState())
-    ) {
-        // Header row
-        Row {
-            // Round # column
-            Text(
-                text = "#",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(40.dp),
-                textAlign = TextAlign.Center
-            )
-            game.players.forEach { player ->
-                Text(
-                    text = player.name.take(6),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(55.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        // Score rows
-        game.rounds.forEach { round ->
-            Row {
-                Text(
-                    text = "${stringResource(R.string.round_abbr)}${round.roundNumber + 1}",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.width(40.dp),
-                    textAlign = TextAlign.Center
-                )
-                game.players.forEach { player ->
-                    val score = round.scores[player.name] ?: 0
-                    val isWinner = round.winnerPlayerName == player.name
-                    Text(
-                        text = "$score",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isWinner) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.width(55.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
-        // Cumulative totals
-        HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
-        Row {
-            Text(
-                text = stringResource(R.string.total),
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(40.dp),
-                textAlign = TextAlign.Center
-            )
-            game.players.forEach { player ->
-                Text(
-                    text = "${game.getPlayerTotal(player.name)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(55.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-private fun formatDurationShort(ms: Int): String {
-    return when (ms) {
-        30_000 -> "30s"
-        45_000 -> "45s"
-        60_000 -> "1m"
-        90_000 -> "1m 30s"
-        120_000 -> "2m"
-        180_000 -> "3m"
-        300_000 -> "5m"
-        else -> "${ms / 1000}s"
     }
 }
 

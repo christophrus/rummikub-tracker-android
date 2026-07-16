@@ -65,5 +65,3 @@ data class Game(
 }
 
 enum class TimerState { RUNNING, PAUSED, STOPPED }
-
-enum class GameStatus { SETUP, PLAYING, DECLARING_WINNER, ENDED }

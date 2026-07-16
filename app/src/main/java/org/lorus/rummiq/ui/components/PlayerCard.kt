@@ -3,7 +3,6 @@ package org.lorus.rummiq.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,14 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import org.lorus.rummiq.R
 import org.lorus.rummiq.ui.theme.Indigo40
 import org.lorus.rummiq.ui.theme.Purple40
 import java.io.File
@@ -73,59 +69,6 @@ fun PlayerAvatar(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
-        }
-    }
-}
-
-@Composable
-fun PlayerCard(
-    name: String,
-    imagePath: String? = null,
-    isCurrentPlayer: Boolean = false,
-    score: Int = 0,
-    modifier: Modifier = Modifier
-) {
-    val gradient = if (isCurrentPlayer) {
-        Brush.linearGradient(listOf(Indigo40, Purple40))
-    } else {
-        null
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(
-                    if (gradient != null) Modifier.background(gradient)
-                    else Modifier
-                )
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PlayerAvatar(
-                name = name,
-                imagePath = imagePath,
-                size = 40
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = if (isCurrentPlayer) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isCurrentPlayer) Color.White else MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "${stringResource(R.string.score)}: $score",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isCurrentPlayer) Color.White.copy(alpha = 0.8f)
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }
