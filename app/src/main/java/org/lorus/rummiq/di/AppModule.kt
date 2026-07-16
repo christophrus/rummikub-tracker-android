@@ -3,6 +3,7 @@ package org.lorus.rummiq.di
 import android.content.Context
 import androidx.room.Room
 import org.lorus.rummiq.data.local.AppDatabase
+import org.lorus.rummiq.data.local.TRACKER_MIGRATIONS
 import org.lorus.rummiq.data.local.dao.*
 import org.lorus.rummiq.data.local.datastore.PreferencesDataStore
 import dagger.Module
@@ -24,7 +25,8 @@ object AppModule {
             AppDatabase::class.java,
             "rummiq.db"
         )
-            .fallbackToDestructiveMigration()
+            // Real migrations preserve game history; no destructive fallback.
+            .addMigrations(*TRACKER_MIGRATIONS)
             .build()
     }
 

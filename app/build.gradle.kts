@@ -53,6 +53,11 @@ android {
     room {
         schemaDirectory("$projectDir/schemas")
     }
+
+    // Expose exported Room schemas to instrumented tests so MigrationTestHelper can load them.
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -124,5 +129,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlinx.coroutines.android)
     androidTestImplementation(libs.compose.ui.test)
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
     debugImplementation(libs.compose.ui.test.manifest)
 }

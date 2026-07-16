@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [AnalysisResultEntity::class, DetectedTileEntity::class],
     version = 3,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -25,7 +25,10 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rummiq_counter.db"
                 )
-                    .fallbackToDestructiveMigration()
+                    // No exported schema history exists for v1/v2, so allow a one-time recreate
+                    // only from those old versions. Any future change (v3+) must ship a real
+                    // Migration — no silent data wipe.
+                    .fallbackToDestructiveMigrationFrom(1, 2)
                     .build()
                     .also { INSTANCE = it }
             }
