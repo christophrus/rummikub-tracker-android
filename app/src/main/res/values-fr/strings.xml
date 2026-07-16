@@ -29,6 +29,7 @@
     <string name="quick_add">Ajout rapide</string>
     <string name="start_game">Démarrer la partie</string>
     <string name="min_two_players">Au moins 2 joueurs requis</string>
+    <string name="duplicate_player">Ce joueur est déjà dans la partie</string>
     <string name="select_starting_player">Sélectionner le joueur</string>
     <string name="round_number">Tour %d</string>
     <string name="paused">EN PAUSE</string>

@@ -32,6 +32,7 @@
     <string name="quick_add">Quick Add</string>
     <string name="start_game">Start Game</string>
     <string name="min_two_players">At least 2 players required</string>
+    <string name="duplicate_player">This player is already in the game</string>
 
     <!-- Player Selection Screen -->
     <string name="select_starting_player">Select Starting Player</string>

@@ -69,8 +69,15 @@ class NewGameViewModel @Inject constructor(
     }
 
     fun addPlayer(name: String) {
-        if (name.isBlank()) return
-        players = players + NewPlayerEntry(name = name.trim())
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        // Names identify players within a game (game_players PK), so duplicates would collapse
+        // into one row and corrupt scoring — reject them here.
+        if (players.any { it.name.equals(trimmed, ignoreCase = true) }) {
+            errorMessage = "duplicate_player"
+            return
+        }
+        players = players + NewPlayerEntry(name = trimmed)
         newPlayerName = ""
         errorMessage = null
     }
@@ -89,7 +96,7 @@ class NewGameViewModel @Inject constructor(
     }
 
     fun addSavedPlayer(player: Player) {
-        if (players.any { it.name == player.name }) return
+        if (players.any { it.name.equals(player.name, ignoreCase = true) }) return
         players = players + NewPlayerEntry(name = player.name, imagePath = player.imagePath)
         errorMessage = null
     }
@@ -97,6 +104,13 @@ class NewGameViewModel @Inject constructor(
     suspend fun startGame(): Long? {
         if (players.size < 2) {
             errorMessage = "min_two_players"
+            return null
+        }
+
+        // Defensive: duplicate names would collide on the game_players primary key.
+        val normalizedNames = players.map { it.name.trim().lowercase() }
+        if (normalizedNames.size != normalizedNames.toSet().size) {
+            errorMessage = "duplicate_player"
             return null
         }
 
@@ -388,6 +402,7 @@ private fun getStringResId(name: String): Int {
         "timer_3m" -> R.string.timer_3m
         "timer_5m" -> R.string.timer_5m
         "min_two_players" -> R.string.min_two_players
+        "duplicate_player" -> R.string.duplicate_player
         else -> R.string.app_name
     }
 }
