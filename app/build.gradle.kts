@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
@@ -94,30 +93,12 @@ dependencies {
     // DataStore
     implementation(libs.datastore.preferences)
 
-    // CameraX
-    implementation(libs.camerax.core)
-    implementation(libs.camerax.camera2)
-    implementation(libs.camerax.lifecycle)
-    implementation(libs.camerax.view)
-
     // ONNX Runtime (ML for tile detection)
     implementation(libs.onnxruntime.android)
-
-    // Permissions
-    implementation(libs.accompanist.permissions)
 
     // Image Loading
     implementation(libs.coil.compose)
     implementation(libs.exifinterface)
-
-    // Networking
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-
-    // Serialization
-    implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

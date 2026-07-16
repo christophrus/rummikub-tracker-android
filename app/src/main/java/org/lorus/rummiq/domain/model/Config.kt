@@ -28,7 +28,5 @@ object Config {
     const val CLOCK_COLOR_YELLOW_SECONDS = 15
     const val CLOCK_COLOR_RED_SECONDS = 10
 
-    const val API_URL = "https://rummikub.lorus.org/api/analyze"
-
     const val MAX_EXTENSIONS_LIMIT = 10
 }
